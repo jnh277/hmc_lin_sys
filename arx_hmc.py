@@ -16,7 +16,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ###############################################################################
 
-"""Estimates a model using data from an ARX model with Gaussian noise."""
+"""Estimates an ARX model using data with Gaussian noise."""
 import pystan
 import numpy as np
 import pandas as pd
@@ -28,10 +28,9 @@ import seaborn as sns
 
 
 # specific data path
-data_path = 'data/arx_order3.mat'
-# order_guess = (3, 4)
-input_order = 4         # gives the terms b_0 * u_k + b_1 * u_{k-1} + .. + b_{input_order-1} * u_{k-input_order+1}
-output_order = 3        # gives the terms a_0 * y_{k-1} + ... + a_{output_order-1}*y_{k-output_order}
+data_path = 'data/arx_order4.mat'
+input_order = 5         # gives the terms b_0 * u_k + b_1 * u_{k-1} + .. + b_{input_order-1} * u_{k-input_order+1}
+output_order = 4        # gives the terms a_0 * y_{k-1} + ... + a_{output_order-1}*y_{k-output_order}
 
 data = loadmat(data_path)
 
@@ -97,14 +96,11 @@ stan_est = {'mean': yhat_mean, 'upper': yhat_upper_ci, 'lower': yhat_lower_ci,
 
 a_coef_traces = traces['a_coefs']
 b_coef_traces = traces['b_coefs']
+shrinkage_param = traces["shrinkage_param"]
+shrinkage_param_mean = np.mean(shrinkage_param,0)
 
 a_coef_mean = np.mean(a_coef_traces,0)
 b_coef_mean = np.mean(b_coef_traces,0)
-# the a values are the negative of the true value,
-# look at how the a matrix is defined in matlab
-# a*y = blah
-
-
 
 plt.subplot(1,1,1)
 plt.plot(y_val,linewidth=0.5)

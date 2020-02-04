@@ -2,7 +2,7 @@ clear all
 clc
 
 % how to create a random ARX model
-default_test_model = true;
+default_test_model = false;
 noObservations = 1000;
 Ts = 1;
 
@@ -11,14 +11,17 @@ rng(15)
 % adjust noise standard deviation to be appropriate for the different
 % models
 
-sig_e = 2;    % works well with the default 
-Band = [0 1];
+% sig_e = 2;    % works well with the default 
+% Band = [0 1];
 
 % sig_e = 1;   % works well with rng(15) and n_states = 5
-
+% Band = [0 0.3];
 
 % sig_e = 0.01;   % works well with rng(15) and n_states = 3
 % Band = [0 0.1];
+
+sig_e = 0.05;   % works well with rng(15) and n_states = 5
+Band = [0 0.3];
 
 
 if default_test_model
@@ -29,7 +32,7 @@ if default_test_model
     n_states = 2;
     
 else % generate a random test model
-    n_states = 3;
+    n_states = 4;
     n_inputs = 1;
     n_outputs = 1;
     
@@ -89,9 +92,9 @@ sig_e_ML = sqrt(modelEstimate.NoiseVariance);
 a_true = m0.A;
 b_true = m0.B;
 
-save('../data/arx_order2.mat','y_estimation', 'u_estimation', 'y_validation',...
-    'u_validation','y_hat_val_ML','a_ML','b_ML','sig_e_ML','a_true','b_true',...
-    'sig_e','n_states')
+% save('../data/arx_order4.mat','y_estimation', 'u_estimation', 'y_validation',...
+%     'u_validation','y_hat_val_ML','a_ML','b_ML','sig_e_ML','a_true','b_true',...
+%     'sig_e','n_states')
 
 %%
 figure(1)
