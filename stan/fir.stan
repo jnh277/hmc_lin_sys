@@ -21,12 +21,12 @@
 // FIR model with Gaussian noise and horseshoe sparseness prior on the coefficients.
 
 data {
-    int<lower=0> max_order;
+    int<lower=0> input_order;
     int<lower=0> no_obs_est;
     int<lower=0> no_obs_val;
     vector[no_obs_est] y_est;
-    vector[no_obs_est] u_est;
-    vector[no_obs_val] u_val;
+    matrix[no_obs_est, input_order] est_input_matrix;
+    matrix[no_obs_val, input_order] val_input_matrix;
 }
 parameters {
     vector[input_order] b_coefs;
@@ -41,8 +41,8 @@ model {
 
   sig_e ~ cauchy(0.0, 1.0);
 
-  for (t in (1:no_obs_est)) {
-        y_est[n] ~ est_input_matrix[n,:]*b_coefs, sig_e);
+  for (n in 1:no_obs_est) {
+        y_est[n] ~ normal(est_input_matrix[n,:]*b_coefs, sig_e);
     }
 }
 generated quantities {
