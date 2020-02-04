@@ -22,14 +22,13 @@ import numpy as np
 import pandas as pd
 from scipy.io import loadmat
 from helpers import build_input_matrix
-from helpers import build_obs_matrix
 import matplotlib.pyplot as plt
 import seaborn as sns
 
 
 # specific data path
 data_path = 'data/fir_order2.mat'
-input_order = 16         # gives the terms b_0 * u_k + b_1 * u_{k-1} + .. + b_{input_order-1} * u_{k-input_order+1}
+input_order = 16       # gives the terms b_0 * u_k + b_1 * u_{k-1} + .. + b_{input_order-1} * u_{k-input_order+1}
 
 data = loadmat(data_path)
 
