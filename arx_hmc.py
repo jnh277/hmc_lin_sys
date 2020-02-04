@@ -44,8 +44,6 @@ no_obs_est = len(y_est)
 no_obs_val = len(y_val)
 
 # build regression matrix
-# est_data_matrix = build_phi_matrix(y_est, order_guess, u_est)
-# val_data_matrix = build_phi_matrix(y_val, order_guess, u_val)
 est_input_matrix = build_input_matrix(u_est, input_order)
 est_obs_matrix = build_obs_matrix(y_est, output_order)
 val_input_matrix = build_input_matrix(u_val, input_order)
@@ -53,8 +51,6 @@ val_obs_matrix = build_obs_matrix(y_val, output_order)
 
 # trim measurement vectors to suit regression matrix
 max_delay = np.max((output_order,input_order-1))
-# y_est = y_est[int(np.max(order_guess)):]
-# y_val = y_val[int(np.max(order_guess)):]
 y_est = y_est[int(max_delay):]
 y_val = y_val[int(max_delay):]
 
@@ -64,12 +60,6 @@ def init_function():
     a_true = data['a_true'].flatten()[1:output_order+1]
     b_true = data['b_true'].flatten()
     sig_e = data['sig_e'].flatten()
-    # coefs_true = np.hstack((a_true, b_true))
-    # output = dict(coefs=coefs_true * np.random.uniform(0.8, 1.2, len(coefs_true)),
-    #               sig_e=(sig_e * np.random.uniform(0.8, 1.2))[0],
-    #               coefs_hyperprior=np.abs(np.random.standard_cauchy(len(coefs_true))),
-    #               shrinkage_param=np.abs(np.random.standard_cauchy(1))[0]
-    #               )
     output = dict(a_coefs=a_true * np.random.uniform(0.8, 1.2, len(a_true)),
                   b_coefs=b_true * np.random.uniform(0.8, 1.2, len(b_true)),
                   sig_e=(sig_e * np.random.uniform(0.8, 1.2))[0],
