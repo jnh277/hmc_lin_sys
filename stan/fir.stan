@@ -30,19 +30,15 @@ data {
 }
 parameters {
     vector[input_order] b_coefs;
-//    real<lower=0> b_coefs_hyperprior[input_order];
     vector<lower=0>[input_order] b_coefs_hyperprior;
     real<lower=0> shrinkage_param;
     real<lower=0> sig_e;
 }
 model {
-  b_coefs_hyperprior ~ cauchy(0.0, 1.0);
-//    for (i in 1:input_order)
-//        b_coefs[i] ~ normal(0.0, b_coefs_hyperprior[i]^2*shrinkage_param^2);
+    b_coefs_hyperprior ~ cauchy(0.0, 1.0);
     b_coefs ~ normal(0.0, b_coefs_hyperprior .* b_coefs_hyperprior*shrinkage_param^2);
-
-  sig_e ~ cauchy(0.0, 1.0);
-   y_est ~ normal(est_input_matrix*b_coefs, sig_e);
+    sig_e ~ cauchy(0.0, 1.0);
+    y_est ~ normal(est_input_matrix*b_coefs, sig_e);
 }
 generated quantities {
     vector[no_obs_val] y_hat;
