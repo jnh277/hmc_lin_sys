@@ -28,7 +28,7 @@ import seaborn as sns
 
 # specific data path
 data_path = 'data/fir_order2.mat'
-input_order = 16       # gives the terms b_0 * u_k + b_1 * u_{k-1} + .. + b_{input_order-1} * u_{k-input_order+1}
+input_order = 20       # gives the terms b_0 * u_k + b_1 * u_{k-1} + .. + b_{input_order-1} * u_{k-input_order+1}
 
 data = loadmat(data_path)
 
