@@ -28,24 +28,29 @@ import seaborn as sns
 data_path = 'data/ss_order1.mat'
 data = loadmat(data_path)
 
-y_est = data['y_estimation'].flatten()
-u_est = data['u_estimation'].flatten()
-y_val = data['y_validation'].flatten()
-u_val = data['u_validation'].flatten()
+y_est = data['y_estimation']
+u_est = data['u_estimation']
+y_val = data['y_validation']
+u_val = data['u_validation']
+
+y_est = y_est[1:500]
+u_est = u_est[1:500]
 
 no_obs_est = len(y_est)
 no_obs_val = len(y_val)
 
+no_states = 1
+no_outputs = 1
+Ts = 0.1
 
 # Run Stan
 def init_function():
-    output = dict(r=np.abs(np.random.standard_cauchy(1))[0],
-                  q=np.abs(np.random.standard_cauchy(1))[0],
-                  d_hyper=np.abs(np.random.standard_cauchy(1))[0],
+    output = dict(L_Q=np.diag(np.ones((no_states,1)).flatten()),
+                  L_R=np.diag(np.ones((no_outputs,1)).flatten()),
                   )
     return output
 
-model = pystan.StanModel(file='stan/hidden_ss.stan')
+model = pystan.StanModel(file='stan/ssm_uc.stan')
 
 stan_data = {'no_obs_est': len(y_est),
              'no_obs_val': len(y_val),
@@ -53,12 +58,16 @@ stan_data = {'no_obs_est': len(y_est),
              'u_est':u_est,
              'y_val':y_val,
              'u_val':u_val,
+             'no_states':1,
+             'no_inputs':1,
+             'no_outputs':1,
+             'Ts':Ts
              }
 
 control = {"adapt_delta": 0.8,
            "max_treedepth":10}         # increasing from default 0.8 to reduce divergent steps
 
-fit = model.sampling(data=stan_data, init=init_function, iter=5000, chains=4,control=control)
+fit = model.sampling(data=stan_data,init=init_function, iter=5000, chains=4,control=control,n_jobs=1)
 
 # print(fit)
 
@@ -72,14 +81,14 @@ yhat_upper_ci = np.percentile(yhat, 97.5, axis=0)
 yhat_lower_ci = np.percentile(yhat, 2.5, axis=0)
 
 
-a_traces = traces['a']
-b_traces = traces['b']
-c_traces = traces['c']
-d_traces = traces['d']
-q_traces = traces['q']
-r_traces = traces['r']
+a_traces = traces['A']
+b_traces = traces['B']
+c_traces = traces['C']
+d_traces = traces['D']
+q_traces = traces['Q']
+r_traces = traces['R']
 h_traces = traces['h']
-d_hyper_traces = traces['d_hyper']
+
 
 a_mean = np.mean(a_traces,0)
 b_mean = np.mean(b_traces,0)
@@ -88,7 +97,7 @@ d_mean = np.mean(d_traces,0)
 h_mean = np.mean(h_traces,0)
 r_mean = np.mean(r_traces,0)
 q_mean = np.mean(q_traces,0)
-d_hyper_mean = np.mean(d_hyper_traces,0)
+# d_hyper_mean = np.mean(d_hyper_traces,0)
 
 
 plt.subplot(1,1,1)

@@ -1,17 +1,17 @@
-%%
+% generate data for an order 2 system
+
 clear all
 clc
 noObservations = 1000;
-sig_e = 0.1;
+sig_e = 0.7;
 Ts = 0.1;
 
 rng(15)
 
 n_states = 1;
-sys = c2d(tf([0 0.1],[1, 1]),Ts);
-
+sys = c2d(tf([0 1],[1, 1, 5]),Ts);
 m0 = idss(sys);
-m0.K = 0.1;     % add in some state noise just for fun
+m0.K = [0.1;0.01];     % add in some state noise just for fun
 
 
 % generate random binary signal
@@ -51,11 +51,13 @@ validationData = iddata(dataOutNoisy(noEstimationData:end), dataIn(noEstimationD
 
 sys = idss(m0);
 a_true = sys.a;
-b_true = sys.
+b_true = sys.b;
+c_true = sys.c;
+d_true = sys.d;
 
 
-save('../data/ss_order1.mat','y_estimation', 'u_estimation', 'y_validation',...
-    'u_validation',...
+save('../data/ss_order2.mat','y_estimation', 'u_estimation', 'y_validation',...
+    'u_validation','a_true','b_true','c_true','d_true',...
     'sig_e','n_states')
 
 %%
@@ -67,7 +69,3 @@ hold on
 
 hold off
 legend('Validation data')
-
-
-
-
