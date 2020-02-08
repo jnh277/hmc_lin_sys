@@ -21,7 +21,7 @@ Bd = H(1,2);
 
 q = NaN(1,no_obs+1);
 y = NaN(1,no_obs);
-u = NaN(1,no_obs);
+u = NaN(1,no_obs+1);
 q(1) = 0;
 u(1) = 1;
 
@@ -42,6 +42,7 @@ for t=1:no_obs
 end
 
 q(:,end) = [];
+u(end) = [];
 
 
 %%
