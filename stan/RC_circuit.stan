@@ -41,8 +41,8 @@ transformed parameters {
     real Ad;
     real Bd;
     real C = exp(log_Cq);
-    matrix[2,2] F;
-    F = matrix_exp(append_row(append_col(A,1),rep_matrix(0,1,2))*Ts);
+    matrix[2,2] F = matrix_exp([[A, 1.0],[0, 0]]);
+//    F = matrix_exp(append_row(append_col(to_vector(A),to_vector(1)),rep_matrix(0,1,2))*Ts);
     Ad = F[1,1];
     Bd = F[1,2];
 }
@@ -52,16 +52,16 @@ model {
     h[1] ~ normal(0, 1.0);  // prior on initial state
 
     // parameter priors
-    Cq ~ normal(0, 1.0);
-    Rq ~ normal(0, 1.0);
+    log_Cq ~ normal(0, 1.0);
+    log_Rq ~ normal(0, 1.0);
 
     // state distributions
     h[2:no_obs_est] ~ normal(Ad*h[1:no_obs_est-1]+Bd*u_est[1:no_obs_est-1], q);
-    y_est ~ normal(h/Cq, r);
+    y_est ~ normal(h/exp(log_Cq), r);
 }
 generated quantities {
     vector[no_obs_est] y_hat;
-    y_hat = c*h + d*u_est;
+    y_hat = h/exp(log_Cq);
 
 }
 
