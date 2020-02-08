@@ -30,7 +30,7 @@ data {
 parameters {
     vector[no_obs_est] h;
     real<lower=0,upper=1> a;    // in actual fact this could go to negative one
-    real<lower=0> b;            // placing the lower bound because of the unobservable symmetry
+    real<lower=0> b;            // b and c have an unobservable symmetry
     real<lower=0> c;
     real d;
     real<lower=0> d_hyper;
@@ -49,12 +49,13 @@ model {
 
     // parameter priors
     a ~ beta(2,2);
+//    a ~ cauchy(0, 1.0);
     b ~ cauchy(0, 1.0); // would a horseshoe prior on these be better
     c ~ cauchy(0, 1.0);
     d_hyper ~ cauchy(0,1.0);
     d ~ normal(0, d_hyper^2); // it probably is for d which can often be zero
 
-    h[2:no_obs_est] ~ normal(a*h[1:no_obs_est-1]+b*u_est[1:no_obs_est-1], q);
+    h[2:no_obs_est] ~ normal(a*h[1:no_obs_est-1]+b*u_est[1:no_obs_est-1], r);
     y_est ~ normal(c*h + d*u_est, r);
 }
 generated quantities {
