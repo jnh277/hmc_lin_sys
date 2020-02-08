@@ -17,8 +17,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ###############################################################################
 */
-
-// stan model for an RC circuit and its state
+// stan model for an RLC circuit and its states
 
 data {
     int<lower=0> no_obs_est;
@@ -30,22 +29,22 @@ data {
     real<lower=0> Ts;
 }
 parameters {
-    vector[no_obs_est] h;
+    matrix[2,no_obs_est] h;         // hidden states
     real<lower=0.0> Cq;            // the capacitance
     real<lower=0.0> Rq;            // the resistance
+    real<lower=0.0> Lq;             // inductance
     real<lower=0.0> q;                 // process noise
     real<lower=0.0> r;                // measurement noise
 
 }
 transformed parameters {
-    real A = -Cq/Rq;
-    real Ad;
-    real Bd;
-    matrix[2,2] F = matrix_exp([[A, 1.0],[0, 0]] * Ts);
-//    F = matrix_exp(append_row(append_col(to_vector(A),to_vector(1)),rep_matrix(0,1,2))*Ts);
-    Ad = F[1,1];
-    Bd = F[1,2];
+    matrix[2,2] Ad;
+    vector[2] Bd;
+    matrix[3,3] F = matrix_exp([[-Rq/Lq, -1/Cq, 1.0],[1/Lq, 0, 0.0],[0, 0, 0]] * Ts);
+    Ad = F[1:2,1:2];
+    Bd = F[1:2,3];
 }
+
 model {
     q ~ cauchy(0.0, 1.0);
     r ~ cauchy(0.0, 1.0);
@@ -54,14 +53,20 @@ model {
     // parameter priors
     Cq ~ inv_gamma(2.0, 1.0);
     Rq ~ inv_gamma(2.0, 1.0);
+    Lq ~ inv_gamma(2.0, 1.0);
 
     // state distributions
-    h[2:no_obs_est] ~ normal(Ad*h[1:no_obs_est-1]+Bd*u_est[1:no_obs_est-1], q);
-    y_est ~ normal(h/Cq, r);
+
+    h[1,2:no_obs_est] ~ normal(Ad[1,1]*h[1,1:no_obs_est-1]+Ad[1,2]*h[2,1:no_obs_est-1]+Bd[1]*u_est[1:no_obs_est-1]',q);
+    h[2,2:no_obs_est] ~ normal(Ad[2,1]*h[1,1:no_obs_est-1]+Ad[2,2]*h[2,1:no_obs_est-1],q);
+
+//    to_vector(h[:,2:no_obs_est]) ~ normal(to_vector(Ad*h[:,1:no_obs_est-1]+Bd*u_est[1:no_obs_est-1]), q);
+    y_est ~ normal(h[2,:]/Cq, r);
 }
 generated quantities {
     vector[no_obs_est] y_hat;
-    y_hat = h/Cq;
+    y_hat = h[2,:]'/Cq;
 
 }
+
 

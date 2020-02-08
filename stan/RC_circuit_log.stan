@@ -18,7 +18,6 @@
 ###############################################################################
 */
 
-// stan model for an RC circuit and its state
 
 data {
     int<lower=0> no_obs_est;
@@ -31,14 +30,14 @@ data {
 }
 parameters {
     vector[no_obs_est] h;
-    real<lower=0.0> Cq;            // the capacitance
-    real<lower=0.0> Rq;            // the resistance
-    real<lower=0.0> q;                 // process noise
-    real<lower=0.0> r;                // measurement noise
+    real log_Cq;            // log of the capacitance
+    real log_Rq;            // log of the resistance
+    real<lower=0> q;                 // process noise
+    real<lower=0> r;                // measurement noise
 
 }
 transformed parameters {
-    real A = -Cq/Rq;
+    real A = -exp(log_Cq)/exp(log_Rq);
     real Ad;
     real Bd;
     matrix[2,2] F = matrix_exp([[A, 1.0],[0, 0]] * Ts);
@@ -52,16 +51,16 @@ model {
     h[1] ~ normal(0, 1.0);  // prior on initial state
 
     // parameter priors
-    Cq ~ inv_gamma(2.0, 1.0);
-    Rq ~ inv_gamma(2.0, 1.0);
+    log_Cq ~ normal(0, 1.0);
+    log_Rq ~ normal(0, 1.0);
 
     // state distributions
     h[2:no_obs_est] ~ normal(Ad*h[1:no_obs_est-1]+Bd*u_est[1:no_obs_est-1], q);
-    y_est ~ normal(h/Cq, r);
+    y_est ~ normal(h/exp(log_Cq), r);
 }
 generated quantities {
     vector[no_obs_est] y_hat;
-    y_hat = h/Cq;
+    y_hat = h/exp(log_Cq);
 
 }
 

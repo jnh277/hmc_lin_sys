@@ -15,18 +15,18 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ###############################################################################
-"""Estimates a RC circuit and its state."""
 
-
+"""Estimates a RLC circuit and its states."""
 import pystan
 import numpy as np
 from scipy.io import loadmat
 import matplotlib.pyplot as plt
 import seaborn as sns
+import arvix
 
 
 # specific data path
-data_path = 'data/rc_circuit.mat'
+data_path = 'data/rlc_circuit.mat'
 data = loadmat(data_path)
 
 y_est = data['y_estimation'].flatten()
@@ -45,10 +45,11 @@ def init_function():
                   q=1.0,
                   Cq=1.0,
                   Rq=1.0,
+                  Lq = 1.0,
                   )
     return output
 
-model = pystan.StanModel(file='stan/RC_circuit.stan')
+model = pystan.StanModel(file='stan/RLC_circuit.stan')
 
 stan_data = {'no_obs_est': len(y_est),
              'no_obs_val': len(y_val),
@@ -80,6 +81,7 @@ yhat_lower_ci = np.percentile(yhat, 2.5, axis=0)
 # Rq_traces = np.exp(traces['log_Rq'])
 Cq_traces = traces['Cq']
 Rq_traces = traces['Rq']
+Lq_traces = traces['Lq']
 q_traces = traces['q']
 r_traces = traces['r']
 h_traces = traces['h']
@@ -87,6 +89,7 @@ h_traces = traces['h']
 
 Cq_mean = np.mean(Cq_traces,0)
 Rq_mean = np.mean(Rq_traces,0)
+Lq_mean = np.mean(Lq_traces,0)
 h_mean = np.mean(h_traces,0)
 r_mean = np.mean(r_traces,0)
 q_mean = np.mean(q_traces,0)
@@ -124,8 +127,9 @@ def plot_trace(param,num_plots,pos, param_name='parameter'):
 
 plot_trace(Cq_traces,4,1,'Cq')
 plot_trace(Rq_traces,4,2,'Rq')
-plot_trace(r_traces,4,3,'q')
-plot_trace(q_traces,4,4,'r')
+plot_trace(Lq_traces,4,3,'Lq')
+plot_trace(r_traces,4,4,'r')
+# plot_trace(q_traces,5,5,'q')
 plt.show()
 
 
