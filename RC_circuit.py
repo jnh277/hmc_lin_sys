@@ -129,3 +129,10 @@ plot_trace(q_traces,4,4,'r')
 plt.show()
 
 
+plt.subplot(1,1,1)
+plt.plot(Cq_traces,Rq_traces,'o')
+plt.xlabel('Cq')
+plt.ylabel('Rq')
+plt.title('sample pairs plot')
+plt.show()
+
