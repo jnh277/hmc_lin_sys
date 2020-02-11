@@ -22,7 +22,6 @@ import numpy as np
 from scipy.io import loadmat
 import matplotlib.pyplot as plt
 import seaborn as sns
-import arvix
 
 
 # specific data path
@@ -42,14 +41,14 @@ no_obs_val = len(y_val)
 # Run Stan
 def init_function():
     output = dict(r=1.0,
-                  q=1.0,
+                  # q=1.0,
                   Cq=1.0,
                   Rq=1.0,
                   Lq = 1.0,
                   )
     return output
 
-model = pystan.StanModel(file='stan/RLC_circuit.stan')
+model = pystan.StanModel(file='stan/RLC_circuit_diag_Q.stan')
 
 stan_data = {'no_obs_est': len(y_est),
              'no_obs_val': len(y_val),
@@ -82,7 +81,7 @@ yhat_lower_ci = np.percentile(yhat, 2.5, axis=0)
 Cq_traces = traces['Cq']
 Rq_traces = traces['Rq']
 Lq_traces = traces['Lq']
-q_traces = traces['q']
+# q_traces = traces['q']
 r_traces = traces['r']
 h_traces = traces['h']
 
@@ -92,7 +91,7 @@ Rq_mean = np.mean(Rq_traces,0)
 Lq_mean = np.mean(Lq_traces,0)
 h_mean = np.mean(h_traces,0)
 r_mean = np.mean(r_traces,0)
-q_mean = np.mean(q_traces,0)
+# q_mean = np.mean(q_traces,0)
 
 
 
@@ -130,6 +129,10 @@ plot_trace(Rq_traces,4,2,'Rq')
 plot_trace(Lq_traces,4,3,'Lq')
 plot_trace(r_traces,4,4,'r')
 # plot_trace(q_traces,5,5,'q')
+plt.show()
+
+plt.subplot(1,1,1)
+plt.plot(Cq_traces,Rq_traces,'o')
 plt.show()
 
 
