@@ -88,10 +88,11 @@ y_validation = y(:,noEstimationData:end);
 u_estimation = u(1:noEstimationData);
 u_validation = u(noEstimationData:end);
 states_est = q(:,1:noEstimationData);
+states_val = q(:,noEstimationData:end);
 
 save('../data/c_tanks3.mat','y_estimation', 'u_estimation', 'y_validation',...
     'u_validation','C1','C2','C3','R12','R13','R23','Ro',...
-    'R','Q','Ts','states_est')
+    'R','Q','Ts','states_est','states_val')
 
 
 

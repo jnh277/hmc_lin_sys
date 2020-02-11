@@ -165,4 +165,9 @@ plt.subplot(1,1,1)
 plt.plot(Cq_traces[:,1],Rq_traces[:,1],'o')
 plt.show()
 
+## validation
+states_val = data["states_val"]
+
+
+
 
