@@ -38,7 +38,7 @@ parameters {
 
 }
 transformed parameters {
-    real A = -Cq/Rq;
+    real A = -1/Rq/Cq;
     real Ad;
     real Bd;
     matrix[2,2] F = matrix_exp([[A, 1.0],[0, 0]] * Ts);
