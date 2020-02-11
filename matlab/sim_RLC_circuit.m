@@ -58,6 +58,14 @@ plot(u)
 plot(y,'o')
 hold off
 
+
+figure(2)
+clf
+plot(q(1,:))
+hold on
+plot(q(2,:))
+hold off
+
 % Estimate the model using all the estimation data
 noObservations = no_obs;
 noEstimationData = floor(0.67 * noObservations);
@@ -66,10 +74,11 @@ y_estimation = y(1:noEstimationData);
 y_validation = y(noEstimationData:end);
 u_estimation = u(1:noEstimationData);
 u_validation = u(noEstimationData:end);
+states_est = q(:,1:noEstimationData);
 
 save('../data/rlc_circuit.mat','y_estimation', 'u_estimation', 'y_validation',...
     'u_validation','Rq','Cq','Lq',...
-    'R','Q','Ts')
+    'R','Q','Ts','states_est')
 
 
 
