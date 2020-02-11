@@ -17,7 +17,24 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ###############################################################################
 */
-// stan model for an RLC circuit and its states
+// stan model for an RLC circuit and its states with a full covariance matrix
+
+//functions{
+////    real vector_normal_lpdf(matrix y, matrix mu, vector sigma_q){
+////        int pdims[2] = dims(y);
+////        vector[pdims[1]] sc_e = diagonal((y - mu) * (y-mu)')./ (sigma_q .* sigma_q);
+//////        real p1;
+//////        p1 = -pdims[1]*0.5*log(2*pi()) - 0.5 * sum(log(sigma_q .* sigma_q));
+////        return -pdims[1]*0.5*log(2*pi()) - 0.5 * sum(log(sigma_q .* sigma_q)) - 0.5 * sum(sc_e);
+////    }
+//    real vector_normal_lpdf(matrix y, matrix mu, vector sigma_q){
+//        int pdims[2] = dims(y);
+//        vector[pdims[1]] sc_e = diagonal((y - mu) * (y-mu)')./ (sigma_q .* sigma_q);
+////        real p1;
+////        p1 = -pdims[1]*0.5*log(2*pi()) - 0.5 * sum(log(sigma_q .* sigma_q));
+//        return -pdims[1]*0.5*log(2*pi()) - 0.5 * sum(log(sigma_q .* sigma_q)) - 0.5 * sum(sc_e);
+//    }
+//}
 
 data {
     int<lower=0> no_obs_est;
@@ -35,19 +52,23 @@ parameters {
     real<lower=0.0> Lq;             // inductance
     real<lower=0.0> q;                 // process noise
     real<lower=0.0> r;                // measurement noise
+    vector<lower=0.0>[2] diag_q;             // diagonal process noise
 
 }
 transformed parameters {
+    matrix[2,no_obs_est] mu;
     matrix[2,2] Ad;
     vector[2] Bd;
     matrix[3,3] F = matrix_exp([[-Rq/Lq, -1/Cq, 1.0],[1/Lq, 0, 0.0],[0, 0, 0]] * Ts);
     Ad = F[1:2,1:2];
     Bd = F[1:2,3];
+    mu = Ad*h+Bd*u_est;
 }
 
 model {
-    q ~ normal(0.0, 1.0);
-    r ~ normal(0.0, 1.0);
+
+    diag_q ~ cauchy(0.0, 1.0); // diagonal process noise
+    r ~ cauchy(0.0, 1.0);    // measurement noise
     h[:,1] ~ normal(0, 1.0);  // prior on initial state
 
     // parameter priors
@@ -56,9 +77,12 @@ model {
     Lq ~ inv_gamma(2.0, 1.0);
 
     // state distributions
-    to_vector(h[:,2:no_obs_est]) ~ normal(to_vector(Ad * h[:,1:no_obs_est-1] + Bd * u_est[1:no_obs_est-1]),q);
 
-    // measurement distributions
+
+//    target += vector_normal_lpdf(h[:,2:no_obs_est] | h[:,1:no_obs_est-1]+Bd*u_est[1:no_obs_est-1], diag_q);
+
+    to_vector(h[1,2:no_obs_est]) ~ normal(to_vector(mu[1,1:no_obs_est-1]), diag_q[1]);
+    to_vector(h[2,2:no_obs_est]) ~ normal(to_vector(mu[2,1:no_obs_est-1]), diag_q[2]);
     y_est ~ normal(h[2,:]/Cq, r);
 }
 generated quantities {

@@ -17,7 +17,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ###############################################################################
 */
-// stan model for an RLC circuit and its states
+// stan model for an RLC circuit and its states with a full covariance matrix
 
 data {
     int<lower=0> no_obs_est;
@@ -35,6 +35,8 @@ parameters {
     real<lower=0.0> Lq;             // inductance
     real<lower=0.0> q;                 // process noise
     real<lower=0.0> r;                // measurement noise
+    cholesky_factor_corr[2] LQcorr;  // cholesky factor of Q correlation matrix
+    vector<lower=0>[2] Tau_Q;       // scale for Q covariance matrix
 
 }
 transformed parameters {
@@ -43,10 +45,22 @@ transformed parameters {
     matrix[3,3] F = matrix_exp([[-Rq/Lq, -1/Cq, 1.0],[1/Lq, 0, 0.0],[0, 0, 0]] * Ts);
     Ad = F[1:2,1:2];
     Bd = F[1:2,3];
+
 }
 
 model {
-    q ~ normal(0.0, 1.0);
+    matrix[2,no_obs_est-1] mu;
+    vector[2] mu_A[no_obs_est-1];
+    vector[2] h_A[no_obs_est-1];
+    mu = Ad * h[:,1:no_obs_est-1] + Bd * u_est[1:no_obs_est-1];
+    for (t in 1:no_obs_est-1) {
+        mu_A[t] = mu[:,t];
+        h_A[t] = h[:,t+1];
+    }
+
+//    q ~ normal(0.0, 1.0);
+    Tau_Q ~ cauchy(0, 1.0);
+    LQcorr ~ lkj_corr_cholesky(2.0);
     r ~ normal(0.0, 1.0);
     h[:,1] ~ normal(0, 1.0);  // prior on initial state
 
@@ -56,9 +70,14 @@ model {
     Lq ~ inv_gamma(2.0, 1.0);
 
     // state distributions
-    to_vector(h[:,2:no_obs_est]) ~ normal(to_vector(Ad * h[:,1:no_obs_est-1] + Bd * u_est[1:no_obs_est-1]),q);
 
-    // measurement distributions
+//    to_vector(h[:,2:no_obs_est]) ~ normal(to_vector(Ad * h[:,1:no_obs_est-1] + Bd * u_est[1:no_obs_est-1]),q);
+    h_A ~ multi_normal_cholesky(mu_A, diag_pre_multiply(Tau_Q,LQcorr));
+//    h_A ~ multi_normal(mu_A, diag_pre_multiply(Tau_Q,LQcorr) * diag_pre_multiply(Tau_Q,LQcorr)');
+//    h[1,2:no_obs_est] ~ normal(Ad[1,1]*h[1,1:no_obs_est-1]+Ad[1,2]*h[2,1:no_obs_est-1]+Bd[1]*u_est[1:no_obs_est-1]',q);
+//    h[2,2:no_obs_est] ~ normal(Ad[2,1]*h[1,1:no_obs_est-1]+Ad[2,2]*h[2,1:no_obs_est-1],q);
+
+//    to_vector(h[:,2:no_obs_est]) ~ normal(to_vector(Ad*h[:,1:no_obs_est-1]+Bd*u_est[1:no_obs_est-1]), q);
     y_est ~ normal(h[2,:]/Cq, r);
 }
 generated quantities {
