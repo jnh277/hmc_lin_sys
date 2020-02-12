@@ -31,6 +31,12 @@ q(:,1) = [0,0];
 u(1) = 1;
 
 
+%% observability test
+Obs = [C];
+for i = 1:20
+   Obs = [Obs;C*A^i] 
+end
+%%
 
 for t=1:no_obs
     if rand > 0.95 
