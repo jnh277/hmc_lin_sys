@@ -42,8 +42,8 @@ parameters {
 model {
     a_coefs_hyperprior ~ cauchy(0.0, 1.0);
     b_coefs_hyperprior ~ cauchy(0.0, 1.0);
-    a_coefs ~ normal(0.0, a_coefs_hyperprior .* a_coefs_hyperprior * shrinkage_param^2);
-    b_coefs ~ normal(0.0, b_coefs_hyperprior .* b_coefs_hyperprior * shrinkage_param^2);
+    a_coefs ~ normal(0.0, a_coefs_hyperprior * shrinkage_param);
+    b_coefs ~ normal(0.0, b_coefs_hyperprior * shrinkage_param);
 
     sig_e ~ cauchy(0.0, 1.0);
     y_est ~ normal(-est_obs_matrix * a_coefs + est_input_matrix*b_coefs, sig_e);
