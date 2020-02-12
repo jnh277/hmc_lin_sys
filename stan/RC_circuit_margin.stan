@@ -18,7 +18,7 @@
 ###############################################################################
 */
 
-// stan model for an RC circuit and its state
+// stan model for estimating RC circuit by marginalising over states
 
 data {
     int<lower=0> no_obs_est;
