@@ -31,36 +31,36 @@ functions{
 
 data {
     int<lower=0> no_obs_est;
-    int<lower=0> no_obs_val;
+    int<lower=0> no_states;
     row_vector[no_obs_est] y_est;
     row_vector[no_obs_est] u_est;
-    row_vector[no_obs_val] y_val;
-    row_vector[no_obs_val] u_val;
     real<lower=0> Ts;
 }
 transformed data{
-    vector[2] B;
-    B[1] = 0;
-    B[2] = 1;
+    vector[no_states] Bs = rep_vector(0.0,no_states);
+    Bs[no_states] = 1.0;
 }
 parameters {
-    matrix[2,no_obs_est] h;         // hidden states
-    vector[2] a_coefs;
-    row_vector[2] C;
+    matrix[no_states,no_obs_est] h;         // hidden states
+    row_vector[no_states] a_coefs;
+    row_vector[no_states] C;
     real D;
     real<lower=0.0> r;                // measurement noise
     // components of process noise matrix
     // for now will just have diagonal components
-    vector<lower=0,upper=pi()/2>[2] tauQ_unif;
-    cholesky_factor_corr[2] LQcorr;
+    vector<lower=0,upper=pi()/2>[no_states] tauQ_unif;
+    cholesky_factor_corr[no_states] LQcorr;
 
 }
 transformed parameters {
-    matrix[2,2] A = [[0, 1],[a_coefs[1],a_coefs[2]]];
-    matrix[2,2] Ad;
-    vector[2] Bd;
-    vector<lower=0>[2] tauQ = 2.5 * tan(tauQ_unif);       // LQ diag scaling
-    matrix[3,3] F = matrix_exp(append_row(append_col(A,B),[0,0,0]) * Ts);
+    matrix[no_states,no_states] A = rep_matrix(0.0,no_states,no_states);
+    matrix[no_states,no_states] Ad;
+    vector[no_states] Bd;
+    vector<lower=0>[no_states] tauQ = 2.5 * tan(tauQ_unif);       // LQ diag scaling
+    matrix[3,3] F;
+    A[no_states,:] = a_coefs;
+    for (i in 1:no_states-1) A[i,i+1] = 1.0;
+    F = matrix_exp(append_row(append_col(A,Bs),[0,0,0]) * Ts);
     Ad = F[1:2,1:2];
     Bd = F[1:2,3];
 
@@ -80,13 +80,15 @@ model {
     target += matrix_normal_lpdf(h[:,2:no_obs_est] | Ad * h[:,1:no_obs_est-1] + Bd * u_est[1:no_obs_est-1], diag_pre_multiply(tauQ,LQcorr));
 
     // measurement distributions
-    y_est ~ normal(h[1,:], r);
+    y_est ~ normal(C*h+D*u_est, r);
 }
 generated quantities {
     row_vector[no_obs_est] y_hat;
     cholesky_factor_cov[2] LQ;
-    y_hat = h[1,:];
+    vector[no_states] B = Bs;
+    y_hat = C*h+D*u_est;
     LQ = diag_pre_multiply(tauQ,LQcorr);
+
 
 }
 
