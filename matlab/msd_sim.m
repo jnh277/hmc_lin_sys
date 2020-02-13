@@ -10,7 +10,9 @@ rng(15)
 Ts = 0.05;
 no_obs = 1000;
 R = 0.1^2;
-Q = 0.02^2;
+% Q = diag([0.02^2; 0.05^2]);
+Q = diag([0, 0.5^2]);
+
 
 Mq = 1.5;
 Kq = 3.0;
@@ -24,6 +26,13 @@ C = [1, 0];
 H = expm([A, B;zeros(size(B)).', zeros(size(B,2))]*Ts);
 Ad = H(1:2,1:2);
 Bd = H(1:2,3);
+
+% discretising Q
+F = expm([-A, Q;
+    zeros(size(A)), A.']*Ts);
+
+Qd = F(3:4,3:4).'*F(1:2,3:4);       % transpose of bottom right multipled by top right
+LQ = chol(Qd,'lower');
 
 q = NaN(2,no_obs+1);
 y = NaN(1,no_obs);
@@ -43,7 +52,7 @@ for t=1:no_obs
     end
 
     
-    q(:,t+1) = Ad*q(:,t) + Bd*u(t) + sqrt(Q)*randn(2,1);
+    q(:,t+1) = Ad*q(:,t) + Bd*u(t) + sqrtm(Qd)*randn(2,1);
     y(t) = C*q(:,t) + D*u(t)+sqrt(R)*randn;
     
 end
@@ -80,9 +89,9 @@ u_validation = u(noEstimationData:end);
 states_est = q(:,1:noEstimationData);
 states_val = q(:,noEstimationData:end);
 
-save('../data/msd.mat','y_estimation', 'u_estimation', 'y_validation',...
-    'u_validation','Mq','Kq','Dq',...
-    'R','Q','Ts','states_est','states_val')
+% save('../data/msd_Qfull.mat','y_estimation', 'u_estimation', 'y_validation',...
+%     'u_validation','Mq','Kq','Dq',...
+%     'R','Q','Ts','states_est','states_val')
 
 
 
