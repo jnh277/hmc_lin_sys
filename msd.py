@@ -42,14 +42,14 @@ no_obs_val = len(y_val)
 # Run Stan
 def init_function():
     output = dict(r=1.0,
-                  q=1.0,
+                  # q=1.0,
                   Mq=1.0,
                   Dq=1.0,
                   Kq = 1.0,
                   )
     return output
 
-model = pystan.StanModel(file='stan/msd.stan')
+model = pystan.StanModel(file='stan/msd_multi_normal.stan')
 
 stan_data = {'no_obs_est': len(y_est),
              'no_obs_val': len(y_val),
