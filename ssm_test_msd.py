@@ -22,21 +22,19 @@ import numpy as np
 from scipy.io import loadmat
 import matplotlib.pyplot as plt
 import seaborn as sns
+from scipy import signal
 
 
 # specific data path
-data_path = 'data/msd_Qfull.mat'
+data_path = 'data/msd_sinInputs.mat'
 data = loadmat(data_path)
 
 y_est = data['y_estimation'].flatten()
 u_est = data['u_estimation'].flatten()
-y_val = data['y_validation'].flatten()
-u_val = data['u_validation'].flatten()
 states_est = data['states_est']
 Ts = data['Ts'].flatten()
 
 no_obs_est = len(y_est)
-no_obs_val = len(y_val)
 
 
 # Run Stan
@@ -49,14 +47,11 @@ def init_function():
                   )
     return output
 
-model = pystan.StanModel(file='stan/ssm_modal.stan')
+model = pystan.StanModel(file='stan/ssm.stan')
 
 stan_data = {'no_obs_est': len(y_est),
-             'no_obs_val': len(y_val),
              'y_est': y_est,
              'u_est':u_est,
-             'y_val':y_val,
-             'u_val':u_val,
              'Ts':Ts[0],
              'no_states':2,
              }
@@ -109,23 +104,7 @@ plt.title('measurement estimates')
 plt.legend(('true','mean','upper CI','lower CI'))
 plt.show()
 
-plt.subplot(1,2,1)
-plt.plot(states_est[0,:],linewidth=0.5)
-plt.plot(h_mean[0,:],linewidth=0.5)
-plt.plot(h_upper_ci[0,:],'--',linewidth=0.5)
-plt.plot(h_lower_ci[0,:],'--',linewidth=0.5)
-plt.title('Position estimates')
-plt.legend(('true','mean','upper CI','lower CI'))
 
-
-plt.subplot(1,2,2)
-plt.plot(states_est[1,:],linewidth=0.5)
-plt.plot(h_mean[1,:],linewidth=0.5)
-plt.plot(h_upper_ci[1,:],'--',linewidth=0.5)
-plt.plot(h_lower_ci[1,:],'--',linewidth=0.5)
-plt.title('velocity estimates')
-plt.legend(('true','mean','upper CI','lower CI'))
-plt.show()
 
 def plot_trace(param,num_plots,pos, param_name='parameter'):
     """Plot the trace and posterior of a parameter."""
@@ -149,15 +128,58 @@ def plot_trace(param,num_plots,pos, param_name='parameter'):
     plt.gcf().tight_layout()
     plt.legend()
 
-# plot_trace(Mq_traces,4,1,'Mq')
-# plot_trace(Dq_traces,4,2,'Dq')
-# plot_trace(Kq_traces,4,3,'Kq')
-# plot_trace(r_traces,4,4,'r')
+plot_trace(A_traces[:,1,0],4,1,'A[2,2]')
+plot_trace(C_traces[:,1],4,2,'C[1]')
+plot_trace(D_traces,4,3,'D')
+plot_trace(r_traces,4,4,'r')
 # # plot_trace(q_traces,5,5,'q')
-# plt.show()
+plt.show()
 #
-# plt.subplot(1,1,1)
-# plt.plot(Mq_traces,Dq_traces,'o')
-# plt.show()
+plt.subplot(1,1,1)
+plt.plot(A_traces[:,1,0],A_traces[:,1,1],'o')
+plt.title('samples pairs plot')
+plt.show()
+
+
+# how to do actual validation?? BODE diagram
+# B_mean = np.array([[0],[1]])
+A_true = data['A_true']
+B_true = data['B_true']
+C_true = data['C_true']
+D_true = data['D_true']
+
+w_plot = np.logspace(-2,1)
+# plot the true bode diagram
+w,mag,phase = signal.bode((A_true,B_true,C_true,float(D_true)),w_plot)
+# have to convert to flaot because for some reason D, and C are uint8
+plt.subplot(2,1,1)
+plt.semilogx(w, mag)    # Bode magnitude plot
+plt.title('Bode diagram')
+plt.ylabel('Magnitude (dB)')
+plt.subplot(2,1,2)
+plt.semilogx(w, phase)  # Bode phase plot
+plt.ylabel('Phase (deg)')
+plt.xlabel('Frequency (rad/s)')
+
+
+# plot estimated bode diagram samples
+no_samples = np.shape(A_traces)[0]
+no_plot = 100
+sel = np.random.choice(np.arange(no_samples),no_plot,False)
+
+for s in sel:
+    A_sample = A_traces[s,:,:]
+    B_sample = B_traces[s,:].reshape(2,1)
+    C_sample = C_traces[s,:].reshape(1,2)
+    D_sample = D_traces[s]
+    w, mag, phase = signal.bode((A_sample, B_sample, C_sample, float(D_sample)),w_plot)
+
+    plt.subplot(2,1,1)
+    plt.semilogx(w, mag,color='green',alpha=0.1)    # Bode magnitude plot
+    plt.subplot(2,1,2)
+    plt.semilogx(w, phase,color='green',alpha=0.1)  # Bode phase plot
+
+plt.show()
+
 
 
