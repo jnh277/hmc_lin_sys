@@ -129,3 +129,4 @@ dmypy.json
 .pyre/
 *.xml
 stan/.DS_Store
+data/.DS_Store
