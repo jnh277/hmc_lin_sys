@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
-no_obs_est = 100
+no_obs_est = 200
 dims = 2
 
 Sigma = np.array([[1, -0.25],[-0.25,1]])
@@ -27,9 +27,9 @@ def init_function():
 model = pystan.StanModel(file='stan/wishart_test.stan')
 
 stan_data = {'no_obs': int(no_obs_est),
-             'obs':y,
+             'obs':y.T,
              'K':int(dims),
-             'u':u
+             'u':u.T
              }
 
 fit = model.sampling(data=stan_data,init=init_function, iter=5000, chains=4)
