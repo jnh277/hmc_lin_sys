@@ -47,7 +47,7 @@ def init_function():
                   )
     return output
 
-model = pystan.StanModel(file='stan/ssm.stan')
+model = pystan.StanModel(file='stan/ssm_ctrlcanon.stan')
 
 stan_data = {'no_obs_est': len(y_est),
              'y_est': y_est,
@@ -149,18 +149,6 @@ C_true = data['C_true']
 D_true = data['D_true']
 
 w_plot = np.logspace(-2,1)
-# plot the true bode diagram
-w,mag,phase = signal.bode((A_true,B_true,C_true,float(D_true)),w_plot)
-# have to convert to flaot because for some reason D, and C are uint8
-plt.subplot(2,1,1)
-plt.semilogx(w, mag)    # Bode magnitude plot
-plt.title('Bode diagram')
-plt.ylabel('Magnitude (dB)')
-plt.subplot(2,1,2)
-plt.semilogx(w, phase)  # Bode phase plot
-plt.ylabel('Phase (deg)')
-plt.xlabel('Frequency (rad/s)')
-
 
 # plot estimated bode diagram samples
 no_samples = np.shape(A_traces)[0]
@@ -175,9 +163,25 @@ for s in sel:
     w, mag, phase = signal.bode((A_sample, B_sample, C_sample, float(D_sample)),w_plot)
 
     plt.subplot(2,1,1)
-    plt.semilogx(w, mag,color='green',alpha=0.1)    # Bode magnitude plot
+    h2, = plt.semilogx(w, mag,color='green',alpha=0.1,label='samples')    # Bode magnitude plot
     plt.subplot(2,1,2)
     plt.semilogx(w, phase,color='green',alpha=0.1)  # Bode phase plot
+
+
+# plot the true bode diagram
+w,mag,phase = signal.bode((A_true,B_true,C_true,float(D_true)),w_plot)
+# have to convert to flaot because for some reason D, and C are uint8
+plt.subplot(2,1,1)
+h1, = plt.semilogx(w, mag,color='blue', label='True system')    # Bode magnitude plot
+plt.title('Bode diagram')
+plt.ylabel('Magnitude (dB)')
+plt.legend(handles=[h1,h2])
+plt.subplot(2,1,2)
+plt.semilogx(w, phase,color='blue')  # Bode phase plot
+plt.ylabel('Phase (deg)')
+plt.xlabel('Frequency (rad/s)')
+
+
 
 plt.show()
 
