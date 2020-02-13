@@ -17,7 +17,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ###############################################################################
 */
-// stan state space model with L2 priors on parameters
+// stan state space model with L2 (Gaussian) priors on parameters
 functions{
     real matrix_normal_lpdf(matrix y, matrix mu, matrix LSigma){
         int pdims[2] = dims(y);
