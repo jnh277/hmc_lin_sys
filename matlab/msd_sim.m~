@@ -47,16 +47,15 @@ q(:,1) = [0,0];
 
 
 
-% % staggered sins input
-% T = Ts*(1:no_obs);
-% u(1:340) = 2.0;
-% u(341:560) = sin(0.141*T(341:560));
-% u(561:780) = sin(1.41*T(561:780));
-% u(781:1000) = sin(20*T(781:1000));
+% staggered sins input
+T = Ts*(1:no_obs);
+u(1:340) = 2.0;
+u(341:560) = sin(0.141*T(341:560));
+u(561:780) = sin(1.41*T(561:780));
+u(781:1000) = sin(20*T(781:1000));
 
-% % sum of sins input
-no_sins = 5;
-omegas = logspace(0,log(w_max),no_sins);
+% sum of sins in
+% no_sins = 5
 
 
 %% observability test
