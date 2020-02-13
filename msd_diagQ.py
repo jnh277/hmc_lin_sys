@@ -16,7 +16,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ###############################################################################
 
-"""Estimates a msd and its states."""
+"""Estimates a msd and its states with diagonal process noise."""
 import pystan
 import numpy as np
 from scipy.io import loadmat
@@ -25,7 +25,7 @@ import seaborn as sns
 
 
 # specific data path
-data_path = 'data/msd.mat'
+data_path = 'data/msd_Qfull.mat'
 data = loadmat(data_path)
 
 y_est = data['y_estimation'].flatten()
@@ -42,14 +42,14 @@ no_obs_val = len(y_val)
 # Run Stan
 def init_function():
     output = dict(r=1.0,
-                  q=1.0,
+                  # LQdiag=np.ones((2)),
                   Mq=1.0,
                   Dq=1.0,
                   Kq = 1.0,
                   )
     return output
 
-model = pystan.StanModel(file='stan/msd.stan')
+model = pystan.StanModel(file='stan/msd_multi_normal.stan')
 
 stan_data = {'no_obs_est': len(y_est),
              'no_obs_val': len(y_val),
@@ -63,7 +63,7 @@ stan_data = {'no_obs_est': len(y_est),
 control = {"adapt_delta": 0.8,
            "max_treedepth":10}         # increasing from default 0.8 to reduce divergent steps
 
-fit = model.sampling(data=stan_data, init=init_function, iter=5000, chains=4,control=control)
+fit = model.sampling(data=stan_data, init=init_function, iter=2000, chains=4,control=control)
 
 # print(fit)
 
@@ -80,7 +80,7 @@ yhat_lower_ci = np.percentile(yhat, 2.5, axis=0)
 Mq_traces = traces['Mq']
 Dq_traces = traces['Dq']
 Kq_traces = traces['Kq']
-q_traces = traces['q']
+LQ_traces = traces['LQ']
 r_traces = traces['r']
 h_traces = traces['h']
 
@@ -90,7 +90,7 @@ Dq_mean = np.mean(Dq_traces,0)
 Kq_mean = np.mean(Kq_traces,0)
 h_mean = np.mean(h_traces,0)
 r_mean = np.mean(r_traces,0)
-q_mean = np.mean(q_traces,0)
+LQ_mean = np.mean(LQ_traces,0)
 
 h_upper_ci = np.percentile(h_traces, 97.5, axis=0)
 h_lower_ci = np.percentile(h_traces, 2.5, axis=0)

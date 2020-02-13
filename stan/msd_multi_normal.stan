@@ -46,21 +46,25 @@ parameters {
     real<lower=0.0> r;                // measurement noise
     // components of process noise matrix
     // for now will just have diagonal components
-    vector<lower=0.0>[2] LQdiag;
-
+//    vector<lower=0.0>[2] LQdiag;
+    vector<lower=0,upper=pi()/2>[2] tauQ_unif;
+    cholesky_factor_corr[2] LQcorr;
 
 }
 transformed parameters {
     matrix[2,2] Ad;
     vector[2] Bd;
-    cholesky_factor_cov[2] LQ = diag_matrix(LQdiag);
+    vector<lower=0>[2] tauQ = 2.5 * tan(tauQ_unif);       // LQ diag scaling
+//    cholesky_factor_cov[2] LQ = diag_matrix(LQdiag);
     matrix[3,3] F = matrix_exp([[0, 1.0, 0.0],[-Kq/Mq, -Dq/Mq, 1.0/Mq],[0, 0, 0]] * Ts);
     Ad = F[1:2,1:2];
     Bd = F[1:2,3];
+
 }
 
 model {
-    LQdiag ~ cauchy(0.0, 1.0);
+//    LQdiag ~ cauchy(0.0, 1.0);
+    LQcorr ~ lkj_corr_cholesky(2);
     r ~ normal(0.0, 1.0);
     h[:,1] ~ normal(0, 1.0);  // prior on initial state
 
@@ -70,14 +74,17 @@ model {
     Dq ~ inv_gamma(2.0, 1.0);
 
     // state distributions
-    target += matrix_normal_lpdf(h[:,2:no_obs_est] | Ad * h[:,1:no_obs_est-1] + Bd * u_est[1:no_obs_est-1], LQ);
+//    target += matrix_normal_lpdf(h[:,2:no_obs_est] | Ad * h[:,1:no_obs_est-1] + Bd * u_est[1:no_obs_est-1], LQ);
+    target += matrix_normal_lpdf(h[:,2:no_obs_est] | Ad * h[:,1:no_obs_est-1] + Bd * u_est[1:no_obs_est-1], diag_pre_multiply(tauQ,LQcorr));
 
     // measurement distributions
     y_est ~ normal(h[1,:], r);
 }
 generated quantities {
     row_vector[no_obs_est] y_hat;
+    cholesky_factor_cov[2] LQ;
     y_hat = h[1,:];
+    LQ = diag_pre_multiply(tauQ,LQcorr);
 
 }
 
