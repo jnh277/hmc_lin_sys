@@ -17,7 +17,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ###############################################################################
 */
-// stan state space model
+// stan state space model with L2 priors on parameters
 functions{
     real matrix_normal_lpdf(matrix y, matrix mu, matrix LSigma){
         int pdims[2] = dims(y);
@@ -31,12 +31,9 @@ functions{
 
 data {
     int<lower=0> no_obs_est;
-    int<lower=0> no_obs_val;
     int<lower=0> no_states;
     row_vector[no_obs_est] y_est;
     row_vector[no_obs_est] u_est;
-    row_vector[no_obs_val] y_val;
-    row_vector[no_obs_val] u_val;
     real<lower=0> Ts;
 }
 parameters {
@@ -77,12 +74,12 @@ model {
     target += matrix_normal_lpdf(h[:,2:no_obs_est] | Ad * h[:,1:no_obs_est-1] + Bd * u_est[1:no_obs_est-1], diag_pre_multiply(tauQ,LQcorr));
 
     // measurement distributions
-    y_est ~ normal(h[1,:], r);
+    y_est ~ normal(C*h+D*u_est, r);
 }
 generated quantities {
     row_vector[no_obs_est] y_hat;
     cholesky_factor_cov[2] LQ;
-    y_hat = h[1,:];
+    y_hat = C*h+D*u_est;
     LQ = diag_pre_multiply(tauQ,LQcorr);
 
 }
