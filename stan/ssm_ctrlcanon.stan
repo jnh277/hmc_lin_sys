@@ -32,33 +32,37 @@ functions{
 data {
     int<lower=0> no_obs_est;
     int<lower=0> no_obs_val;
-    int<lower=0> no_states;
     row_vector[no_obs_est] y_est;
     row_vector[no_obs_est] u_est;
     row_vector[no_obs_val] y_val;
     row_vector[no_obs_val] u_val;
     real<lower=0> Ts;
 }
+transformed data{
+    vector[2] B;
+    B[1] = 0;
+    B[2] = 1;
+}
 parameters {
-    matrix[no_states,no_obs_est] h;         // hidden states
-    matrix[no_states,no_states] A;
-    vector[no_states] B;
-    row_vector[no_states] C;
+    matrix[2,no_obs_est] h;         // hidden states
+    vector[2] a_coefs;
+    row_vector[2] C;
     real D;
     real<lower=0.0> r;                // measurement noise
     // components of process noise matrix
     // for now will just have diagonal components
-    vector<lower=0,upper=pi()/2>[no_states] tauQ_unif;
-    cholesky_factor_corr[no_states] LQcorr;
+    vector<lower=0,upper=pi()/2>[2] tauQ_unif;
+    cholesky_factor_corr[2] LQcorr;
 
 }
 transformed parameters {
-    matrix[no_states,no_states] Ad;
-    vector[no_states] Bd;
-    vector<lower=0>[no_states] tauQ = 2.5 * tan(tauQ_unif);       // LQ diag scaling
-    matrix[no_states+1,no_states+1] F = matrix_exp(append_row(append_col(A,B),rep_row_vector(0.0,no_states+1)) * Ts);
-    Ad = F[1:no_states,1:no_states];
-    Bd = F[1:no_states,no_states+1];
+    matrix[2,2] A = [[0, 1],[a_coefs[1],a_coefs[2]]];
+    matrix[2,2] Ad;
+    vector[2] Bd;
+    vector<lower=0>[2] tauQ = 2.5 * tan(tauQ_unif);       // LQ diag scaling
+    matrix[3,3] F = matrix_exp(append_row(append_col(A,B),[0,0,0]) * Ts);
+    Ad = F[1:2,1:2];
+    Bd = F[1:2,3];
 
 }
 
@@ -68,8 +72,7 @@ model {
     h[:,1] ~ normal(0, 1.0);  // prior on initial state
 
     // parameter priors
-    to_vector(A) ~ normal(0.0, 1.0);
-    B ~ normal(0.0, 1.0);
+    a_coefs ~ normal(0.0, 1.0);
     C ~ normal(0.0, 1.0);
     D ~ normal(0.0, 1.0);
 

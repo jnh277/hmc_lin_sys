@@ -17,7 +17,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ###############################################################################
 */
-// stan state space model
+// stan state space model in modal form
 functions{
     real matrix_normal_lpdf(matrix y, matrix mu, matrix LSigma){
         int pdims[2] = dims(y);
@@ -40,25 +40,30 @@ data {
     real<lower=0> Ts;
 }
 parameters {
-    matrix[no_states,no_obs_est] h;         // hidden states
-    matrix[no_states,no_states] A;
-    vector[no_states] B;
-    row_vector[no_states] C;
+    matrix[2,no_obs_est] h;         // hidden states
+    vector<lower=0.0>[2] p_real;
+    vector[1] p_complex;
+    vector[2] B;
+    row_vector[2] C;
     real D;
     real<lower=0.0> r;                // measurement noise
     // components of process noise matrix
     // for now will just have diagonal components
-    vector<lower=0,upper=pi()/2>[no_states] tauQ_unif;
-    cholesky_factor_corr[no_states] LQcorr;
+    vector<lower=0,upper=pi()/2>[2] tauQ_unif;
+    cholesky_factor_corr[2] LQcorr;
 
 }
 transformed parameters {
-    matrix[no_states,no_states] Ad;
-    vector[no_states] Bd;
-    vector<lower=0>[no_states] tauQ = 2.5 * tan(tauQ_unif);       // LQ diag scaling
-    matrix[no_states+1,no_states+1] F = matrix_exp(append_row(append_col(A,B),rep_row_vector(0.0,no_states+1)) * Ts);
-    Ad = F[1:no_states,1:no_states];
-    Bd = F[1:no_states,no_states+1];
+    matrix[2,2] Ad;
+    vector[2] Bd;
+    vector<lower=0>[2] tauQ = 2.5 * tan(tauQ_unif);       // LQ diag scaling
+    matrix[3,3] F;
+    matrix[2,2] A = -diag_matrix(p_real);
+    A[1,2] = p_complex[1];
+    A[2,1] = -p_complex[1];
+    F = matrix_exp(append_row(append_col(A,B),[0,0,0]) * Ts);
+    Ad = F[1:2,1:2];
+    Bd = F[1:2,3];
 
 }
 
@@ -68,8 +73,8 @@ model {
     h[:,1] ~ normal(0, 1.0);  // prior on initial state
 
     // parameter priors
-    to_vector(A) ~ normal(0.0, 1.0);
-    B ~ normal(0.0, 1.0);
+    p_real ~ normal(0.0, 1.0);
+    p_complex ~ normal(0.0, 1.0);
     C ~ normal(0.0, 1.0);
     D ~ normal(0.0, 1.0);
 
