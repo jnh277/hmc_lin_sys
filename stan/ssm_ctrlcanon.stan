@@ -17,7 +17,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ###############################################################################
 */
-// stan state space model
+// stan state space model in controller canonical form with L2 (Gaussian) priors
 functions{
     real matrix_normal_lpdf(matrix y, matrix mu, matrix LSigma){
         int pdims[2] = dims(y);
@@ -43,8 +43,8 @@ transformed data{
 parameters {
     matrix[no_states,no_obs_est] h;         // hidden states
     row_vector[no_states] a_coefs;
-    row_vector[no_states] C;
-    real D;
+    row_vector[no_states] b_coefs;
+    real b0;
     real<lower=0.0> r;                // measurement noise
     // components of process noise matrix
     // for now will just have diagonal components
@@ -54,11 +54,15 @@ parameters {
 }
 transformed parameters {
     matrix[no_states,no_states] A = rep_matrix(0.0,no_states,no_states);
+    row_vector[no_states] C;
+    real D;
     matrix[no_states,no_states] Ad;
     vector[no_states] Bd;
     vector<lower=0>[no_states] tauQ = 2.5 * tan(tauQ_unif);       // LQ diag scaling
     matrix[3,3] F;
-    A[no_states,:] = a_coefs;
+    A[no_states,:] = -a_coefs;
+    C = b_coefs - a_coefs*b0;
+    D = b0;
     for (i in 1:no_states-1) A[i,i+1] = 1.0;
     F = matrix_exp(append_row(append_col(A,Bs),[0,0,0]) * Ts);
     Ad = F[1:2,1:2];
@@ -73,8 +77,8 @@ model {
 
     // parameter priors
     a_coefs ~ normal(0.0, 1.0);
-    C ~ normal(0.0, 1.0);
-    D ~ normal(0.0, 1.0);
+    b_coefs ~ normal(0.0, 1.0);
+    b0 ~ normal(0.0, 1.0);
 
     // state distributions
     target += matrix_normal_lpdf(h[:,2:no_obs_est] | Ad * h[:,1:no_obs_est-1] + Bd * u_est[1:no_obs_est-1], diag_pre_multiply(tauQ,LQcorr));
