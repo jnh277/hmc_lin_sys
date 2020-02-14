@@ -7,7 +7,7 @@ clc
 
 rng(15)
 
-Ts = 0.05;
+Ts = 0.025;
 no_obs = 1000;
 R = 0.1^2;
 % Q = diag([0.02^2; 0.05^2]);
@@ -55,9 +55,10 @@ q(:,1) = [0,0];
 % u(781:1000) = sin(20*T(781:1000));
 
 % % sum of sins input
-no_sins = 5;
-omegas = logspace(0,log(w_max),no_sins);
-
+no_sins = 6;
+T = Ts*(1:no_obs);
+omegas = [0,logspace(-1,log10(w_max/5),no_sins-1)];
+u = sum(sin(omegas.'*T + rand(no_sins,1)),1);
 
 %% observability test
 %%
@@ -75,8 +76,8 @@ for t=1:no_obs
     
 end
 
-q(:,end) = [];
-u(end) = [];
+% q(:,end) = [];
+% u(end) = [];
 
 
 %%
@@ -121,7 +122,7 @@ D_true = D;
 %     'u_validation','Mq','Kq','Dq','A_true','B_true','C_true','D_true',...
 %     'R','Q','Ts','states_est','states_val')
 
-save('../data/msd_sinInputs.mat','y_estimation', 'u_estimation',...
+save('../data/msd_sumsins.mat','y_estimation', 'u_estimation',...
     'Mq','Kq','Dq','A_true','B_true','C_true','D_true',...
     'R','Q','Ts','states_est','w_max')
 
