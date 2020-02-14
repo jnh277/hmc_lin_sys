@@ -26,7 +26,7 @@ from scipy import signal
 
 
 # specific data path
-data_path = 'data/msd_sinInputs.mat'
+data_path = 'data/msd_sumsins.mat'
 data = loadmat(data_path)
 
 y_est = data['y_estimation'].flatten()
@@ -47,7 +47,7 @@ def init_function():
                   )
     return output
 
-model = pystan.StanModel(file='stan/ssm_ctrlcanon.stan')
+model = pystan.StanModel(file='stan/ssm_horseshoe.stan')
 
 stan_data = {'no_obs_est': len(y_est),
              'y_est': y_est,

@@ -17,7 +17,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ###############################################################################
 */
-// stan state space model with L2 (Gaussian) priors on parameters
+// stan state space model with horseshoe priors on parameters
 functions{
     real matrix_normal_lpdf(matrix y, matrix mu, matrix LSigma){
         int pdims[2] = dims(y);
@@ -45,7 +45,7 @@ parameters {
     vector<lower=0.0>[no_states*no_states] A_hyper;     // A matrix hyperpriors
     vector<lower=0.0>[no_states] B_hyper;               // B matrix hyperpriors
     row_vector<lower=0.0>[no_states] C_hyper;           // C matrix hyperpriors
-    real<lower=0.0> D;                                 // D matrix hyperpriors
+    real<lower=0.0> D_hyper;                                 // D matrix hyperpriors
     real<lower=0.0> shrinkage_param;                    // horeshoe shrinkage param
     real<lower=0.0> r;                      // measurement noise std
     // components of process noise matrix
@@ -78,9 +78,9 @@ model {
 
     // parameter priors
     to_vector(A) ~ normal(0.0, A_hyper * shrinkage_param);
-    B ~ normal(0.0, A_hyper * shrinkage_param);
-    C ~ normal(0.0, A_hyper * shrinkage_param);
-    D ~ normal(0.0, A_hyper * shrinkage_param);
+    B ~ normal(0.0, B_hyper * shrinkage_param);
+    C ~ normal(0.0, C_hyper * shrinkage_param);
+    D ~ normal(0.0, D_hyper * shrinkage_param);
 
     // state distributions
     target += matrix_normal_lpdf(h[:,2:no_obs_est] | Ad * h[:,1:no_obs_est-1] + Bd * u_est[1:no_obs_est-1], diag_pre_multiply(tauQ,LQcorr));
