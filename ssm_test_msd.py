@@ -47,7 +47,7 @@ def init_function():
                   )
     return output
 
-model = pystan.StanModel(file='stan/ssm_horseshoe.stan')
+model = pystan.StanModel(file='stan/ssm_ctrlcanon.stan')
 
 stan_data = {'no_obs_est': len(y_est),
              'y_est': y_est,

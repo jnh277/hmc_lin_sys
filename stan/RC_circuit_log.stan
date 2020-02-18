@@ -18,6 +18,8 @@
 ###############################################################################
 */
 
+// using the log of parameters to enforce positiveness is pointless as
+// this is how stan already enforces lower bounds... read the manual
 
 data {
     int<lower=0> no_obs_est;

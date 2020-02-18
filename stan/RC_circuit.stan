@@ -25,8 +25,6 @@ data {
     int<lower=0> no_obs_val;
     vector[no_obs_est] y_est;
     vector[no_obs_est] u_est;
-    vector[no_obs_val] y_val;
-    vector[no_obs_val] u_val;
     real<lower=0> Ts;
 }
 parameters {
@@ -45,6 +43,8 @@ transformed parameters {
 //    F = matrix_exp(append_row(append_col(to_vector(A),to_vector(1)),rep_matrix(0,1,2))*Ts);
     Ad = F[1,1];
     Bd = F[1,2];
+
+
 }
 model {
     q ~ cauchy(0.0, 1.0);
