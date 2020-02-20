@@ -21,7 +21,7 @@ import pystan
 import numpy as np
 from scipy.io import loadmat
 import matplotlib.pyplot as plt
-import seaborn as sns
+from helpers import plot_trace
 import pickle
 from pathlib import Path
 
@@ -114,28 +114,6 @@ plt.title('measurement estimation')
 plt.show()
 
 
-
-def plot_trace(param,num_plots,pos, param_name='parameter'):
-    """Plot the trace and posterior of a parameter."""
-
-    # Summary statistics
-    mean = np.mean(param)
-    median = np.median(param)
-    cred_min, cred_max = np.percentile(param, 2.5), np.percentile(param, 97.5)
-
-    # Plotting
-    plt.subplot(num_plots, 1, pos)
-    plt.hist(param, 30, density=True)
-    sns.kdeplot(param, shade=True)
-    plt.xlabel(param_name)
-    plt.ylabel('density')
-    plt.axvline(mean, color='r', lw=2, linestyle='--', label='mean')
-    plt.axvline(median, color='c', lw=2, linestyle='--', label='median')
-    plt.axvline(cred_min, linestyle=':', color='k', alpha=0.2, label='95% CI')
-    plt.axvline(cred_max, linestyle=':', color='k', alpha=0.2)
-
-    plt.gcf().tight_layout()
-    plt.legend()
 
 plot_trace(Cq_traces,4,1,'Cq')
 plot_trace(Rq_traces,4,2,'Rq')

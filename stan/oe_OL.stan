@@ -17,11 +17,11 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ###############################################################################
 */
-// stan Output error (i.e. discrete state space) model
+// stan Output error (i.e. discrete transfer function) model
 
 
 // OE model with Gaussian noise and horseshoe sparseness prior on the coefficients.
-// Using horsehoe prior
+// Using horsehoe prior, using open loop propagation (which doesnt work)
 
 data {
   int<lower=0> output_order;
@@ -31,7 +31,6 @@ data {
   row_vector[no_obs_est] y_est;
   row_vector[no_obs_est] u_est;
   row_vector[no_obs_val] u_val;
-  row_vector[no_obs_val] y_val;
 }
 transformed data {
     int<lower=0> max_order = max(output_order,input_order-1);
@@ -43,23 +42,11 @@ parameters {
     vector<lower=0>[output_order] f_coefs_hyperprior;
     real<lower=0> shrinkage_param;
     real<lower=0> r;            // noise standard deviation
-//    row_vector[max_order] e_init;
 }
 transformed parameters{
-    vector[input_order] b_flip;
-    vector[output_order] f_flip;
-    row_vector[no_obs_est] ehat;
-    row_vector[no_obs_est] yhat;
-    real<lower=0.0> rF = sqrt(sum((r * r)*(f_coefs .* f_coefs) + r*r));
-//    ehat[1:max_order] = e_init;
-    ehat[1:max_order] = rep_row_vector(0.0,max_order);
-    yhat[1:max_order] = rep_row_vector(0.0,max_order);
-    for (i in 1:output_order) f_flip[i] = f_coefs[output_order-1+1];
-    for (i in 1:input_order) b_flip[i] = b_coefs[input_order-1+1];
+    row_vector[no_obs_est] mu = rep_row_vector(0.0,no_obs_est);
     for (i in max_order+1:no_obs_est){
-        yhat[i] = u_est[i-input_order+1:i] * b_flip
-            - yhat[i-output_order:i-1]*f_flip - ehat[i-output_order:i-1]*f_flip;
-        ehat[i] = y_est[i] - yhat[i];
+        mu[i] = u_est[i-input_order+1:i] * b_coefs  -  mu[i-output_order:i-1] * f_coefs;
     }
 
 
@@ -73,22 +60,19 @@ model {
     // parameters
     b_coefs ~ normal(0.0, b_coefs_hyperprior * shrinkage_param);
     f_coefs ~ normal(0.0, f_coefs_hyperprior * shrinkage_param);
-//    e_init ~ normal(0.0, r);
 
     // noise standard deviation
     r ~ cauchy(0.0, 1.0);
 
     // measurement likelihood
-//    e ~ normal(0.0, r);     // this includes the e_init prior
-    y_est[max_order+1:no_obs_est] ~ normal(yhat[max_order+1:no_obs_est], rF);
+    y_est[max_order+1:no_obs_est] ~ normal(mu[max_order+1:no_obs_est], r);
 
 }
 generated quantities {
     row_vector[no_obs_val] y_hat_val = rep_row_vector(0.0,no_obs_val);
-    row_vector[no_obs_val] e_val = rep_row_vector(0.0,no_obs_val);
-//    e_val[1:max_order] = rep_row_vector(0.0,max_order);
-    for (i in max_order+1:no_obs_val){ // this isn't the best estimate of y_val as it doesnt have the error terms?
-        y_hat_val[i] = u_val[i-input_order+1:i] * b_coefs  - y_val[i-output_order:i-1] * f_coefs;
+
+    for (i in max_order+1:no_obs_val){
+        y_hat_val[i] = u_val[i-input_order+1:i] * b_coefs  - y_hat_val[i-output_order:i-1] * f_coefs;
     }
 }
 

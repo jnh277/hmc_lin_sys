@@ -23,6 +23,7 @@ import pandas as pd
 from scipy.io import loadmat
 from helpers import build_input_matrix
 from helpers import build_obs_matrix
+from helpers import plot_trace
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -109,27 +110,6 @@ plt.plot(yhat_upper_ci,'--',linewidth=0.5)
 plt.plot(yhat_lower_ci,'--',linewidth=0.5)
 plt.show()
 
-def plot_trace(param,num_plots,pos, param_name='parameter'):
-    """Plot the trace and posterior of a parameter."""
-
-    # Summary statistics
-    mean = np.mean(param)
-    median = np.median(param)
-    cred_min, cred_max = np.percentile(param, 2.5), np.percentile(param, 97.5)
-
-    # Plotting
-    plt.subplot(num_plots, 1, pos)
-    plt.hist(param, 30, density=True);
-    sns.kdeplot(param, shade=True)
-    plt.xlabel(param_name)
-    plt.ylabel('density')
-    plt.axvline(mean, color='r', lw=2, linestyle='--', label='mean')
-    plt.axvline(median, color='c', lw=2, linestyle='--', label='median')
-    plt.axvline(cred_min, linestyle=':', color='k', alpha=0.2, label='95% CI')
-    plt.axvline(cred_max, linestyle=':', color='k', alpha=0.2)
-
-    plt.gcf().tight_layout()
-    plt.legend()
 
 plot_trace(a_coef_traces[:,0],4,1,'a[0]')
 plot_trace(a_coef_traces[:,1],4,2,'a[2]')
