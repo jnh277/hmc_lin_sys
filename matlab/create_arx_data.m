@@ -2,7 +2,7 @@ clear all
 clc
 
 % how to create a random ARX model
-default_test_model = false;
+default_test_model = true;
 noObservations = 1000;
 Ts = 1;
 
