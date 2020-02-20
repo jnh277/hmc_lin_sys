@@ -23,6 +23,8 @@ import numpy as np
 from scipy.io import loadmat
 import matplotlib.pyplot as plt
 from helpers import plot_trace
+from helpers import plot_dbode
+from scipy import signal
 
 
 # specific data path
@@ -46,8 +48,8 @@ def init_function():
     f_true = data['f_coef_true'].flatten()[1:output_order+1]
     b_true = data['b_coef_true'].flatten()
     sig_e = data['sig_e'].flatten()
-    output = dict(f_coefs=(f_true) * np.random.uniform(0.8, 1.2, len(f_true)),
-                  b_coefs=(b_true)* np.random.uniform(0.8, 1.2, len(b_true)),
+    output = dict(f_coefs=np.flip(f_true) * np.random.uniform(0.8, 1.2, len(f_true)),
+                  b_coefs=np.flip(b_true)* np.random.uniform(0.8, 1.2, len(b_true)),
                   # r = 1.0,
                   r=(sig_e * np.random.uniform(0.8, 1.2))[0],
                   # a_coefs_hyperprior=np.abs(np.random.standard_cauchy(len(f_true))),
@@ -56,7 +58,7 @@ def init_function():
                   )
     return output
 
-model = pystan.StanModel(file='stan/oe3.stan')
+model = pystan.StanModel(file='stan/oe.stan')
 
 stan_data = {'input_order': int(input_order),
              'output_order': int(output_order),
@@ -67,7 +69,17 @@ stan_data = {'input_order': int(input_order),
              'u_val':u_val,
              'no_obs_val': len(y_val),
              }
-fit = model.sampling(data=stan_data, init=init_function, iter=5000, chains=4)
+# stan_data = {'order_b': int(input_order),
+#              'order_f': int(output_order),
+#              'no_obs_est': len(y_est),
+#              'y_est': y_est,
+#              'y_val': y_val,
+#              'u_est':u_est,
+#              'u_val':u_val,
+#              'no_obs_val': len(y_val),
+#              }
+
+fit = model.sampling(data=stan_data, init=init_function, iter=2000, chains=4)
 
 traces = fit.extract()
 yhat = traces['y_hat_val']
@@ -82,12 +94,12 @@ yhat_lower_ci = np.percentile(yhat, 2.5, axis=0)
 # mu_traces = traces['mu']
 f_coef_traces = traces['f_coefs']
 b_coef_traces = traces['b_coefs']
-shrinkage_param = traces["shrinkage_param"]
-shrinkage_param_mean = np.mean(shrinkage_param,0)
-r_traces = traces["r"]
+# shrinkage_param = traces["shrinkage_param"]
+# shrinkage_param_mean = np.mean(shrinkage_param,0)
+# r_traces = traces["r"]
 
 # mu_mean = np.mean(mu_traces,0)
-r_mean = np.mean(r_traces,0)
+# r_mean = np.mean(r_traces,0)
 
 f_mean = np.mean(f_coef_traces,0)
 b_mean = np.mean(b_coef_traces,0)
@@ -100,13 +112,6 @@ plt.plot(yhat_lower_ci,'--',linewidth=0.5)
 plt.ylim((-2,2))
 plt.show()
 
-# plt.subplot(1,1,1)
-# plt.plot(y_est,linewidth=0.5)
-# plt.plot(mu_mean,linewidth=0.5)
-# plt.plot(yhat_upper_ci,'--',linewidth=0.5)
-# plt.plot(yhat_lower_ci,'--',linewidth=0.5)
-# plt.show()
-
 
 
 plot_trace(f_coef_traces[:,0],4,1,'f[0]')
@@ -116,3 +121,61 @@ plot_trace(b_coef_traces[:,1],4,4,'b[1]')
 plt.show()
 
 
+# now plot the bode diagram
+
+f_true = data["f_coef_true"]
+b_true = data["b_coef_true"]
+
+Ts = data["Ts"]
+w_res = 100
+w_plot = np.logspace(-3,1,w_res)
+
+plot_dbode(b_coef_traces[:,-1::-1],f_coef_traces[:,-1::-1],b_true.flatten(),f_true.flatten(),Ts,w_plot)
+
+# plot estimated bode diagram samples
+no_samples = np.shape(f_coef_traces)[0]
+no_plot = 300
+sel = np.random.choice(np.arange(no_samples),no_plot,False)
+
+mag_samples = np.zeros((w_res,no_plot))
+phase_samples = np.zeros((w_res,no_plot))
+
+count = 0
+for s in sel:
+    f_sample = np.concatenate(([1.0],f_coef_traces[s,-1::-1]),0)
+    b_sample = b_coef_traces[s,-1::-1]      # need to flip vectors
+    w, mag_samples[:,count], phase_samples[:,count] = signal.dbode((b_sample, f_sample, Ts),w_plot)
+    count = count+1
+
+
+# calculate the true bode diagram
+# plot the true bode diagram
+w,mag_true,phase_true = signal.dbode((b_true.flatten(),f_true.flatten(),Ts),w_plot)
+#
+# # plot the samples
+# plt.subplot(2,1,1)
+# h2, = plt.semilogx(w.flatten(), mag_samples[:,0],color='green',alpha=0.1,label='samples')    # Bode magnitude plot
+# plt.semilogx(w.flatten(), mag_samples[:,1:],color='green',alpha=0.1)    # Bode magnitude plot
+# h1, = plt.semilogx(w.flatten(), mag_true,color='blue', label='True system')    # Bode magnitude plot
+# hm, = plt.semilogx(w.flatten(), np.mean(mag_samples,1),'-.',color='orange',label='mean')    # Bode magnitude plot
+# # hu, = plt.semilogx(w.flatten(), np.percentile(mag_samples, 97.5, axis=1),'--',color='orange',label='Upper CI')    # Bode magnitude plot
+#
+#
+# plt.legend(handles=[h1,h2,hm])
+# plt.legend()
+# plt.title('Bode diagram')
+# plt.ylabel('Magnitude (dB)')
+# plt.xlim((10e-2,10e1))
+#
+# plt.subplot(2,1,2)
+# plt.semilogx(w.flatten(), phase_samples,color='green',alpha=0.1)  # Bode phase plot
+# plt.semilogx(w.flatten(), phase_true,color='blue')  # Bode phase plot
+# plt.semilogx(w.flatten(), np.mean(phase_samples,1),color='green',alpha=0.1)  # Bode phase plot
+# hm, = plt.semilogx(w.flatten(), np.mean(phase_samples,1),'-.',color='orange',label='mean')    # Bode magnitude plot
+# plt.ylabel('Phase (deg)')
+# plt.xlabel('Frequency (rad/s)')
+# plt.xlim((10e-2,10e1))
+# plt.ylim((-330,60))
+#
+# plt.show()
+#
