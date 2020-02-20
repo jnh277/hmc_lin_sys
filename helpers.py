@@ -19,6 +19,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+from scipy import signal
 
 def build_phi_matrix(obs,order,inputs):
     "Builds the regressor matrix"
@@ -89,3 +90,53 @@ def plot_trace(param,num_plots,pos, param_name='parameter'):
 
     plt.gcf().tight_layout()
     plt.legend()
+
+
+def plot_dbode(num_samples,den_samples,num_true,den_true,Ts,omega,no_plot=300):
+    # plot estimated bode diagram samples
+    no_samples = np.shape(num_samples)[0]
+    sel = np.random.choice(np.arange(no_samples), no_plot, False)
+    omega_res = max(np.shape(omega))
+
+    mag_samples = np.zeros((omega_res, no_plot))
+    phase_samples = np.zeros((omega_res, no_plot))
+
+
+    count = 0
+    for s in sel:
+        num_sample = np.concatenate(([1.0], num_samples[s,:]), 0)
+        den_sample = den_samples[s, :]  # need to flip vectors
+        w, mag_samples[:, count], phase_samples[:, count] = signal.dbode((num_sample, den_sample, Ts), omega)
+        count = count + 1
+
+    # calculate the true bode diagram
+    # plot the true bode diagram
+    w, mag_true, phase_true = signal.dbode((num_true.flatten(), den_true.flatten(), Ts), omega)
+
+    # plot the samples
+    plt.subplot(2, 1, 1)
+    h2, = plt.semilogx(w.flatten(), mag_samples[:, 0], color='green', alpha=0.1, label='samples')  # Bode magnitude plot
+    plt.semilogx(w.flatten(), mag_samples[:, 1:], color='green', alpha=0.1)  # Bode magnitude plot
+    h1, = plt.semilogx(w.flatten(), mag_true, color='blue', label='True system')  # Bode magnitude plot
+    hm, = plt.semilogx(w.flatten(), np.mean(mag_samples, 1), '-.', color='orange', label='mean')  # Bode magnitude plot
+    # hu, = hm, = plt.semilogx(w.flatten(), np.percentile(mag_samples, 97.5, axis=1),'--',color='orange',label='Upper CI')    # Bode magnitude plot
+
+    plt.legend(handles=[h1, h2, hm])
+    plt.legend()
+    plt.title('Bode diagram')
+    plt.ylabel('Magnitude (dB)')
+    plt.xlim((10e-2, 10e1))
+
+    plt.subplot(2, 1, 2)
+    plt.semilogx(w.flatten(), phase_samples, color='green', alpha=0.1)  # Bode phase plot
+    plt.semilogx(w.flatten(), phase_true, color='blue')  # Bode phase plot
+    plt.semilogx(w.flatten(), np.mean(phase_samples, 1), color='green', alpha=0.1)  # Bode phase plot
+    hm, = plt.semilogx(w.flatten(), np.mean(phase_samples, 1), '-.', color='orange',
+                       label='mean')  # Bode magnitude plot
+    plt.ylabel('Phase (deg)')
+    plt.xlabel('Frequency (rad/s)')
+    plt.xlim((10e-2, 10e1))
+    plt.ylim((-330, 60))
+
+    # plt.show()
+
