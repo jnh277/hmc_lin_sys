@@ -35,26 +35,24 @@ ylabel('pdf')
 
 
 %%
-num_dims = 3;
+num_dims = 2;
 sigma = 1.0;
 
-% N = 5000;
+N = 5000;
 
 X = sigma*randn(num_dims,N);
 
 d = sqrt(sum(X.^2,1));
 [c,edges] = histcounts(d);
 
-% CI = 0.67;
-CI = 0.95;
+CI = 0.67;
+% CI = 0.90;
 
 [v_sorted,i_sorted] = sort(c,'descend');
 db = edges(i_sorted);
 tt = cumsum(v_sorted) < CI * N;
 min_d = min(db(tt));
 max_d = max(db(tt));
-
-inds_edge = logical((edges < max_d) .* (edges > min_d));
 
 
 
@@ -83,14 +81,10 @@ xlabel('x_2')
 ylabel('pdf')
 
 subplot 224
-% histogram(d,'Normalization','pdf')
-histogram(d)
-hold on
-h = histogram(d(inds),edges(inds_edge));
-hold off
+histogram(d,'Normalization','pdf')
 title('distance of samples form mean')
 xlabel('distance')
-ylabel('number of samples')
+ylabel('pdf')
 
 figure(4)
 clf
@@ -107,7 +101,6 @@ d = sqrt(sum(X.^2,1));
 [c,edges] = histcounts(d,'BinLimits',[0 10]);
 
 CI = 0.67;
-% CI = 0.95;
 [v_sorted,i_sorted] = sort(c,'descend');
 db = edges(i_sorted);
 tt = cumsum(v_sorted) < CI * N;

@@ -19,19 +19,18 @@
 """Estimates an ARX model using data with Gaussian noise."""
 import pystan
 import numpy as np
-import pandas as pd
 from scipy.io import loadmat
 from helpers import build_input_matrix
 from helpers import build_obs_matrix
 from helpers import plot_trace
 import matplotlib.pyplot as plt
-import seaborn as sns
+from helpers import plot_dbode
 
 
 # specific data path
-data_path = 'data/arx_order4.mat'
-input_order = 5         # gives the terms b_0 * u_k + b_1 * u_{k-1} + .. + b_{input_order-1} * u_{k-input_order+1}
-output_order = 4        # gives the terms a_0 * y_{k-1} + ... + a_{output_order-1}*y_{k-output_order}
+data_path = 'data/arx_order2.mat'
+input_order = 6         # gives the terms b_0 * u_k + b_1 * u_{k-1} + .. + b_{input_order-1} * u_{k-input_order+1}
+output_order = 5        # gives the terms a_0 * y_{k-1} + ... + a_{output_order-1}*y_{k-output_order}
 
 data = loadmat(data_path)
 
@@ -60,11 +59,13 @@ def init_function():
     a_true = data['a_true'].flatten()[1:output_order+1]
     b_true = data['b_true'].flatten()
     sig_e = data['sig_e'].flatten()
-    output = dict(a_coefs=a_true * np.random.uniform(0.8, 1.2, len(a_true)),
-                  b_coefs=b_true * np.random.uniform(0.8, 1.2, len(b_true)),
+    output = dict(a_coefs=np.concatenate((np.zeros(3),a_true * np.random.uniform(0.8, 1.2, len(a_true))),0),
+                  b_coefs=np.concatenate((np.zeros(3),b_true * np.random.uniform(0.8, 1.2, len(b_true))),0),
+                  # a_coefs=a_true * np.random.uniform(0.8, 1.2, len(a_true)),
+                  # b_coefs=b_true * np.random.uniform(0.8, 1.2, len(b_true)),
                   sig_e=(sig_e * np.random.uniform(0.8, 1.2))[0],
-                  a_coefs_hyperprior=np.abs(np.random.standard_cauchy(len(a_true))),
-                  b_coefs_hyperprior=np.abs(np.random.standard_cauchy(len(b_true))),
+                  # a_coefs_hyperprior=np.abs(np.random.standard_cauchy(len(a_true))),
+                  # b_coefs_hyperprior=np.abs(np.random.standard_cauchy(len(b_true))),
                   shrinkage_param=np.abs(np.random.standard_cauchy(1))[0]
                   )
     return output
@@ -116,5 +117,13 @@ plot_trace(a_coef_traces[:,1],4,2,'a[2]')
 plot_trace(b_coef_traces[:,0],4,3,'b[0]')
 plot_trace(b_coef_traces[:,1],4,4,'b[1]')
 plt.show()
+
+b_true = data["b_true"]
+a_true = data["a_true"]
+Ts = 1.0
+
+w_res = 100
+w_plot = np.logspace(-2,np.log10(3.14),w_res)
+plot_dbode(b_coef_traces,a_coef_traces,b_true,a_true,Ts,w_plot)
 
 

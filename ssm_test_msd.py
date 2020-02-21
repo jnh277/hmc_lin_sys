@@ -127,42 +127,95 @@ B_true = data['B_true']
 C_true = data['C_true']
 D_true = data['D_true']
 
+
+
+
+
+def plot_bode(A_smps,B_smps,C_smps,D_smps,A_t,B_t,C_t,D_t,omega,no_plot=300):
+    """plot bode diagram from estimated system samples and true sys"""
+    no_samples = np.shape(A_smps)[0]
+    sel = np.random.choice(np.arange(no_samples), no_plot, False)
+    omega_res = max(np.shape(omega))
+
+    mag_samples = np.zeros((omega_res, no_plot))
+    phase_samples = np.zeros((omega_res, no_plot))
+
+    count = 0
+    for s in sel:
+        A_s = A_smps[s]
+        B_s = B_smps[s]
+        C_s = C_smps[s]
+        D_s = D_smps[s]
+        w, mag_samples[:, count], phase_samples[:, count] = signal.bode((A_s,B_s,C_s,float(D_s)), omega)
+        count = count + 1
+
+    # calculate the true bode diagram
+    # plot the true bode diagram
+    w, mag_true, phase_true = signal.bode((A_t, B_t, C_t, float(D_t)), omega)
+
+    # plot the samples
+    plt.subplot(2, 1, 1)
+    h2, = plt.semilogx(w.flatten(), mag_samples[:, 0], color='green', alpha=0.1, label='samples')  # Bode magnitude plot
+    plt.semilogx(w.flatten(), mag_samples[:, 1:], color='green', alpha=0.1)  # Bode magnitude plot
+    h1, = plt.semilogx(w.flatten(), mag_true, color='blue', label='True system')  # Bode magnitude plot
+    hm, = plt.semilogx(w.flatten(), np.mean(mag_samples, 1), '-.', color='orange', label='mean')  # Bode magnitude plot
+    # hu, = plt.semilogx(w.flatten(), np.percentile(mag_samples, 97.5, axis=1),'--',color='orange',label='Upper CI')    # Bode magnitude plot
+
+    plt.legend(handles=[h1, h2, hm])
+    plt.legend()
+    plt.title('Bode diagram')
+    plt.ylabel('Magnitude (dB)')
+    plt.xlim((min(omega), max(omega)))
+
+    plt.subplot(2, 1, 2)
+    plt.semilogx(w.flatten(), phase_samples, color='green', alpha=0.1)  # Bode phase plot
+    plt.semilogx(w.flatten(), phase_true, color='blue')  # Bode phase plot
+    plt.semilogx(w.flatten(), np.mean(phase_samples, 1), color='green', alpha=0.1)  # Bode phase plot
+    plt.semilogx(w.flatten(), np.mean(phase_samples, 1), '-.', color='orange',
+                       label='mean')  # Bode magnitude plot
+    plt.ylabel('Phase (deg)')
+    plt.xlabel('Frequency (rad/s)')
+    plt.xlim((min(omega), max(omega)))
+
+    plt.show()
+
 w_plot = np.logspace(-2,1)
-
-# plot estimated bode diagram samples
-no_samples = np.shape(A_traces)[0]
-no_plot = 100
-sel = np.random.choice(np.arange(no_samples),no_plot,False)
-
-for s in sel:
-    A_sample = A_traces[s,:,:]
-    B_sample = B_traces[s,:].reshape(2,1)
-    C_sample = C_traces[s,:].reshape(1,2)
-    D_sample = D_traces[s]
-    w, mag, phase = signal.bode((A_sample, B_sample, C_sample, float(D_sample)),w_plot)
-
-    plt.subplot(2,1,1)
-    h2, = plt.semilogx(w, mag,color='green',alpha=0.1,label='samples')    # Bode magnitude plot
-    plt.subplot(2,1,2)
-    plt.semilogx(w, phase,color='green',alpha=0.1)  # Bode phase plot
-
-
-# plot the true bode diagram
-w,mag,phase = signal.bode((A_true,B_true,C_true,float(D_true)),w_plot)
-# have to convert to flaot because for some reason D, and C are uint8
-plt.subplot(2,1,1)
-h1, = plt.semilogx(w, mag,color='blue', label='True system')    # Bode magnitude plot
-plt.title('Bode diagram')
-plt.ylabel('Magnitude (dB)')
-plt.legend(handles=[h1,h2])
-plt.subplot(2,1,2)
-plt.semilogx(w, phase,color='blue')  # Bode phase plot
-plt.ylabel('Phase (deg)')
-plt.xlabel('Frequency (rad/s)')
-
-
-
-plt.show()
-
-
-
+plot_bode(A_traces,B_traces,C_traces,D_traces,A_true,B_true,C_true,D_true,w_plot)
+#
+# # plot estimated bode diagram samples
+# no_samples = np.shape(A_traces)[0]
+# no_plot = 100
+# sel = np.random.choice(np.arange(no_samples),no_plot,False)
+#
+# for s in sel:
+#     A_sample = A_traces[s,:,:]
+#     B_sample = B_traces[s,:].reshape(2,1)
+#     C_sample = C_traces[s,:].reshape(1,2)
+#     D_sample = D_traces[s]
+#     w, mag, phase = signal.bode((A_sample, B_sample, C_sample, float(D_sample)),w_plot)
+#
+#     plt.subplot(2,1,1)
+#     h2, = plt.semilogx(w, mag,color='green',alpha=0.1,label='samples')    # Bode magnitude plot
+#     plt.subplot(2,1,2)
+#     plt.semilogx(w, phase,color='green',alpha=0.1)  # Bode phase plot
+#
+#
+# # plot the true bode diagram
+# w,mag,phase = signal.bode((A_true,B_true,C_true,float(D_true)),w_plot)
+# # have to convert to flaot because for some reason D, and C are uint8
+# plt.subplot(2,1,1)
+# h1, = plt.semilogx(w, mag,color='blue', label='True system')    # Bode magnitude plot
+# plt.title('Bode diagram')
+# plt.ylabel('Magnitude (dB)')
+# plt.legend(handles=[h1,h2])
+# plt.subplot(2,1,2)
+# plt.semilogx(w, phase,color='blue')  # Bode phase plot
+# plt.ylabel('Phase (deg)')
+# plt.xlabel('Frequency (rad/s)')
+#
+#
+#
+# plt.show()
+#
+#
+#
