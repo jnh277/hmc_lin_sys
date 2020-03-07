@@ -60,8 +60,7 @@ T = Ts*(1:no_obs);
 omegas = [0,logspace(-1,log10(w_max/5),no_sins-1)];
 u = sum(sin(omegas.'*T + rand(no_sins,1)),1);
 
-%% observability test
-%%
+%% simulate
 
 for t=1:no_obs
 %     if rand > 0.975

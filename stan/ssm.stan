@@ -65,7 +65,7 @@ model {
     h[:,1] ~ normal(0, 1.0);  // prior on initial state
 
     // parameter priors
-    to_vector(A) ~ normal(0.0, 1.0);
+    to_vector(A) ~ normal(0.0,60.0);
     B ~ normal(0.0, 1.0);
     C ~ normal(0.0, 1.0);
     D ~ normal(0.0, 1.0);
@@ -78,7 +78,7 @@ model {
 }
 generated quantities {
     row_vector[no_obs_est] y_hat;
-    cholesky_factor_cov[2] LQ;
+    cholesky_factor_cov[no_states] LQ;
     y_hat = C*h+D*u_est;
     LQ = diag_pre_multiply(tauQ,LQcorr);
 

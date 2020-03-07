@@ -42,6 +42,13 @@ else % generate a random test model
     % error noise structure
 %     ss_sys = drss(n_states, n_outputs, n_inputs);
     ss_sys = rss(n_states, n_outputs, n_inputs);
+    A_true = ss_sys.A;
+    B_true = ss_sys.B;
+    C_true = ss_sys.C;
+    D_true = ss_sys.D;
+    figure(2)
+    bode(ss_sys)
+    
     ss_sys = c2d(ss_sys,Ts);
     
     % convert to idss structure taht allows non simple error model
@@ -94,9 +101,9 @@ sig_e_ML = sqrt(modelEstimate.NoiseVariance);
 a_true = m0.A;
 b_true = m0.B;
 
-% save('../data/arx_order4.mat','y_estimation', 'u_estimation', 'y_validation',...
-%     'u_validation','y_hat_val_ML','a_ML','b_ML','sig_e_ML','a_true','b_true',...
-%     'sig_e','n_states')
+save('../data/arx_order4.mat','y_estimation', 'u_estimation', 'y_validation',...
+    'u_validation','y_hat_val_ML','a_ML','b_ML','sig_e_ML','a_true','b_true',...
+    'sig_e','n_states','A_true','B_true','C_true','D_true')
 
 %%
 figure(1)

@@ -38,16 +38,16 @@ data {
 }
 parameters {
     matrix[no_states,no_obs_est] h;         // hidden states
-    matrix[no_states,no_states] A;          // A matrix
-    vector[no_states] B;                    // B matrix
-    row_vector[no_states] C;                // C matrix
-    real D;                                 // D matrix
-    vector<lower=0.0>[no_states*no_states] A_hyper;     // A matrix hyperpriors
-    vector<lower=0.0>[no_states] B_hyper;               // B matrix hyperpriors
-    row_vector<lower=0.0>[no_states] C_hyper;           // C matrix hyperpriors
-    real<lower=0.0> D_hyper;                                 // D matrix hyperpriors
-    real<lower=0.0> shrinkage_param;                    // horeshoe shrinkage param
-    real<lower=0.0> r;                      // measurement noise std
+    matrix[no_states,no_states] A;
+    vector[no_states] B;
+    row_vector[no_states] C;
+    real D;
+    vector<lower=0>[no_states*no_states] A_hyper;
+    vector<lower=0>[no_states] B_hyper;
+    row_vector<lower=0>[no_states] C_hyper;
+    real<lower=0> D_hyper;
+    real<lower=0> shrinkage_param;
+    real<lower=0.0> r;                // measurement noise
     // components of process noise matrix
     // for now will just have diagonal components
     vector<lower=0,upper=pi()/2>[no_states] tauQ_unif;
@@ -69,7 +69,7 @@ model {
     r ~ normal(0.0, 1.0);
     h[:,1] ~ normal(0, 1.0);  // prior on initial state
 
-    // hyperprior priors
+    // hyperpriors
     A_hyper ~ cauchy(0.0, 1.0);
     B_hyper ~ cauchy(0.0, 1.0);
     C_hyper ~ cauchy(0.0, 1.0);
@@ -77,10 +77,10 @@ model {
     shrinkage_param ~ cauchy(0.0, 1.0);
 
     // parameter priors
-    to_vector(A) ~ normal(0.0, A_hyper * shrinkage_param);
-    B ~ normal(0.0, B_hyper * shrinkage_param);
-    C ~ normal(0.0, C_hyper * shrinkage_param);
-    D ~ normal(0.0, D_hyper * shrinkage_param);
+    to_vector(A) ~ normal(0.0, A_hyper*shrinkage_param);
+    B ~ normal(0.0, B_hyper*shrinkage_param);
+    C ~ normal(0.0, C_hyper*shrinkage_param);
+    D ~ normal(0.0, D_hyper*shrinkage_param);
 
     // state distributions
     target += matrix_normal_lpdf(h[:,2:no_obs_est] | Ad * h[:,1:no_obs_est-1] + Bd * u_est[1:no_obs_est-1], diag_pre_multiply(tauQ,LQcorr));
@@ -90,7 +90,7 @@ model {
 }
 generated quantities {
     row_vector[no_obs_est] y_hat;
-    cholesky_factor_cov[2] LQ;
+    cholesky_factor_cov[no_states] LQ;
     y_hat = C*h+D*u_est;
     LQ = diag_pre_multiply(tauQ,LQcorr);
 
