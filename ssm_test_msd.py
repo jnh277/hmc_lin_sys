@@ -25,6 +25,7 @@ from helpers import plot_bode
 from helpers import plot_trace
 
 
+
 # specific data path
 data_path = 'data/msd_sumsins.mat'
 data = loadmat(data_path)
@@ -47,7 +48,7 @@ def init_function():
                   )
     return output
 
-model = pystan.StanModel(file='stan/ssm.stan')
+model = pystan.StanModel(file='stan/ssm_horseshoe.stan')
 
 stan_data = {'no_obs_est': len(y_est),
              'y_est': y_est,
@@ -131,3 +132,5 @@ D_true = data['D_true']
 w_plot = np.logspace(-2,1)
 plot_bode(A_traces,B_traces,C_traces,D_traces,A_true,B_true,C_true,D_true,w_plot)
 #
+
+# plot_bode(A_traces,B_traces,C_traces,D_traces,A_true,B_true,C_true,D_true,A_ML,B_ML,C_ML,D_ML,w_plot)

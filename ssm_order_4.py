@@ -23,6 +23,7 @@ from scipy.io import loadmat
 import matplotlib.pyplot as plt
 from helpers import plot_bode
 from helpers import plot_trace
+from helpers import plot_bode_ML
 
 
 # specific data path
@@ -39,25 +40,25 @@ no_obs_est = len(y_est)
 
 
 # Run Stan
-# def init_function():
-#     output = dict(r=1.0,
-#                   A=data['A_ML'],
-#                   B=data['B_ML'].flatten(),
-#                   C=data['C_ML'].flatten(),
-#                   D=data['D_ML'][0,0],
-#                   )
-#     return output
-
 def init_function():
     output = dict(r=1.0,
-                  # A=np.array([[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]),
-                  # B=np.array([0.0,1.0,1.0,1.0]),
-                  # C=data['C_ML'].flatten(),
+                  A=data['A_ML'],
+                  B=data['B_ML'].flatten(),
+                  C=data['C_ML'].flatten(),
                   D=data['D_ML'][0,0],
                   )
     return output
 
-model = pystan.StanModel(file='stan/ssm_horseshoe.stan')
+# def init_function():
+#     output = dict(r=1.0,
+#                   # A=np.array([[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]),
+#                   # B=np.array([0.0,1.0,1.0,1.0]),
+#                   # C=data['C_ML'].flatten(),
+#                   D=data['D_ML'][0,0],
+#                   )
+#     return output
+
+model = pystan.StanModel(file='stan/ssm.stan')
 
 stan_data = {'no_obs_est': len(y_est),
              'y_est': y_est,
@@ -139,7 +140,11 @@ D_true = data['D_true']
 
 
 w_plot = np.logspace(-2,3)
-plot_bode(A_traces,B_traces,C_traces,D_traces,A_true,B_true,C_true,D_true,w_plot)
+# plot_bode(A_traces,B_traces,C_traces,D_traces,A_true,B_true,C_true,D_true,w_plot)
 #
+A_ML = data['A_ML']
+B_ML = data['B_ML']
+C_ML = data['C_ML']
+D_ML = data['D_ML']
 
-# plot_bode(A_traces,B_traces,C_traces,D_traces,data['A_ML'],data['B_ML'].flatten(),data['A_ML'].flatten(),data['A_ML'][0,0],w_plot)
+plot_bode_ML(A_traces,B_traces,C_traces,D_traces,A_true,B_true,C_true,D_true,A_ML,B_ML,C_ML,D_ML,w_plot,save=True)

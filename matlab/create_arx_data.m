@@ -4,7 +4,7 @@ clc
 % a hard system t = tf(rand(1,5),[1 41/10 92/5 134/5 105/2 5])
 
 % how to create a random ARX model
-default_test_model = false;
+default_test_model = true;
 noObservations = 1000;
 Ts = 1;
 

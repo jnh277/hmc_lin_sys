@@ -65,9 +65,9 @@ model {
     h[:,1] ~ normal(0, 1.0);  // prior on initial state
 
     // parameter priors
-    to_vector(A) ~ normal(0.0,60.0);
-    B ~ normal(0.0, 1.0);
-    C ~ normal(0.0, 1.0);
+    to_vector(A) ~ normal(100.0,1.0);
+    B ~ normal(0.0, 10.0);
+    C ~ normal(0.0, 10.0);
     D ~ normal(0.0, 1.0);
 
     // state distributions

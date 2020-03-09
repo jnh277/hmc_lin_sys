@@ -35,7 +35,7 @@ ylabel('pdf')
 
 
 %%
-num_dims = 3;
+num_dims = 2;
 sigma = 1.0;
 
 % N = 5000;
