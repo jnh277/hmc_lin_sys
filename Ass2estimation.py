@@ -87,3 +87,19 @@ control = {"adapt_delta": 0.8,
            "max_treedepth":10}         # increasing from default 0.8 to reduce divergent steps
 
 fit = model.sampling(data=stan_data, iter=2000, chains=4,control=control)
+
+
+traces = fit.extract()
+mass = traces['m']
+length = traces['l']
+inertia = traces['J']
+
+mass_mean = np.mean(mass,0)
+length_mean = np.mean(length,0)
+inertia_mean = np.mean(inertia,0)
+
+plot_trace(mass,3,1,'mass')
+plot_trace(length,3,2,'length')
+plot_trace(inertia,3,3,'inertia')
+plt.show()
+
