@@ -38,8 +38,33 @@ functions{
     }
     vector discrete_update(vector z, real u1, real u2, real m, real J, real l, real a, real r1, real r2, real Ts){
         vector[5] z_next;
-        vector[5] dz = process_model(z, u1, u2, m, J, l, a, r1, r2);
-        z_next = z + Ts * dz;
+        vector[5] dz;
+        z_next = z;
+        for (n in 1:10){
+            dz = process_model(z, u1, u2, m, J, l, a, r1, r2);
+            z_next = z_next + Ts/10 * dz;
+        }
+        return z_next;
+    }
+    matrix process_model_vec(matrix z, row_vector u1, row_vector u2, real m, real J, real l, real a, real r1, real r2){
+        int pdims[2] = dims(z);
+//        row_vector[pdims[2]] tmp;
+        matrix[pdims[1],pdims[2]] dz;
+        dz[1,:] = cos(z[3,:]) .* z[4,:] ./ m;       // dx
+        dz[2,:] = sin(z[3,:]) .* z[4,:] ./ m;       // dy
+        dz[3,:] = z[5,:] ./ (J+m*l^2);             // d\theta
+        dz[4,:] = -r1*z[4,:]/m - m*l^2*z[5,:] .* z[5,:] ./ (J+m*l^2)^2 + u1 + u2;  // d p_1
+//        tmp = l*z[4:,]-r2;
+        dz[5,:] = (l*z[4,:]-r2) .* z[5,:] ./ (J+m*l^2) + u1*a - u2*a;
+        return dz;
+    }
+    matrix discrete_update_vec(matrix z, row_vector u1, row_vector u2, real m, real J, real l, real a, real r1, real r2, real Ts){
+        int pdims[2] = dims(z);
+        matrix[pdims[1],pdims[2]] z_next;
+        z_next = z;
+        for (n in 1:10){
+            z_next = z_next + Ts/10 * process_model_vec(z_next, u1, u2, m, J, l, a, r1, r2);
+        }
         return z_next;
     }
 }
@@ -75,9 +100,10 @@ transformed parameters {
     vector<lower=0>[5] tauQ = 2.5 * tan(tauQ_unif);       // LQ diag scaling
     vector<lower=0>[3] tauR = 2.5 * tan(tauR_unif);       // LR diag scaling
     mu[:,1] = z0;
-    for (k in 1:no_obs-1) {
-        mu[:,k+1] = discrete_update(h[:,k], u1[k], u2[k], m, J, l, a, r1, r2, Ts);
-    }
+//    for (k in 1:no_obs-1) {
+//        mu[:,k+1] = discrete_update(h[:,k], u1[k], u2[k], m, J, l, a, r1, r2, Ts);
+//    }
+    mu[:,2:no_obs] = discrete_update_vec(h[:,1:no_obs-1], u1[1:no_obs-1], u2[1:no_obs-1], m, J, l, a, r1, r2, Ts);
 
 }
 
