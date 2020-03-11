@@ -40,25 +40,25 @@ no_obs_est = len(y_est)
 
 
 # Run Stan
-def init_function():
-    output = dict(r=1.0,
-                  A=data['A_ML'],
-                  B=data['B_ML'].flatten(),
-                  C=data['C_ML'].flatten(),
-                  D=data['D_ML'][0,0],
-                  )
-    return output
-
 # def init_function():
 #     output = dict(r=1.0,
-#                   # A=np.array([[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]),
-#                   # B=np.array([0.0,1.0,1.0,1.0]),
-#                   # C=data['C_ML'].flatten(),
+#                   A=data['A_ML'],
+#                   B=data['B_ML'].flatten(),
+#                   C=data['C_ML'].flatten(),
 #                   D=data['D_ML'][0,0],
 #                   )
 #     return output
 
-model = pystan.StanModel(file='stan/ssm.stan')
+def init_function():
+    output = dict(r=1.0,
+                  # A=np.array([[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]),
+                  # B=np.array([1.0,1.0,1.0,1.0]),
+                  # C=data['C_ML'].flatten(),
+                  D=data['D_ML'][0,0],
+                  )
+    return output
+
+model = pystan.StanModel(file='stan/ssm_horseshoe.stan')
 
 stan_data = {'no_obs_est': len(y_est),
              'y_est': y_est,

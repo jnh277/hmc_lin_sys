@@ -78,10 +78,11 @@ y_hat_val_ML = yhatOracle.OutputData;
 b_ML = modelEstimate.b;
 sig_e_ML = sqrt(modelEstimate.NoiseVariance);
 
-
+a_true = m0.den;
+b_true = m0.num;
 save('../data/fir_order2.mat','y_estimation', 'u_estimation', 'y_validation',...
     'u_validation','y_hat_val_ML','b_ML','sig_e_ML',...
-    'sig_e','n_states')
+    'sig_e','n_states','a_true','b_true')
 
 %%
 figure(1)
@@ -92,5 +93,14 @@ plot(y_hat_val_ML)
 
 hold off
 legend('Validation data','ML Predicted')
+
+
+figure(3)
+clf
+bode(m0)
+hold on
+bode(modelEstimate)
+bode([1, zeros(1,12)],b_ML,'Ts',1)
+hold off
 
 

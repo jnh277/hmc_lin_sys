@@ -130,6 +130,7 @@ plot_trace(Dq_traces,4,2,'Dq')
 plot_trace(Kq_traces,4,3,'Kq')
 plot_trace(r_traces,4,4,'r')
 # plot_trace(q_traces,5,5,'q')
+plt.savefig('msd.png',format='png')
 plt.show()
 
 plt.subplot(1,1,1)

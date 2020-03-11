@@ -107,9 +107,12 @@ m1 = oe(data_estimation, [3 2 0]);
 yhat = predict(m1, data_validation);
 yhat = yhat.OutputData;
 
+F_ML = m1.F;
+B_ML = m1.B;
+
 save('../data/oe_order2.mat','y_estimation', 'u_estimation', 'y_validation',...
     'u_validation','f_coef_true','b_coef_true',...
-    'sig_e','Ts')
+    'sig_e','Ts','F_ML','B_ML')
 
 
 %% can i do maximum likelihood like this

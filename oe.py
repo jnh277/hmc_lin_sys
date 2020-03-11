@@ -128,6 +128,66 @@ b_true = data["b_coef_true"]
 
 Ts = data["Ts"]
 w_res = 100
-w_plot = np.logspace(-3,1,w_res)
+w_plot = np.logspace(-3,np.log10(10*3.14),w_res)
 
-plot_dbode(b_coef_traces[:,-1::-1],f_coef_traces[:,-1::-1],b_true.flatten(),f_true.flatten(),Ts,w_plot)
+
+F_ML = data['F_ML']
+B_ML = data['B_ML']
+plot_dbode_ML(b_coef_traces[:,-1::-1],f_coef_traces[:,-1::-1],b_true.flatten(),f_true.flatten(),B_ML.flatten(),F_ML.flatten(),Ts,w_plot,save=True)
+
+
+
+def plot_dbode_ML(num_samples,den_samples,num_true,den_true,num_ML,den_ML,Ts,omega,no_plot=300, max_samples=1000, save=False):
+    """plot bode diagram from estimated discrete time system samples and true sys"""
+    no_samples = np.shape(num_samples)[0]
+    no_eval = min(no_samples,max_samples)
+    sel = np.random.choice(np.arange(no_samples), no_eval, False)
+    omega_res = max(np.shape(omega))
+
+    mag_samples = np.zeros((omega_res, no_eval))
+    phase_samples = np.zeros((omega_res, no_eval))
+
+
+
+    count = 0
+    for s in sel:
+        den_sample = np.concatenate(([1.0], den_samples[s,:]), 0)
+        num_sample = num_samples[s, :]
+        w, mag_samples[:, count], phase_samples[:, count] = signal.dbode((num_sample, den_sample, Ts), omega)
+        count = count + 1
+
+    # calculate the true bode diagram
+    # plot the true bode diagram
+    w, mag_true, phase_true = signal.dbode((num_true.flatten(), den_true.flatten(), Ts), omega)
+    w, mag_ML, phase_ML = signal.dbode((num_ML.flatten(), den_ML.flatten(), Ts), omega)
+
+    # plot the samples
+    plt.subplot(2, 1, 1)
+    h2, = plt.semilogx(w.flatten(), mag_samples[:, 0], color='green', alpha=0.1, label='hmc samples')  # Bode magnitude plot
+    plt.semilogx(w.flatten(), mag_samples[:, 1:no_plot], color='green', alpha=0.1)  # Bode magnitude plot
+    h1, = plt.semilogx(w.flatten(), mag_true, color='blue', label='True system')  # Bode magnitude plot
+    hml, = plt.semilogx(w.flatten(), mag_ML,'--', color='purple', label='ML estimate')  # Bode magnitude plot
+    hm, = plt.semilogx(w.flatten(), np.mean(mag_samples, 1), '-.', color='orange', label='hmc mean')  # Bode magnitude plot
+    # hu, = plt.semilogx(w.flatten(), np.percentile(mag_samples, 97.5, axis=1),'--',color='orange',label='Upper CI')    # Bode magnitude plot
+
+    plt.legend(handles=[h1, h2, hm])
+    plt.legend()
+    plt.title('Bode diagram')
+    plt.ylabel('Magnitude (dB)')
+    plt.xlim((min(w.flatten()),min(max(omega),1/Ts*3.14)))
+
+    plt.subplot(2, 1, 2)
+    plt.semilogx(w.flatten(), phase_samples[:,:no_plot], color='green', alpha=0.1)  # Bode phase plot
+    plt.semilogx(w.flatten(), phase_true, color='blue')  # Bode phase plot
+    hml, = plt.semilogx(w.flatten(), phase_ML, '--', color='purple')  # Bode magnitude plot
+    plt.semilogx(w.flatten(), np.mean(phase_samples, 1), '-.', color='orange',
+                       label='mean')  # Bode magnitude plot
+    plt.ylabel('Phase (deg)')
+    plt.xlabel('Frequency (rad/s)')
+    plt.xlim((min(w.flatten()), min(max(omega),1/Ts*3.14)))
+    plt.ylim((min(phase_true)*1.2, max(phase_true)*1.2))
+
+    if save:
+        plt.savefig('bode_plot_oe.png',format='png')
+
+    plt.show()

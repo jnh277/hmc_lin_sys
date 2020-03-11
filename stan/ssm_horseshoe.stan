@@ -70,7 +70,7 @@ model {
     h[:,1] ~ normal(0, 1.0);  // prior on initial state
 
     // hyperpriors
-    A_hyper ~ cauchy(0.0, 1.0);
+    A_hyper ~ cauchy(0.0, 10.0);
     B_hyper ~ cauchy(0.0, 1.0);
     C_hyper ~ cauchy(0.0, 1.0);
     D_hyper ~ cauchy(0.0, 1.0);

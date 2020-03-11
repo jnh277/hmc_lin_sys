@@ -24,6 +24,7 @@ from scipy.io import loadmat
 from helpers import build_input_matrix
 import matplotlib.pyplot as plt
 from helpers import plot_trace
+from helpers import plot_firfreq
 
 
 # specific data path
@@ -105,8 +106,12 @@ plt.show()
 
 plot_trace(b_coef_traces[:,0],4,1,'b[0]')
 plot_trace(b_coef_traces[:,1],4,2,'b[1]')
-plot_trace(b_coef_traces[:,14],4,3,'b[14]')
-plot_trace(b_coef_traces[:,15],4,4,'b[15]')
+plot_trace(b_coef_traces[:,11],4,3,'b[11]')
+plot_trace(b_coef_traces[:,12],4,4,'b[12]')
 plt.show()
+Ts = 1.0
 
-
+b_ML = data['b_ML']
+num_true = data['b_true']
+den_true = data['a_true']
+plot_firfreq(b_coef_traces,num_true,den_true,b_ML.flatten())
