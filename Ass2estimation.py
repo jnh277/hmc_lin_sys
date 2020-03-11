@@ -51,24 +51,6 @@ r2 = 1
 a = 0.5
 z0 = np.array([x[0],y[0],theta[0],0,0])
 
-plt.subplot(2,2,1)
-plt.plot(x,y)
-plt.xlabel('x')
-plt.ylabel('y')
-plt.subplot(2,2,2)
-plt.plot(u1)
-plt.ylabel('u1')
-plt.xlabel('t')
-plt.subplot(2,2,3)
-plt.plot(u2)
-plt.ylabel('u2')
-plt.xlabel('t')
-plt.subplot(2,2,4)
-plt.plot(theta)
-plt.ylabel('heading (theta)')
-plt.xlabel('t')
-plt.show()
-
 
 model = pystan.StanModel(file='stan/ass2.stan')
 
@@ -83,8 +65,15 @@ stan_data = {'no_obs': no_obs,
              'z0':z0
              }
 
-control = {"adapt_delta": 0.8,
-           "max_treedepth":10}         # increasing from default 0.8 to reduce divergent steps
+control = {"adapt_delta": 0.85,
+           "max_treedepth":12}         # increasing from default 0.8 to reduce divergent steps
+
+def init_function():
+    output = dict(m = 5 * np.random.uniform(0.8,1.2),
+                  J = 2 * np.random.uniform(0.8,1.2),
+                  l = 0.2 * np.random.uniform(0.8,1.2),
+                  )
+    return output
 
 fit = model.sampling(data=stan_data, iter=2000, chains=4,control=control)
 
@@ -93,13 +82,35 @@ traces = fit.extract()
 mass = traces['m']
 length = traces['l']
 inertia = traces['J']
+z = traces['h']
 
 mass_mean = np.mean(mass,0)
 length_mean = np.mean(length,0)
 inertia_mean = np.mean(inertia,0)
+z_mean = np.mean(z,0)
 
 plot_trace(mass,3,1,'mass')
 plot_trace(length,3,2,'length')
 plot_trace(inertia,3,3,'inertia')
+plt.show()
+
+plt.subplot(2,2,1)
+plt.plot(x,y)
+plt.plot(z_mean[0,:],z_mean[1,:],'--')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.subplot(2,2,2)
+plt.plot(u1)
+plt.ylabel('u1')
+plt.xlabel('t')
+plt.subplot(2,2,3)
+plt.plot(u2)
+plt.ylabel('u2')
+plt.xlabel('t')
+plt.subplot(2,2,4)
+plt.plot(theta)
+plt.plot(z_mean[2,:],'--')
+plt.ylabel('heading (theta)')
+plt.xlabel('t')
 plt.show()
 

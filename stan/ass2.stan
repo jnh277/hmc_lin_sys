@@ -62,8 +62,8 @@ functions{
         int pdims[2] = dims(z);
         matrix[pdims[1],pdims[2]] z_next;
         z_next = z;
-        for (n in 1:10){
-            z_next = z_next + Ts/10 * process_model_vec(z_next, u1, u2, m, J, l, a, r1, r2);
+        for (n in 1:2){
+            z_next = z_next + Ts/2 * process_model_vec(z_next, u1, u2, m, J, l, a, r1, r2);
         }
         return z_next;
     }
@@ -114,9 +114,9 @@ model {
     h[:,1] ~ normal(0, 1.0);  // prior on initial state
 
     // parameter priors
-    m ~ cauchy(0,10);
-    l ~ cauchy(0,10);
-    J ~ cauchy(0,10);
+    m ~ cauchy(0,5);
+    l ~ cauchy(0,1);
+    J ~ cauchy(0,5);
 
     // state distributions
     target += matrix_normal_lpdf(h | mu, diag_pre_multiply(tauQ,LQcorr));
