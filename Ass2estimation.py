@@ -21,7 +21,6 @@ import pystan
 import numpy as np
 from scipy.io import loadmat
 import matplotlib.pyplot as plt
-
 from helpers import plot_trace
 
 
@@ -66,11 +65,12 @@ stan_data = {'no_obs': no_obs,
              }
 
 control = {"adapt_delta": 0.85,
-           "max_treedepth":12}         # increasing from default 0.8 to reduce divergent steps
+           "max_treedepth":13}         # increasing from default 0.8 to reduce divergent steps
 
 def init_function():
     output = dict(m = 5 * np.random.uniform(0.8,1.2),
                   J = 2 * np.random.uniform(0.8,1.2),
+                  # phi = 1/2* np.random.uniform(0.8,1.2),
                   l = 0.2 * np.random.uniform(0.8,1.2),
                   )
     return output
@@ -88,6 +88,14 @@ mass_mean = np.mean(mass,0)
 length_mean = np.mean(length,0)
 inertia_mean = np.mean(inertia,0)
 z_mean = np.mean(z,0)
+
+LQ = traces['LQ']
+LQ_mean = np.mean(LQ,0)
+LR = traces['LR']
+LR_mean = np.mean(LR,0)
+
+R = np.matmul(LR_mean.T, LR_mean)
+Q = R = np.matmul(LQ_mean.T, LQ_mean)
 
 plot_trace(mass,3,1,'mass')
 plot_trace(length,3,2,'length')
@@ -110,6 +118,8 @@ plt.xlabel('t')
 plt.subplot(2,2,4)
 plt.plot(theta)
 plt.plot(z_mean[2,:],'--')
+plt.plot(np.percentile(z[:,2,:],97.5,axis=0),'--')
+plt.plot(np.percentile(z[:,2,:],2.5,axis=0),'--')
 plt.ylabel('heading (theta)')
 plt.xlabel('t')
 plt.show()
