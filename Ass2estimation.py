@@ -64,8 +64,8 @@ stan_data = {'no_obs': no_obs,
              'z0':z0
              }
 
-control = {"adapt_delta": 0.85,
-           "max_treedepth":13}         # increasing from default 0.8 to reduce divergent steps
+control = {"adapt_delta": 0.95,
+           "max_treedepth":15}         # increasing from default 0.8 to reduce divergent steps
 
 def init_function():
     output = dict(m = 5 * np.random.uniform(0.8,1.2),
@@ -75,7 +75,7 @@ def init_function():
                   )
     return output
 
-fit = model.sampling(data=stan_data, iter=2000, chains=4,control=control)
+fit = model.sampling(data=stan_data, iter=8000, chains=8,control=control)
 
 
 traces = fit.extract()

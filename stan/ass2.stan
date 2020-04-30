@@ -40,9 +40,9 @@ functions{
         vector[5] z_next;
         vector[5] dz;
         z_next = z;
-        for (n in 1:10){
+        for (n in 1:20){
             dz = process_model(z, u1, u2, m, J, l, a, r1, r2);
-            z_next = z_next + Ts/10 * dz;
+            z_next = z_next + Ts/20 * dz;
         }
         return z_next;
     }
