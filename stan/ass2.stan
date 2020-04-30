@@ -60,8 +60,8 @@ functions{
         int pdims[2] = dims(z);
         matrix[pdims[1],pdims[2]] z_next;
         z_next = z;
-        for (n in 1:2){
-            z_next = z_next + Ts/2 * process_model_vec(z_next, u1, u2, m, J, l, a, r1, r2);
+        for (n in 1:10){
+            z_next = z_next + Ts/10 * process_model_vec(z_next, u1, u2, m, J, l, a, r1, r2);
         }
         return z_next;
     }
@@ -116,8 +116,8 @@ transformed parameters {
 //    for (k in 1:no_obs-1) {
 //        mu[:,k+1] = discrete_update(h[:,k], u1[k], u2[k], m, J, l, a, r1, r2, Ts);
 //    }
-//    mu[:,2:no_obs] = discrete_update_vec(h[:,1:no_obs-1], u1[1:no_obs-1], u2[1:no_obs-1], m, J, l, a, r1, r2, Ts);
-    mu[:,2:no_obs] = rk4_update(h[:,1:no_obs-1], u1[1:no_obs-1], u2[1:no_obs-1], m, J, l, a, r1, r2, Ts);
+    mu[:,2:no_obs] = discrete_update_vec(h[:,1:no_obs-1], u1[1:no_obs-1], u2[1:no_obs-1], m, J, l, a, r1, r2, Ts);
+//    mu[:,2:no_obs] = rk4_update(h[:,1:no_obs-1], u1[1:no_obs-1], u2[1:no_obs-1], m, J, l, a, r1, r2, Ts);
 
 }
 
