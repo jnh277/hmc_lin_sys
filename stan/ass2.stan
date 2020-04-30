@@ -60,8 +60,8 @@ functions{
         int pdims[2] = dims(z);
         matrix[pdims[1],pdims[2]] z_next;
         z_next = z;
-        for (n in 1:10){
-            z_next = z_next + Ts/10 * process_model_vec(z_next, u1, u2, m, J, l, a, r1, r2);
+        for (n in 1:5){
+            z_next = z_next + Ts/5 * process_model_vec(z_next, u1, u2, m, J, l, a, r1, r2);
         }
         return z_next;
     }
