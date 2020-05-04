@@ -49,6 +49,8 @@ r1 = 1
 r2 = 1
 a = 0.5
 z0 = np.array([x[0],y[0],theta[0],0,0])
+theta_diff = theta[1:]-theta[:-1]
+z_init = [x,y,theta,0*x,0*x]
 
 
 model = pystan.StanModel(file='stan/ass2.stan')
@@ -61,7 +63,7 @@ stan_data = {'no_obs': no_obs,
              'a':a,
              'r1':r1,
              'r2':r2,
-             'z0':z0
+             'z0':z0,
              }
 
 control = {"adapt_delta": 0.85,
@@ -72,10 +74,12 @@ def init_function():
                   J = 2 * np.random.uniform(0.8,1.2),
                   # phi = 1/2* np.random.uniform(0.8,1.2),
                   l = 0.2 * np.random.uniform(0.8,1.2),
+                  h = z_init + np.random.normal(0.0,1.0,np.shape(z_init)),
                   )
     return output
 
-fit = model.sampling(data=stan_data, iter=4000, chains=4,control=control)
+# fit = model.sampling(data=stan_data, iter=4000, chains=4,control=control)
+fit = model.sampling(data=stan_data, iter=10, chains=1,control=control)
 
 
 traces = fit.extract()

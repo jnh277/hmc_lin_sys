@@ -67,18 +67,28 @@ functions{
     }
     matrix rk4_update(matrix z, row_vector u1, row_vector u2, real m, real J, real l, real a, real r1, real r2, real Ts){
         int pdims[2] = dims(z);
-//        matrix[pdims[1],pdims[2]] z_next;
         matrix[pdims[1],pdims[2]] k1;
         matrix[pdims[1],pdims[2]] k2;
         matrix[pdims[1],pdims[2]] k3;
         matrix[pdims[1],pdims[2]] k4;
-        k1 = Ts * process_model_vec(z, u1, u2, m, J, l, a, r1, r2);
-        k2 = Ts * process_model_vec(z+k1/2, u1, u2, m, J, l, a, r1, r2);
-        k3 = Ts * process_model_vec(z+k2/2, u1, u2, m, J, l, a, r1, r2);
-        k4 = Ts * process_model_vec(z+k3, u1, u2, m, J, l, a, r1, r2);
+        k1 = process_model_vec(z, u1, u2, m, J, l, a, r1, r2);
+        k2 = process_model_vec(z+Ts*k1/2, u1, u2, m, J, l, a, r1, r2);
+        k3 = process_model_vec(z+Ts*k2/2, u1, u2, m, J, l, a, r1, r2);
+        k4 = process_model_vec(z+Ts*k3, u1, u2, m, J, l, a, r1, r2);
 
-        return z + k1/6 + k2/3 + k3/3 + k4/6;
+        return z + Ts*(k1/6 + k2/3 + k3/3 + k4/6);
     }
+
+    matrix multi_rk4_update(matrix z, row_vector u1, row_vector u2, real m, real J, real l, real a, real r1, real r2, real Ts){
+        int pdims[2] = dims(z);
+        matrix[pdims[1],pdims[2]] z_next;
+        z_next = z;
+        for (n in 1:2){
+            z_next = rk4_update(z_next, u1, u2, m, J, l, a, r1, r2, Ts/2);
+        }
+        return z_next;
+    }
+
 
 }
 
@@ -108,24 +118,23 @@ parameters {
 
 }
 transformed parameters {
-    matrix[5,no_obs] mu;
+    matrix[5,no_obs-1] mu;
 //    matrix[3,no_obs] yhat;
     vector<lower=0>[5] tauQ = 2.5 * tan(tauQ_unif);       // LQ diag scaling
     vector<lower=0>[3] tauR = 2.5 * tan(tauR_unif);       // LR diag scaling
-    mu[:,1] = z0;
 //    for (k in 1:no_obs-1) {
 //        mu[:,k+1] = discrete_update(h[:,k], u1[k], u2[k], m, J, l, a, r1, r2, Ts);
 //    }
-    mu[:,2:no_obs] = discrete_update_vec(h[:,1:no_obs-1], u1[1:no_obs-1], u2[1:no_obs-1], m, J, l, a, r1, r2, Ts);
-//    mu[:,2:no_obs] = rk4_update(h[:,1:no_obs-1], u1[1:no_obs-1], u2[1:no_obs-1], m, J, l, a, r1, r2, Ts);
-
+//    mu[:,2:no_obs] = discrete_update_vec(h[:,1:no_obs-1], u1[1:no_obs-1], u2[1:no_obs-1], m, J, l, a, r1, r2, Ts);
+    mu = rk4_update(h[:,1:no_obs-1], u1[1:no_obs-1], u2[1:no_obs-1], m, J, l, a, r1, r2, Ts);
+//    mu[:,2:no_obs] = multi_rk4_update(h[:,1:no_obs-1], u1[1:no_obs-1], u2[1:no_obs-1], m, J, l, a, r1, r2, Ts);
 }
 
 model {
     LRcorr ~ lkj_corr_cholesky(2);
     LQcorr ~ lkj_corr_cholesky(2);
 //    r ~ normal(0.0, 1.0);
-    h[:,1] ~ normal(0, 1.0);  // prior on initial state
+    h[:,1] ~ normal(z0, 1.0);  // prior on initial state
 
     // parameter priors
     m ~ cauchy(0,5);
@@ -133,7 +142,7 @@ model {
     J ~ cauchy(0,5);
 
     // state distributions
-    target += matrix_normal_lpdf(h | mu, diag_pre_multiply(tauQ,LQcorr));
+    target += matrix_normal_lpdf(h[:,2:no_obs] | mu, diag_pre_multiply(tauQ,LQcorr));
 
     // measurement distributions
 //    y_est ~ normal(h[1,:], r);
