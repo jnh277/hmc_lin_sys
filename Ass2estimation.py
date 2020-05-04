@@ -78,8 +78,8 @@ def init_function():
                   )
     return output
 
-# fit = model.sampling(data=stan_data, iter=4000, chains=4,control=control)
-fit = model.sampling(data=stan_data, iter=10, chains=1,control=control)
+fit = model.sampling(data=stan_data, iter=4000, chains=4,control=control)
+# fit = model.sampling(data=stan_data, iter=10, chains=1,control=control)
 
 
 traces = fit.extract()
