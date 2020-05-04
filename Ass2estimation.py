@@ -74,7 +74,7 @@ def init_function():
                   J = 2 * np.random.uniform(0.8,1.2),
                   # phi = 1/2* np.random.uniform(0.8,1.2),
                   l = 0.2 * np.random.uniform(0.8,1.2),
-                  h = z_init + np.random.normal(0.0,1.0,np.shape(z_init)),
+                  h = z_init + np.random.normal(0.0,0.4,np.shape(z_init)),
                   )
     return output
 
