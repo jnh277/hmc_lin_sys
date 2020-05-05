@@ -63,7 +63,7 @@ stan_data = {'no_obs_est': len(y_est),
 control = {"adapt_delta": 0.8,
            "max_treedepth":10}         # increasing from default 0.8 to reduce divergent steps
 
-fit = model.sampling(data=stan_data, init=init_function, iter=4000, chains=4,control=control)
+fit = model.sampling(data=stan_data, init=init_function, iter=20, chains=4,control=control)
 
 # print(fit)
 
@@ -147,5 +147,18 @@ plt.plot(Dq_traces,Kq_traces,'o')
 plt.xlabel('D')
 plt.ylabel('K')
 plt.show()
+
+plt.subplot(1,1,1)
+plt.plot(h_traces[:,0,100],Mq_traces,'o')
+plt.xlabel('state 1 at k=100')
+plt.ylabel('M')
+plt.show()
+
+plt.subplot(1,1,1)
+plt.plot(h_traces[:,1,300],Kq_traces,'o')
+plt.xlabel('state 2 at k=300')
+plt.ylabel('K')
+plt.show()
+
 
 
