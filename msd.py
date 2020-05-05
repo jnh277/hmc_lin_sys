@@ -133,8 +133,39 @@ plot_trace(r_traces,4,4,'r')
 plt.savefig('msd.png',format='png')
 plt.show()
 
-plt.subplot(1,1,1)
+# create a pairs plot
+
+plt.subplot(3,3,1)
+plt.hist(Mq_traces)
+
+plt.subplot(3,3,2)
 plt.plot(Mq_traces,Dq_traces,'o')
-plt.show()
+
+plt.subplot(3,3,3)
+plt.plot(Mq_traces,Kq_traces,'o')
+
+plt.subplot(3,3,4)
+plt.plot(Dq_traces,Mq_traces,'o')
+
+plt.subplot(3,3,5)
+plt.hist(Dq_traces)
+
+plt.subplot(3,3,6)
+plt.plot(Dq_traces,Kq_traces,'o')
+
+plt.subplot(3,3,7)
+plt.plot(Kq_traces,Dq_traces,'o')
+
+plt.subplot(3,3,7)
+plt.plot(Kq_traces,Mq_traces,'o')
+
+plt.subplot(3,3,9)
+plt.hist(Kq_traces)
+
+
+
+# plt.subplot(2,2,2)
+# plt.plot(Mq_traces,Dq_traces,'o')
+# plt.show()
 
 
