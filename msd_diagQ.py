@@ -63,7 +63,7 @@ stan_data = {'no_obs_est': len(y_est),
 control = {"adapt_delta": 0.8,
            "max_treedepth":10}         # increasing from default 0.8 to reduce divergent steps
 
-fit = model.sampling(data=stan_data, init=init_function, iter=20, chains=4,control=control)
+fit = model.sampling(data=stan_data, init=init_function, iter=4000, chains=4,control=control)
 
 # print(fit)
 
