@@ -160,5 +160,11 @@ plt.xlabel('state 2 at k=300')
 plt.ylabel('K')
 plt.show()
 
+plt.subplot(1,1,1)
+plt.plot(h_traces[:,1,300],h_traces[:,1,301],'o')
+plt.xlabel('state 2 at k=300')
+plt.xlabel('state 2 at k=301')
+plt.show()
+
 
 
