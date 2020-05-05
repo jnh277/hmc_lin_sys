@@ -162,7 +162,7 @@ plt.plot(Kq_traces,Mq_traces,'o')
 plt.subplot(3,3,9)
 plt.hist(Kq_traces)
 
-
+plt.show()
 
 # plt.subplot(2,2,2)
 # plt.plot(Mq_traces,Dq_traces,'o')
