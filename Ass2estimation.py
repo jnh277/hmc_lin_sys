@@ -22,6 +22,7 @@ import numpy as np
 from scipy.io import loadmat
 import matplotlib.pyplot as plt
 from helpers import plot_trace
+import pickle
 
 
 # load data
@@ -73,16 +74,25 @@ def init_function():
     output = dict(m = 5 * np.random.uniform(0.8,1.2),
                   J = 2 * np.random.uniform(0.8,1.2),
                   # phi = 1/2* np.random.uniform(0.8,1.2),
-                  l = 0.2 * np.random.uniform(0.8,1.2),
+                  l = 0.15 * np.random.uniform(0.8,1.2),
                   h = z_init + np.random.normal(0.0,0.4,np.shape(z_init)),
                   )
     return output
 
-fit = model.sampling(data=stan_data, iter=6000, chains=4,control=control, init=init_function)
+fit = model.sampling(data=stan_data, iter=5000, chains=4,control=control, init=init_function)
 # fit = model.sampling(data=stan_data, iter=10, chains=1,control=control, init=init_function)
 
 
 traces = fit.extract()
+
+with open('results/rover_results.pickle', 'wb') as file:
+    pickle.dump(traces, file)
+
+# to read
+# with open('rover_results.pickle') as file:
+#     traces = pickle.load(file)
+
+
 mass = traces['m']
 length = traces['l']
 inertia = traces['J']

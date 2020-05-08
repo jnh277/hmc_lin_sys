@@ -26,6 +26,7 @@ from helpers import plot_trace
 import matplotlib.pyplot as plt
 from helpers import plot_dbode
 from helpers import plot_dbode_ML
+import pickle
 
 
 # specific data path
@@ -86,6 +87,15 @@ stan_data = {'input_order': int(input_order),
 fit = model.sampling(data=stan_data, init=init_function, iter=5000, chains=4)
 
 traces = fit.extract()
+
+with open('results/arx_results.pickle', 'wb') as file:
+    pickle.dump(traces, file)
+
+# to read
+# with open('arx_results.pickle') as file:
+#     traces = pickle.load(file)
+
+
 yhat = traces['y_hat']
 yhat[np.isnan(yhat)] = 0.0
 yhat[np.isinf(yhat)] = 0.0
