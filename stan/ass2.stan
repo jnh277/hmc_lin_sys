@@ -129,8 +129,7 @@ transformed parameters {
     mu = rk4_update(h[:,1:no_obs-1], u1[1:no_obs-1], u2[1:no_obs-1], m, J, l, a, r1, r2, Ts);
 //    mu = multi_rk4_update(h[:,1:no_obs-1], u1[1:no_obs-1], u2[1:no_obs-1], m, J, l, a, r1, r2, Ts);
 }
-
-model {
+swmodel {
     LRcorr ~ lkj_corr_cholesky(2);
     LQcorr ~ lkj_corr_cholesky(2);
 //    r ~ normal(0.0, 1.0);

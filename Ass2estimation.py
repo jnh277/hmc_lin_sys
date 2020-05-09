@@ -71,10 +71,10 @@ control = {"adapt_delta": 0.85,
            "max_treedepth":13}         # increasing from default 0.8 to reduce divergent steps
 
 def init_function():
-    output = dict(m = 5 * np.random.uniform(0.8,1.2),
-                  J = 2 * np.random.uniform(0.8,1.2),
+    output = dict(m = 5 * np.random.uniform(0.5,1.5),
+                  J = 2 * np.random.uniform(0.5,1.5),
                   # phi = 1/2* np.random.uniform(0.8,1.2),
-                  l = 0.15 * np.random.uniform(0.8,1.2),
+                  l = 0.15 * np.random.uniform(0.5,1.5),
                   h = z_init + np.random.normal(0.0,0.4,np.shape(z_init)),
                   )
     return output
@@ -85,7 +85,7 @@ fit = model.sampling(data=stan_data, iter=5000, chains=4,control=control, init=i
 
 traces = fit.extract()
 
-with open('results/rover_results.pickle', 'wb') as file:
+with open('results/rover_results_2.pickle', 'wb') as file:
     pickle.dump(traces, file)
 
 # to read
