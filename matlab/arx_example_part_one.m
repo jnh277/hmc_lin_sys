@@ -77,18 +77,22 @@ save('../data/arx_example_part_one.mat','y_estimation', 'u_estimation', 'y_valid
     'u_validation','y_hat_val_ML','a_ML','b_ML','sig_e_ML','a_true','b_true',...
     'sig_e')
 
-% save('../data/arx_order4.mat','y_estimation', 'u_estimation', 'y_validation',...
-%     'u_validation','y_hat_val_ML','a_ML','b_ML','sig_e_ML','a_true','b_true',...
-%     'sig_e','n_states','A_true','B_true','C_true','D_true')
-
 %%
 figure(1)
 clf
 plot(y_validation)
 hold on
 plot(y_hat_val_ML)
-
 hold off
 legend('Validation data','ML Predicted')
+
+
+figure(2)
+clf
+bode(m0)
+hold on
+bode(modelEstimate)
+hold off
+legend('True sys','Maximum likelihood estimate')
 
 
