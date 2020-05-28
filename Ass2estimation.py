@@ -108,8 +108,8 @@ LQ_mean = np.mean(LQ,0)
 LR = traces['LR']
 LR_mean = np.mean(LR,0)
 
-R = np.matmul(LR_mean.T, LR_mean)
-Q = R = np.matmul(LQ_mean.T, LQ_mean)
+R = np.matmul(LR_mean, LR_mean.T)
+Q = R = np.matmul(LQ_mean, LQ_mean.T)
 
 plot_trace(mass,3,1,'mass')
 plot_trace(length,3,2,'length')

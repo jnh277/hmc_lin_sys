@@ -23,7 +23,7 @@ import numpy as np
 from scipy.io import loadmat
 import matplotlib.pyplot as plt
 from helpers import plot_trace
-from helpers import plot_dbode
+# from helpers import plot_dbode_ML
 from scipy import signal
 
 
@@ -50,7 +50,7 @@ def init_function():
     sig_e = data['sig_e'].flatten()
     output = dict(f_coefs=np.flip(f_true) * np.random.uniform(0.8, 1.2, len(f_true)),
                   b_coefs=np.flip(b_true)* np.random.uniform(0.8, 1.2, len(b_true)),
-                  # r = 1.0,
+                  r2 = 0.1,
                   r=(sig_e * np.random.uniform(0.8, 1.2))[0],
                   # a_coefs_hyperprior=np.abs(np.random.standard_cauchy(len(f_true))),
                   # b_coefs_hyperprior=np.abs(np.random.standard_cauchy(len(b_true))),
@@ -79,12 +79,15 @@ stan_data = {'input_order': int(input_order),
 #              'no_obs_val': len(y_val),
 #              }
 
-fit = model.sampling(data=stan_data, init=init_function, iter=2000, chains=4)
+fit = model.sampling(data=stan_data, init=init_function, iter=3000, chains=4)
 
 traces = fit.extract()
 yhat = traces['y_hat_val']
 yhat[np.isnan(yhat)] = 0.0
 yhat[np.isinf(yhat)] = 0.0
+
+yhat_OL = traces['y_hat_val2']
+yhat_OL_mean = np.mean(yhat_OL, axis=0)
 
 yhat_mean = np.mean(yhat, axis=0)
 yhat_upper_ci = np.percentile(yhat, 97.5, axis=0)
@@ -107,9 +110,11 @@ b_mean = np.mean(b_coef_traces,0)
 plt.subplot(1,1,1)
 plt.plot(y_val,linewidth=0.5)
 plt.plot(yhat_mean,linewidth=0.5)
-plt.plot(yhat_upper_ci,'--',linewidth=0.5)
-plt.plot(yhat_lower_ci,'--',linewidth=0.5)
+plt.plot(yhat_OL_mean,linewidth=0.5)
+# plt.plot(yhat_upper_ci,'--',linewidth=0.5)
+# plt.plot(yhat_lower_ci,'--',linewidth=0.5)
 plt.ylim((-2,2))
+plt.legend(('y val','y hat'))
 plt.show()
 
 
@@ -133,7 +138,6 @@ w_plot = np.logspace(-3,np.log10(10*3.14),w_res)
 
 F_ML = data['F_ML']
 B_ML = data['B_ML']
-plot_dbode_ML(b_coef_traces[:,-1::-1],f_coef_traces[:,-1::-1],b_true.flatten(),f_true.flatten(),B_ML.flatten(),F_ML.flatten(),Ts,w_plot,save=True)
 
 
 
@@ -191,3 +195,9 @@ def plot_dbode_ML(num_samples,den_samples,num_true,den_true,num_ML,den_ML,Ts,ome
         plt.savefig('bode_plot_oe.png',format='png')
 
     plt.show()
+
+
+plot_dbode_ML(b_coef_traces[:,-1::-1],f_coef_traces[:,-1::-1],b_true.flatten(),f_true.flatten(),B_ML.flatten(),F_ML.flatten(),Ts,w_plot,save=True)
+
+
+

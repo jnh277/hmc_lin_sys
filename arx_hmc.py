@@ -28,11 +28,16 @@ from helpers import plot_dbode
 from helpers import plot_dbode_ML
 import pickle
 
-
 # specific data path
-data_path = 'data/arx_order4.mat'
-input_order = 8         # gives the terms b_0 * u_k + b_1 * u_{k-1} + .. + b_{input_order-1} * u_{k-input_order+1}
-output_order = 7        # gives the terms a_0 * y_{k-1} + ... + a_{output_order-1}*y_{k-output_order}
+# data_path = 'data/arx_order2.mat'
+data_path = 'data/robust_noise_id_data1.mat'
+input_order = 10         # gives the terms b_0 * u_k + b_1 * u_{k-1} + .. + b_{input_order-1} * u_{k-input_order+1}
+output_order = 9        # gives the terms a_0 * y_{k-1} + ... + a_{output_order-1}*y_{k-output_order}
+
+# # specific data path
+# data_path = 'data/arx_order4.mat'
+# input_order = 8         # gives the terms b_0 * u_k + b_1 * u_{k-1} + .. + b_{input_order-1} * u_{k-input_order+1}
+# output_order = 7        # gives the terms a_0 * y_{k-1} + ... + a_{output_order-1}*y_{k-output_order}
 
 data = loadmat(data_path)
 
@@ -61,8 +66,8 @@ def init_function():
     a_true = data['a_true'].flatten()[1:output_order+1]
     b_true = data['b_true'].flatten()
     sig_e = data['sig_e'].flatten()
-    output = dict(a_coefs=np.concatenate((np.zeros(3),a_true * np.random.uniform(0.8, 1.2, len(a_true))),0),
-                  b_coefs=np.concatenate((np.zeros(3),b_true * np.random.uniform(0.8, 1.2, len(b_true))),0),
+    output = dict(a_coefs=np.concatenate((np.zeros(7),a_true * np.random.uniform(0.8, 1.2, len(a_true))),0),
+                  b_coefs=np.concatenate((np.zeros(7),b_true * np.random.uniform(0.8, 1.2, len(b_true))),0),
                   # a_coefs=a_true * np.random.uniform(0.8, 1.2, len(a_true)),
                   # b_coefs=b_true * np.random.uniform(0.8, 1.2, len(b_true)),
                   sig_e=(sig_e * np.random.uniform(0.8, 1.2))[0],
@@ -114,6 +119,9 @@ shrinkage_param_mean = np.mean(shrinkage_param,0)
 
 a_coef_mean = np.mean(a_coef_traces,0)
 b_coef_mean = np.mean(b_coef_traces,0)
+
+
+
 
 plt.subplot(1,1,1)
 plt.plot(y_val,linewidth=0.5)

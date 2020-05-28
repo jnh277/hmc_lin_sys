@@ -23,7 +23,8 @@ for k in range(N-1):
 # simulate measurements
 y = x + np.random.normal(0.0, r,np.shape(x))
 
-model = pystan.StanModel(file='stan/LSSM_demo.stan')
+# model = pystan.StanModel(file='stan/LSSM_demo.stan')
+model = pystan.StanModel(file='stan/LSSM_error_param.stan')
 
 stan_data = {
     'N':N,

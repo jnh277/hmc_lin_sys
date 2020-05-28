@@ -80,11 +80,19 @@ model {
 }
 generated quantities {
     row_vector[no_obs_val] y_hat_val = rep_row_vector(0.0,no_obs_val);
+    row_vector[no_obs_val] y_hat_val2 = rep_row_vector(0.0,no_obs_val);
 //    row_vector[no_obs_val] e_val = rep_row_vector(0.0,no_obs_val);
     for (i in max_order+1:no_obs_val){ // this isn't the best estimate of y_val as it doesnt have the error terms?
         y_hat_val[i] = u_val[i-input_order+1:i] * b_coefs
                 - y_val[i-output_order:i-1] * f_coefs;// -e_val[i-output_order:i-1] * f_coefs;
 //        e_val[i] = y_val[i] - y_hat_val[i];
+    }
+//    y_hat_val2[1:max_order] = y_val[1:max_order];
+    for (n in (1+max_order):no_obs_val) {
+            real foo = 0.0;
+            foo -= y_hat_val2[n-output_order:n-1] * f_coefs;
+            foo += u_val[n-input_order+1:n] * b_coefs;
+            y_hat_val2[n] = foo;
     }
 }
 
