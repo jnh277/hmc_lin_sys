@@ -44,21 +44,26 @@ no_obs_val = len(y_val)
 
 
 # Run Stan
+# def init_function():
+#     f_true = data['f_coef_true'].flatten()[1:output_order+1]
+#     b_true = data['b_coef_true'].flatten()
+#     sig_e = data['sig_e'].flatten()
+#     output = dict(f_coefs=np.flip(f_true) * np.random.uniform(0.8, 1.2, len(f_true)),
+#                   b_coefs=np.flip(b_true)* np.random.uniform(0.8, 1.2, len(b_true)),
+#                   r2 = 0.1,
+#                   r=(sig_e * np.random.uniform(0.8, 1.2))[0],
+#                   # a_coefs_hyperprior=np.abs(np.random.standard_cauchy(len(f_true))),
+#                   # b_coefs_hyperprior=np.abs(np.random.standard_cauchy(len(b_true))),
+#                   # shrinkage_param=np.abs(np.random.standard_cauchy(1))[0]
+#                   )
+#     return output
 def init_function():
-    f_true = data['f_coef_true'].flatten()[1:output_order+1]
-    b_true = data['b_coef_true'].flatten()
     sig_e = data['sig_e'].flatten()
-    output = dict(f_coefs=np.flip(f_true) * np.random.uniform(0.8, 1.2, len(f_true)),
-                  b_coefs=np.flip(b_true)* np.random.uniform(0.8, 1.2, len(b_true)),
-                  r2 = 0.1,
-                  r=(sig_e * np.random.uniform(0.8, 1.2))[0],
-                  # a_coefs_hyperprior=np.abs(np.random.standard_cauchy(len(f_true))),
-                  # b_coefs_hyperprior=np.abs(np.random.standard_cauchy(len(b_true))),
-                  # shrinkage_param=np.abs(np.random.standard_cauchy(1))[0]
+    output = dict(r=(sig_e * np.random.uniform(0.8, 1.2))[0],
                   )
     return output
 
-model = pystan.StanModel(file='stan/oe.stan')
+model = pystan.StanModel(file='stan/oe_stable_order2.stan')
 
 stan_data = {'input_order': int(input_order),
              'output_order': int(output_order),
