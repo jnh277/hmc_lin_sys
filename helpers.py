@@ -21,6 +21,16 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy import signal
 
+def calculate_acf(x):
+    lags = np.arange(0, 51, 1)
+    acf = np.zeros(np.shape(lags))
+    tmp = x - np.mean(x)
+    for i in range(len(lags)):
+        acf[i] = sum(tmp[:-len(lags)] * tmp[lags[i]:(-len(lags) + lags[i])])
+    acf = acf / np.max(acf)
+    return acf
+
+
 def build_phi_matrix(obs,order,inputs):
     "Builds the regressor matrix"
     no_obs = len(obs)

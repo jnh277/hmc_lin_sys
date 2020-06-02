@@ -56,7 +56,7 @@ validationData = iddata(dataOutNoisy(noEstimationData:end), dataIn(noEstimationD
 % Estimate the model when the model order is unknown
 % Select model order by exhaustive search using half of the estimation set
 % for estimating model and the remaining for computing the prediction error
-predictionError = zeros([10 10]);
+predictionError = zeros([10 11]);
 for na=1:10
     for nb=1:10
         modelEstimate = arx(estimationData, [na nb 0]);

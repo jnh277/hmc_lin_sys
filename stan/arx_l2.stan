@@ -34,17 +34,13 @@ data {
 parameters {
     vector[output_order] a_coefs;
     vector[input_order] b_coefs;
-    vector<lower=0>[output_order] a_coefs_hyperprior;
-    vector<lower=0>[input_order] b_coefs_hyperprior;
     real<lower=0> shrinkage_param;
     real<lower=0> sig_e;
 }
 model {
-    a_coefs_hyperprior ~ cauchy(0.0, 1.0);
-    b_coefs_hyperprior ~ cauchy(0.0, 1.0);
     shrinkage_param ~ cauchy(0.0, 1.0);
-    a_coefs ~ normal(0.0, a_coefs_hyperprior * shrinkage_param);
-    b_coefs ~ normal(0.0, b_coefs_hyperprior * shrinkage_param);
+    a_coefs ~ normal(0.0, shrinkage_param);
+    b_coefs ~ normal(0.0, shrinkage_param);
 
     sig_e ~ cauchy(0.0, 1.0);
     y_est ~ normal(-est_obs_matrix * a_coefs + est_input_matrix*b_coefs, sig_e);
