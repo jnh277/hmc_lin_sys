@@ -308,6 +308,7 @@ def plot_dbode_ML(num_samples,den_samples,num_true,den_true,num_ML,den_ML,Ts,ome
     plt.ylabel('Phase (deg)')
     plt.xlabel('Frequency (rad/s)')
     plt.xlim((min(omega), min(max(omega),1/Ts*3.14)))
+    # plt.ylim(-300,10)
 
     if save:
         plt.savefig('bode_plot.png',format='png')

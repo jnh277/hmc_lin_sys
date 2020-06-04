@@ -16,89 +16,31 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ###############################################################################
 
-"""Estimates an ARX model using data with Gaussian noise and known model orders."""
-""" A horseshoe prior is placed on the coefficients a_{1:n_a} and b_{1:n_b} """
+""" runs the code for example 1 part 1 in the paper and produces the figures"""
 
-import pystan
 import numpy as np
-from scipy.io import loadmat
-from helpers import build_input_matrix
-from helpers import build_obs_matrix
 from helpers import calculate_acf
 import matplotlib.pyplot as plt
-from helpers import plot_dbode
 from helpers import plot_dbode_ML
 import seaborn as sns
+from arx_hmc import run_arx_hmc
+
 
 # specific data path
-
 data_path = 'data/arx_example_part_one.mat'
 
 # specify model orders, not nb = 3 as opposed to 2 in the paper, because numbering starts at one not zero
 input_order = 3         # gives the terms b_0 * u_k + b_1 * u_{k-1} + .. + b_{input_order-1} * u_{k-input_order+1}
 output_order = 2        # gives the terms a_0 * y_{k-1} + ... + a_{output_order-1}*y_{k-output_order}
 
-data = loadmat(data_path)
 
-y_est = data['y_estimation'].flatten()
-u_est = data['u_estimation'].flatten()
-y_val = data['y_validation'].flatten()
-u_val = data['u_validation'].flatten()
-
-no_obs_est = len(y_est)
-no_obs_val = len(y_val)
-
-# build regression matrix
-est_input_matrix = build_input_matrix(u_est, input_order)
-est_obs_matrix = build_obs_matrix(y_est, output_order)
-val_input_matrix = build_input_matrix(u_val, input_order)
-val_obs_matrix = build_obs_matrix(y_val, output_order)
-
-# trim measurement vectors to suit regression matrix
-max_delay = np.max((output_order,input_order-1))
-y_est = y_est[int(max_delay):]
-y_val = y_val[int(max_delay):]
-
-
-# Set up parameter initialisation, initialise from +/- 40% of the maximum likelihood estimate
-def init_function():
-    a_init = data['a_ML'].flatten()[1:output_order+1]
-    b_init = data['b_ML'].flatten()
-    sig_e_init = data['sig_e_ML'].flatten()
-    output = dict(a_coefs=a_init * np.random.uniform(0.6, 1.4, len(a_init)),
-                  b_coefs=b_init * np.random.uniform(0.6, 1.4, len(b_init)),
-                  sig_e=(sig_e_init * np.random.uniform(0.6, 1.4))[0],
-                  shrinkage_param=np.abs(np.random.standard_cauchy(1))[0]
-                  )
-    return output
-
-# specify model file
-model = pystan.StanModel(file='stan/arx.stan')
-
-# specify the data
-stan_data = {'input_order': int(input_order),
-             'output_order': int(output_order),
-             'no_obs_est': len(y_est),
-             'no_obs_val': len(y_val),
-             'y_est': y_est,
-             'est_obs_matrix': est_obs_matrix,
-             'est_input_matrix': est_input_matrix,
-             'val_obs_matrix': val_obs_matrix,
-             'val_input_matrix': val_input_matrix
-             }
-
-# perform sampling using hamiltonian monte carlo
-fit = model.sampling(data=stan_data, init=init_function, iter=6000, chains=4)
-
-
-# extract the results
-traces = fit.extract()
-
+# estimate using hmc with horeshoe prior
+results_hmc = run_arx_hmc(data_path, input_order, output_order)
 
 # extract parameter samples
-a_coef_traces = traces['a_coefs']
-b_coef_traces = traces['b_coefs']
-shrinkage_param = traces["shrinkage_param"]
+a_coef_traces = results_hmc['a_coefs']
+b_coef_traces = results_hmc['b_coefs']
+shrinkage_param = results_hmc["shrinkage_param"]
 shrinkage_param_mean = np.mean(shrinkage_param,0)
 
 a_coef_mean = np.mean(a_coef_traces,0)
@@ -151,7 +93,7 @@ plt.show()
 
 
 # extract validation data predictions
-yhat = traces['y_hat']      # validation predictions
+yhat = results_hmc['y_hat']      # validation predictions
 yhat[np.isnan(yhat)] = 0.0
 yhat[np.isinf(yhat)] = 0.0
 yhat_mean = np.mean(yhat, axis=0)

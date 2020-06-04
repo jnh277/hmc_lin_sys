@@ -110,22 +110,22 @@ yhat = yhat.OutputData;
 F_ML = m1.F;
 B_ML = m1.B;
 
-save('../data/oe_order2.mat','y_estimation', 'u_estimation', 'y_validation',...
-    'u_validation','f_coef_true','b_coef_true',...
-    'sig_e','Ts','F_ML','B_ML')
+% save('../data/oe_order2.mat','y_estimation', 'u_estimation', 'y_validation',...
+%     'u_validation','f_coef_true','b_coef_true',...
+%     'sig_e','Ts','F_ML','B_ML')
 
 
 %% can i do maximum likelihood like this
-phi = [];
-for i = 3:no_obs
-    phi = [phi;-y.outputData(i-1:-1:i-2).',u.inputData(i:-1:i-2).'];
-    
-    
-end
-
-mu = y.outputData(3:end);
-phi\mu
-    
+% phi = [];
+% for i = 3:no_obs
+%     phi = [phi;-y.outputData(i-1:-1:i-2).',u.inputData(i:-1:i-2).'];
+%     
+%     
+% end
+% 
+% mu = y.outputData(3:end);
+% phi\mu
+%     
 
 %% 
 Bt = fliplr([-0.00014906,  0.00100474, -0.000441  ]);

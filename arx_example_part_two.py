@@ -76,9 +76,9 @@ def init_function():
     a_init = data['a_ML'].flatten()[1:output_order+1]
     b_init = data['b_ML'].flatten()
     sig_e_init = data['sig_e_ML'].flatten()
-    output = dict(a_coefs=a_init * np.random.uniform(0.8, 1.2, len(a_init)),
-                  b_coefs=b_init * np.random.uniform(0.8, 1.2, len(b_init)),
-                  sig_e=(sig_e_init * np.random.uniform(0.8, 1.2))[0],
+    output = dict(a_coefs=a_init * np.random.uniform(0.6, 1.4, len(a_init)),
+                  b_coefs=b_init * np.random.uniform(0.6, 1.4, len(b_init)),
+                  sig_e=(sig_e_init * np.random.uniform(0.6, 1.4))[0],
                   shrinkage_param=np.abs(np.random.standard_cauchy(1))[0]
                   )
     return output
@@ -172,60 +172,9 @@ MF_l1 = 100*(1-np.sum(np.power(y_val-yhat_mean,2))/np.sum(np.power(y_val,2)))
 
 a_ML = data['a_ML'][0,1:]
 b_ML = data['b_ML'][0,:]
+MF_ML = data['MF_ML']
 
-## plots
-fontsize = 16
-plt.subplot(2,1,1)
-plt.plot(np.arange(1,3),data['a_true'][0,1:],'o')
-plt.plot(np.arange(1,11),a_hs_mean,'+')
-plt.plot(np.arange(1,11),a_l2_mean,'*')
-plt.plot(np.arange(1,11),a_l1_mean,'x')
-plt.plot(np.arange(1,len(a_ML)+1),a_ML,'s')
-plt.ylabel('$a_k$',fontsize=fontsize)
-plt.xlabel('k',fontsize=fontsize)
-plt.legend(('True','horseshoe prior','L2 prior','L1','arx'))
-plt.grid()
-
-plt.subplot(2,1,2)
-plt.plot(np.arange(0,3),data['b_true'][0,:],'o')
-plt.plot(np.arange(0,11),b_hs_mean,'+')
-plt.plot(np.arange(0,11),b_l2_mean,'*')
-plt.plot(np.arange(0,11),b_l2_mean,'x')
-plt.plot(np.arange(0,len(b_ML)),b_ML,'s')
-plt.ylabel('$b_k$',fontsize=fontsize)
-plt.xlabel('k',fontsize=fontsize)
-plt.legend(('True','horseshoe prior','L2 prior','L1 prior','arx'))
-plt.grid()
-
-plt.show()
-
-
-## plots
-fontsize = 16
-plt.subplot(2,1,1)
-plt.plot(np.arange(1,9),a_hs_mean[2:],'+')
-plt.plot(np.arange(1,9),a_l2_mean[2:],'*')
-plt.plot(np.arange(1,9),a_l1_mean[2:],'x')
-plt.plot(np.arange(1,len(a_ML)-1),a_ML[2:],'s')
-plt.ylabel('$a_k$',fontsize=fontsize)
-plt.xlabel('k',fontsize=fontsize)
-plt.legend(('True','horseshoe prior','L2 prior','L1','arx'))
-plt.grid()
-
-plt.subplot(2,1,2)
-plt.plot(np.arange(0,8),b_hs_mean[3:],'+')
-plt.plot(np.arange(0,8),b_l2_mean[3:],'*')
-plt.plot(np.arange(0,8),b_l2_mean[3:],'x')
-plt.plot(np.arange(0,len(b_ML)-3),b_ML[3:],'s')
-plt.ylabel('$b_k$',fontsize=fontsize)
-plt.xlabel('k',fontsize=fontsize)
-plt.legend(('horseshoe prior','L2 prior','L1 prior','arx'))
-plt.grid()
-
-plt.show()
-plt.boxplot(a_hs[:,2:])
-plt.boxplot(a_l1[:,2:])
-plt.show()
+## plot the results
 
 # show box plot results for a
 # convert to data frame
@@ -343,15 +292,14 @@ plt.show()
 
 
 #
-# b_true = data["b_true"]
-# a_true = data["a_true"]
-# a_ML = data["a_ML"]
-# b_ML = data["b_ML"]
-#
-# # b_ML = np.array([0.051689781466163,   1.016509059425918,   0.497674739448588,  -0.015555723404122,   0.028557782752386,   0.021349077335907,0.027884769733234,  -0.051274773001460])
-# # a_ML = np.array([1.0, -1.4889,    0.6740,    0.0518,   -0.0126,   -0.0334,    0.0173,    0.0196,   -0.0108])
-# Ts = 1.0
-# w_res = 100
-# w_plot = np.logspace(-2,np.log10(3.14),w_res)
-# plot_dbode_ML(b_hs,a_hs,b_true,a_true,b_ML,a_ML,Ts,w_plot)
+b_true = data["b_true"]
+a_true = data["a_true"]
+a_ML = data["a_ML"]
+b_ML = data["b_ML"]
+
+
+Ts = 1.0
+w_res = 100
+w_plot = np.logspace(-2,np.log10(3.14),w_res)
+plot_dbode_ML(b_hs,a_hs,b_true,a_true,b_ML,a_ML,Ts,w_plot, save=True)
 

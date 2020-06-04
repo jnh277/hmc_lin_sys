@@ -36,9 +36,10 @@ transformed data {
     int<lower=0> max_order = max(output_order,input_order-1);
 }
 parameters {
-    vector[input_order] bb_coefs;
-    vector<lower=-1,upper=1>[output_order] fb_coefs;
-    vector<lower=0>[input_order] bb_coefs_hyperprior;
+    vector[input_order] b_coefs;
+    real mags_a;
+    real phase_a;
+    vector<lower=0>[input_order] b_coefs_hyperprior;
     vector<lower=0>[output_order] fb_coefs_hyperprior;
     real<lower=0> shrinkage_param;
     real<lower=0> r;            // noise standard deviation
@@ -46,13 +47,12 @@ parameters {
 transformed parameters{
     vector[input_order] b_coefs;
     vector[output_order] f_coefs;
+    row_vector[no_obs_est] mu = rep_row_vector(0.0,no_obs_est);
     f_coefs[1] = fb_coefs[1]*fb_coefs[2];
     f_coefs[2] = fb_coefs[1] + fb_coefs[2];
-    b_coefs[1] = bb_coefs[2]*fb_coefs[3]+ bb_coefs[2]*fb_coefs[1] +bb_coefs[1]*fb_coefs[1]*fb_coefs[2];
+    b_coefs[1] = bb_coefs[2]*fb_coefs[2]+ bb_coefs[3]*fb_coefs[1] +bb_coefs[1]*fb_coefs[1]*fb_coefs[2];
     b_coefs[2] = bb_coefs[2]+bb_coefs[3] + bb_coefs[1]*(fb_coefs[1]+fb_coefs[2]);
     b_coefs[3] = bb_coefs[1];
-    row_vector[no_obs_est] mu = rep_row_vector(0.0,no_obs_est);
-
 
     for (i in max_order+1:no_obs_est){
         mu[i] = u_est[i-input_order+1:i] * b_coefs  -  mu[i-output_order:i-1] * f_coefs;
@@ -63,12 +63,12 @@ transformed parameters{
 model {
     // hyper priors
     shrinkage_param ~ cauchy(0.0, 1.0);
-    b_coefs_hyperprior ~ cauchy(0.0, 1.0);
-    f_coefs_hyperprior ~ cauchy(0.0, 1.0);
+    bb_coefs_hyperprior ~ cauchy(0.0, 1.0);
+    fb_coefs_hyperprior ~ cauchy(0.0, 1.0);
 
     // parameters
-    b_coefs ~ normal(0.0, b_coefs_hyperprior * shrinkage_param);
-    f_coefs ~ normal(0.0, f_coefs_hyperprior * shrinkage_param);
+    bb_coefs ~ normal(0.0, bb_coefs_hyperprior * shrinkage_param);
+    fb_coefs ~ normal(0.0, fb_coefs_hyperprior * shrinkage_param);
 
     // noise standard deviation
     r ~ cauchy(0.0, 1.0);

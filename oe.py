@@ -84,15 +84,15 @@ stan_data = {'input_order': int(input_order),
 #              'no_obs_val': len(y_val),
 #              }
 
-fit = model.sampling(data=stan_data, init=init_function, iter=3000, chains=4)
+fit = model.sampling(data=stan_data, init=init_function, iter=8000, chains=4)
 
 traces = fit.extract()
 yhat = traces['y_hat_val']
 yhat[np.isnan(yhat)] = 0.0
 yhat[np.isinf(yhat)] = 0.0
 
-yhat_OL = traces['y_hat_val2']
-yhat_OL_mean = np.mean(yhat_OL, axis=0)
+# yhat_OL = traces['y_hat_val2']
+# yhat_OL_mean = np.mean(yhat_OL, axis=0)
 
 yhat_mean = np.mean(yhat, axis=0)
 yhat_upper_ci = np.percentile(yhat, 97.5, axis=0)
@@ -115,7 +115,7 @@ b_mean = np.mean(b_coef_traces,0)
 plt.subplot(1,1,1)
 plt.plot(y_val,linewidth=0.5)
 plt.plot(yhat_mean,linewidth=0.5)
-plt.plot(yhat_OL_mean,linewidth=0.5)
+# plt.plot(yhat_OL_mean,linewidth=0.5)
 # plt.plot(yhat_upper_ci,'--',linewidth=0.5)
 # plt.plot(yhat_lower_ci,'--',linewidth=0.5)
 plt.ylim((-2,2))
