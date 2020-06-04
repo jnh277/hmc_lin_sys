@@ -28,10 +28,11 @@ import pickle
 from pathlib import Path
 
 
-def run_arx_hmc(data_path, input_order, output_order,  prior='hs'):
+def run_arx_hmc(data_path, input_order, output_order,  prior='hs', hot_start=False):
     """Input order gives the terms b_0 * u_k + b_1 * u_{k-1} + .. + b_{input_order-1} * u_{k-input_order+1}"""
     """Output order gives the terms a_0 * y_{k-1} + ... + a_{output_order-1}*y_{k-output_order} """
     """Priors can be 'hs', 'l1' and 'l2' """
+    """hot_start == True will start within 40% of the maximum likelihood results"""
 
     data = loadmat(data_path)
 
@@ -53,16 +54,29 @@ def run_arx_hmc(data_path, input_order, output_order,  prior='hs'):
     y_val = y_val[int(max_delay):]
 
     # Set up parameter initialisation, initialise from +/- 40% of the maximum likelihood estimate
-    def init_function():
-        a_init = data['a_ML'].flatten()[1:output_order + 1]
-        b_init = data['b_ML'].flatten()
-        sig_e_init = data['sig_e_ML'].flatten()
-        output = dict(a_coefs=a_init * np.random.uniform(0.6, 1.4, len(a_init))*0,
-                      b_coefs=b_init * np.random.uniform(0.6, 1.4, len(b_init))*0,
-                      sig_e=(sig_e_init * np.random.uniform(0.6, 1.4))[0],
-                      shrinkage_param=np.abs(np.random.standard_cauchy(1))[0]
-                      )
-        return output
+    if hot_start == True:
+        def init_function():
+            a_init = data['a_ML'].flatten()[1:output_order + 1]
+            b_init = data['b_ML'].flatten()
+            sig_e_init = data['sig_e_ML'].flatten()
+            output = dict(a_coefs=a_init * np.random.uniform(0.6, 1.4, len(a_init)),
+                          b_coefs=b_init * np.random.uniform(0.6, 1.4, len(b_init)),
+                          sig_e=(sig_e_init * np.random.uniform(0.6, 1.4))[0],
+                          shrinkage_param=np.abs(np.random.standard_cauchy(1))[0]
+                          )
+            return output
+    else:
+        def init_function():
+            a_init = data['a_ML'].flatten()[1:output_order + 1]
+            b_init = data['b_ML'].flatten()
+            sig_e_init = data['sig_e_ML'].flatten()
+            output = dict(a_coefs=a_init * 0,
+                          b_coefs=b_init * 0,
+                          shrinkage_param=np.abs(np.random.standard_cauchy(1))[0]
+                          )
+            return output
+
+
 
     # save_file = Path("./normal_model.pkl")
 
@@ -113,4 +127,4 @@ def run_arx_hmc(data_path, input_order, output_order,  prior='hs'):
     # extract the results
     traces = fit.extract()
 
-    return traces
+    return (fit,traces)

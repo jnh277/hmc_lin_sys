@@ -102,7 +102,7 @@ def run_arx_mh( mh2=True):
     output = {'sigmae': theta[no_burnin_iters:no_iters, order_ab]}
 
     for i in range(order_a):
-        a_name = 'a' + str(i)
+        a_name = 'a' + str(i+1)
         # the negative sign is needed because of how the regressor matrix was defined for the metropolis hastings function
         output.update({a_name: -theta[no_burnin_iters:no_iters, 0 + i]})
 
@@ -120,7 +120,7 @@ def run_arx_mh( mh2=True):
         output.update({'method':'mh0'})
 
 
-    print(np.mean(theta[no_burnin_iters:no_iters, :], axis=0))
+    # print(np.mean(theta[no_burnin_iters:no_iters, :], axis=0))
 
     return output
 
