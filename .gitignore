@@ -130,3 +130,6 @@ dmypy.json
 *.xml
 stan/.DS_Store
 data/.DS_Store
+
+# ignore compiled stan models
+stan/*.pkl
