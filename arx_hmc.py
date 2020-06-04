@@ -24,6 +24,8 @@ import numpy as np
 from scipy.io import loadmat
 from helpers import build_input_matrix
 from helpers import build_obs_matrix
+import pickle
+from pathlib import Path
 
 
 def run_arx_hmc(data_path, input_order, output_order,  prior='hs'):
@@ -62,13 +64,34 @@ def run_arx_hmc(data_path, input_order, output_order,  prior='hs'):
                       )
         return output
 
+    # save_file = Path("./normal_model.pkl")
+
+
     # specify model file
     if prior == 'hs':
-        model = pystan.StanModel(file='stan/arx.stan')
+        model_path = 'stan/arx_hs.pkl'
+        if Path(model_path).is_file():
+            model = pickle.load(open(model_path, 'rb'))
+        else:
+            model = pystan.StanModel(file='stan/arx.stan')
+            with open(model_path, 'wb') as file:
+                pickle.dump(model, file)
     elif prior == 'l1':
-        model = pystan.StanModel(file='stan/arx_l1.stan')
+        model_path = 'stan/arx_l1.pkl'
+        if Path(model_path).is_file():
+            model = pickle.load(open(model_path, 'rb'))
+        else:
+            model = pystan.StanModel(file='stan/arx_l1.stan')
+            with open(model_path, 'wb') as file:
+                pickle.dump(model, file)
     elif prior == 'l2':
-        model = pystan.StanModel(file='stan/arx_l2.stan')
+        model_path = 'stan/arx_l2.pkl'
+        if Path(model_path).is_file():
+            model = pickle.load(open(model_path, 'rb'))
+        else:
+            model = pystan.StanModel(file='stan/arx_l2.stan')
+            with open(model_path, 'wb') as file:
+                pickle.dump(model, file)
     else:
         print("invalid prior specified, priors can be 'hs', 'l1', or 'l2' ")
 
