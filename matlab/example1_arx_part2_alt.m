@@ -24,7 +24,7 @@
 % validation data set
 %
 % The data generated with this script is saved and then used by
-% arx_example_part_two.py
+% example1_arx_part2.py
 
 
 clear all

@@ -23,7 +23,7 @@
 % known.
 %
 % The data generated with this script is saved and then used by
-% arx_example_part_one.py
+% example1_arx_part1.py
 
 rng(15)                 % for reproduceability
 no_obs = 1000;          % number of observations, this will be split into estiamtion and validation later

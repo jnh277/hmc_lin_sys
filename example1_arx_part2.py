@@ -22,14 +22,12 @@
 import pystan
 import numpy as np
 from scipy.io import loadmat
-from helpers import build_input_matrix
-from helpers import build_obs_matrix
-from helpers import calculate_acf
 import matplotlib.pyplot as plt
-from helpers import plot_dbode
 from helpers import plot_dbode_ML
 import seaborn as sns
 import pandas as pd
+
+from arx_hmc import run_arx_hmc
 
 # specific data path
 
@@ -41,72 +39,13 @@ output_order = 10        # gives the terms a_0 * y_{k-1} + ... + a_{output_order
 
 data = loadmat(data_path)
 
-y_est = data['y_estimation'].flatten()
-u_est = data['u_estimation'].flatten()
+# load the validation data for computing model fit metric
 y_val = data['y_validation'].flatten()
-u_val = data['u_validation'].flatten()
-
-no_obs_est = len(y_est)
-no_obs_val = len(y_val)
-
-# build regression matrix
-est_input_matrix = build_input_matrix(u_est, input_order)
-est_obs_matrix = build_obs_matrix(y_est, output_order)
-val_input_matrix = build_input_matrix(u_val, input_order)
-val_obs_matrix = build_obs_matrix(y_val, output_order)
-
-# trim measurement vectors to suit regression matrix
 max_delay = np.max((output_order,input_order-1))
-y_est = y_est[int(max_delay):]
 y_val = y_val[int(max_delay):]
 
-
-# Set up parameter initialisation, initialise from +/- 40% of the maximum likelihood estimate
-# def init_function():
-#     a_init = data['a_ML'].flatten()[1:output_order+1]
-#     b_init = data['b_ML'].flatten()
-#     sig_e_init = data['sig_e_ML'].flatten()
-#     output = dict(a_coefs=np.concatenate((np.zeros(1),a_init * np.random.uniform(0.8, 1.2, len(a_init))),0),
-#                   b_coefs=np.concatenate((np.zeros(3),b_init * np.random.uniform(0.8, 1.2, len(b_init))),0),
-#                   sig_e=(sig_e_init * np.random.uniform(0.8, 1.2))[0],
-#                   shrinkage_param=np.abs(np.random.standard_cauchy(1))[0]
-#                   )
-#     return output
-def init_function():
-    a_init = data['a_ML'].flatten()[1:output_order+1]
-    b_init = data['b_ML'].flatten()
-    sig_e_init = data['sig_e_ML'].flatten()
-    output = dict(a_coefs=a_init * np.random.uniform(0.6, 1.4, len(a_init)),
-                  b_coefs=b_init * np.random.uniform(0.6, 1.4, len(b_init)),
-                  sig_e=(sig_e_init * np.random.uniform(0.6, 1.4))[0],
-                  shrinkage_param=np.abs(np.random.standard_cauchy(1))[0]
-                  )
-    return output
-
-
-# specify the data
-stan_data = {'input_order': int(input_order),
-             'output_order': int(output_order),
-             'no_obs_est': len(y_est),
-             'no_obs_val': len(y_val),
-             'y_est': y_est,
-             'est_obs_matrix': est_obs_matrix,
-             'est_input_matrix': est_input_matrix,
-             'val_obs_matrix': val_obs_matrix,
-             'val_input_matrix': val_input_matrix
-             }
-
-## fit using a horseshoe prior
-# specify model file
-model_hs = pystan.StanModel(file='stan/arx.stan')
-
-# perform sampling using hamiltonian monte carlo
-fit_hs = model_hs.sampling(data=stan_data, init=init_function, iter=6000, chains=4)
-
-
-# extract the results
-traces = fit_hs.extract()
-
+# fit using hmc with horseshoe prior
+(fit_hs,traces) = run_arx_hmc(data_path, input_order, output_order, prior='hs', hot_start=False)
 
 # extract parameter samples
 a_hs= traces['a_coefs']
@@ -120,17 +59,8 @@ yhat_mean = np.mean(yhat, axis=0)
 
 MF_hs = 100*(1-np.sum(np.power(y_val-yhat_mean,2))/np.sum(np.power(y_val,2)))
 
-## fit using an L2 prior
-# specify model file
-model_l2 = pystan.StanModel(file='stan/arx_l2.stan')
-
-
-# perform sampling using hamiltonian monte carlo
-fit_l2 = model_l2.sampling(data=stan_data, init=init_function, iter=6000, chains=4)
-
-
-# extract the results
-traces = fit_l2.extract()
+# fit using hmc with horseshoe prior
+(fit_l2,traces) = run_arx_hmc(data_path, input_order, output_order, prior='l2', hot_start=False)
 
 
 # extract parameter samples
@@ -145,17 +75,8 @@ yhat_mean = np.mean(yhat, axis=0)
 
 MF_l2 = 100*(1-np.sum(np.power(y_val-yhat_mean,2))/np.sum(np.power(y_val,2)))
 
-## fit using an L1 prior
-# specify model file
-model_l1 = pystan.StanModel(file='stan/arx_l1.stan')
-
-
-# perform sampling using hamiltonian monte carlo
-fit_l1 = model_l1.sampling(data=stan_data, init=init_function, iter=6000, chains=4)
-
-
-# extract the results
-traces = fit_l1.extract()
+# fit using hmc with horseshoe prior
+(fit_l1,traces) = run_arx_hmc(data_path, input_order, output_order, prior='l1', hot_start=False)
 
 
 # extract parameter samples
