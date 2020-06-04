@@ -55,8 +55,8 @@ def run_arx_hmc(data_path, input_order, output_order,  prior='hs'):
         a_init = data['a_ML'].flatten()[1:output_order + 1]
         b_init = data['b_ML'].flatten()
         sig_e_init = data['sig_e_ML'].flatten()
-        output = dict(a_coefs=a_init * np.random.uniform(0.6, 1.4, len(a_init)),
-                      b_coefs=b_init * np.random.uniform(0.6, 1.4, len(b_init)),
+        output = dict(a_coefs=a_init * np.random.uniform(0.6, 1.4, len(a_init))*0,
+                      b_coefs=b_init * np.random.uniform(0.6, 1.4, len(b_init))*0,
                       sig_e=(sig_e_init * np.random.uniform(0.6, 1.4))[0],
                       shrinkage_param=np.abs(np.random.standard_cauchy(1))[0]
                       )

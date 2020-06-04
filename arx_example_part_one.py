@@ -24,10 +24,12 @@ import matplotlib.pyplot as plt
 from helpers import plot_dbode_ML
 import seaborn as sns
 from arx_hmc import run_arx_hmc
+from scipy.io import loadmat
 
 
 # specific data path
 data_path = 'data/arx_example_part_one.mat'
+
 
 # specify model orders, not nb = 3 as opposed to 2 in the paper, because numbering starts at one not zero
 input_order = 3         # gives the terms b_0 * u_k + b_1 * u_{k-1} + .. + b_{input_order-1} * u_{k-input_order+1}
@@ -100,6 +102,10 @@ yhat_mean = np.mean(yhat, axis=0)
 yhat_upper_ci = np.percentile(yhat, 99.5, axis=0)
 yhat_lower_ci = np.percentile(yhat, 0.5, axis=0)
 
+
+
+data = loadmat(data_path)
+y_val = data['y_validation'].flatten()
 
 plt.subplot(1,1,1)
 plt.plot(y_val,'+',linewidth=0.5)
