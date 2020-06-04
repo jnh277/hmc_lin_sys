@@ -44,6 +44,8 @@ y_val = data['y_validation'].flatten()
 max_delay = np.max((output_order, input_order - 1))
 y_val = y_val[int(max_delay):]
 
+a_ML = data['a_ML'][0,1:]
+
 # estimate using hmc with horeshoe prior
 (fit_hmc,results_hmc) = run_arx_hmc(data_path, input_order, output_order, prior='l2')
 
@@ -87,7 +89,7 @@ plt.subplot(2,2,2)
 sns.kdeplot(a1_hmc, shade=True)
 sns.kdeplot(a1_mh, shade=True)
 sns.kdeplot(a1_mMALA, shade=True)
-plt.axvline(-1.5, color='k', lw=1, linestyle='--')
+plt.axvline(a_ML[0], color='k', lw=1, linestyle='--')
 plt.xlabel('$a_1$', fontsize=fontsize)
 plt.ylabel('posterior', fontsize=fontsize)
 
