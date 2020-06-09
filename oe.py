@@ -21,10 +21,6 @@
 import pystan
 import numpy as np
 from scipy.io import loadmat
-import matplotlib.pyplot as plt
-from helpers import plot_trace
-# from helpers import plot_dbode_ML
-from scipy import signal
 import pickle
 from pathlib import Path
 
