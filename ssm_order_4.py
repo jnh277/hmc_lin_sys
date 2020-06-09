@@ -27,7 +27,7 @@ from helpers import plot_bode_ML
 
 
 # specific data path
-data_path = 'data/ssm4_sumsins.mat'
+data_path = 'data/example4_lssm.mat'
 data = loadmat(data_path)
 
 y_est = data['y_estimation'].flatten()
