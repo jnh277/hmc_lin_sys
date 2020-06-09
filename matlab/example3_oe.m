@@ -1,5 +1,6 @@
 % example 3 oe
-rng(54531445)
+% rng(54531445)
+rng(13)
 sig_e = 0.5;
 
 % Generate data
@@ -10,7 +11,7 @@ y = filter(B, A, u);
 y = y + sig_e * randn(length(y), 1);
 
 % Partition into estimate and validation sets
-no_est = floor(0.67*noObservations);
+no_est = floor(0.5*noObservations);
 y_estimation = y(1:no_est);
 u_estimation = u(1:no_est);
 y_validation = y(no_est:end);
@@ -31,7 +32,7 @@ yhat_reg = predict(m2, data_validation);
 yhat_reg = yhat_reg.OutputData;
 %%
 MF_ML1 = 100*(1 - sum((y_validation(4:end)-yhat(4:end)).^2)/sum(y_validation(4:end).^2));
-MF_ML2 = 100*(1 - sum((y_validation(4:end)-yhat_reg(4:end)).^2)/sum(y_validation(4:end).^2));
+MF_ML2 = 100*(1 - sum((y_validation(11:end)-yhat_reg(11:end)).^2)/sum(y_validation(11:end).^2));
 
 %%
 f_ml = m1.f;

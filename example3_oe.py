@@ -18,12 +18,10 @@
 
 """Estimates an OE model using data with Gaussian noise and horeshoe priors."""
 
-import pystan
 import numpy as np
 from scipy.io import loadmat
 import matplotlib.pyplot as plt
 from helpers import plot_trace
-# from helpers import plot_dbode_ML
 from scipy import signal
 from oe import run_oe_hmc
 
@@ -50,6 +48,8 @@ yhat[np.isinf(yhat)] = 0.0
 yhat_mean = np.mean(yhat, axis=0)
 yhat_upper_ci = np.percentile(yhat, 97.5, axis=0)
 yhat_lower_ci = np.percentile(yhat, 2.5, axis=0)
+
+MF_hmc = 100*(1-np.sum(np.power(y_val[10:]-yhat_mean[10:],2))/np.sum(np.power(y_val[10:],2)))
 
 
 # mu_traces = traces['mu']

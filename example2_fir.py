@@ -17,12 +17,9 @@
 ###############################################################################
 
 """Estimates an FIR model using data with Gaussian noise."""
-import pystan
 import numpy as np
 from scipy.io import loadmat
 import matplotlib.pyplot as plt
-from helpers import plot_trace
-from helpers import plot_firfreq
 from fir_hmc import run_fir_hmc
 import seaborn as sns
 
