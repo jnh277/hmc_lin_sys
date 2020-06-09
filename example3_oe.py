@@ -36,7 +36,7 @@ output_order = 10
 data = loadmat(data_path)
 y_val = data['y_validation'].flatten()
 
-(fit, traces) = run_oe_hmc(data_path, input_order, output_order)
+(fit, traces) = run_oe_hmc(data_path, input_order, output_order, iter=10000)
 
 yhat = traces['y_hat_val']
 yhat[np.isnan(yhat)] = 0.0

@@ -34,7 +34,7 @@ data_path = 'data/example3_oe.mat'
 input_order = 4
 output_order = 3
 
-def run_oe_hmc(data_path, input_order, output_order,  prior='hs', hot_start=False):
+def run_oe_hmc(data_path, input_order, output_order,  prior='hs', hot_start=False, iter=6000):
     data = loadmat(data_path)
 
     y_est = data['y_estimation'].flatten()
@@ -82,7 +82,7 @@ def run_oe_hmc(data_path, input_order, output_order,  prior='hs', hot_start=Fals
                  'no_obs_val': len(y_val),
                  }
 
-    fit = model.sampling(data=stan_data, init=init_function, iter=6000, chains=4)
+    fit = model.sampling(data=stan_data, init=init_function, iter=iter, chains=4)
     traces = fit.extract()
 
     return (fit, traces)
