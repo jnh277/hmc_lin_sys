@@ -17,14 +17,12 @@
 ###############################################################################
 
 """Estimates a msd and its states using a general linear ssm model."""
-import pystan
 import numpy as np
 from scipy.io import loadmat
 import matplotlib.pyplot as plt
 from helpers import plot_trace
 from helpers import plot_bode_ML
-import pickle
-from pathlib import Path
+from lssm import run_lssm_hmc
 
 
 # specific data path
@@ -35,55 +33,10 @@ y_est = data['y_estimation'].flatten()
 u_est = data['u_estimation'].flatten()
 states_est = data['states_est']
 Ts = data['Ts'].flatten()
-# Ts = np.array([1.0])
 
 no_obs_est = len(y_est)
 
-hot_start = False
-# Run Stan
-if hot_start:
-
-    def init_function():
-        output = dict(r=1.0,
-                      A=data['A_ML'],
-                      B=data['B_ML'].flatten(),
-                      C=data['C_ML'].flatten(),
-                      D=data['D_ML'][0,0],
-                      )
-        return output
-else:
-    def init_function():
-        output = dict(r=1.0,
-                      # A=np.array([[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]),
-                      # B=np.array([1.0,1.0,1.0,1.0]),
-                      # C=data['C_ML'].flatten(),
-                      D=data['D_ML'][0,0],
-                      )
-        return output
-
-
-model_path = 'stan/lssm_hs.pkl'
-if Path(model_path).is_file():
-    model = pickle.load(open(model_path, 'rb'))
-else:
-    model = pystan.StanModel(file='stan/ssm_horseshoe.stan')
-    with open(model_path, 'wb') as file:
-        pickle.dump(model, file)
-
-
-stan_data = {'no_obs_est': len(y_est),
-             'y_est': y_est,
-             'u_est':u_est,
-             'Ts':Ts[0],
-             'no_states':4,
-             }
-
-control = {"adapt_delta": 0.8,
-           "max_treedepth":10}         # increasing from default 0.8 to reduce divergent steps
-
-fit = model.sampling(data=stan_data, init=init_function, iter=4000, chains=4,control=control)
-
-# print(fit)
+(fit, traces) = run_lssm_hmc(data_path, 4, hot_start=False, iter=4000)
 
 traces = fit.extract()
 yhat = traces['y_hat']
