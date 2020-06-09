@@ -129,6 +129,7 @@ def plot_dbode_ML(num_samples,den_samples,num_true,den_true,num_ML,den_ML,num_ML
     # convert back from decibal
     mag_true = np.power(10,mag_true/10)
     mag_ML = np.power(10, mag_ML / 10)
+    mag_ML2 = np.power(10, mag_ML2 / 10)
     mag_samples = np.power(10, mag_samples / 10)
 
     # plot the samples
@@ -137,21 +138,21 @@ def plot_dbode_ML(num_samples,den_samples,num_true,den_true,num_ML,den_ML,num_ML
     plt.semilogx(w.flatten(), mag_samples[:, 1:no_plot], color='green', alpha=0.1)  # Bode magnitude plot
     h1, = plt.semilogx(w.flatten(), mag_true, color='blue', label='True system')  # Bode magnitude plot
     hml, = plt.semilogx(w.flatten(), mag_ML,'--', color='purple', label='ML estimate')  # Bode magnitude plot
-    hml2, = plt.semilogx(w.flatten(), mag_ML2,'--', color='pink', label='ML reg estimate')  # Bode magnitude plot
+    hml2, = plt.semilogx(w.flatten(), mag_ML2,'--', color='red', label='ML reg estimate')  # Bode magnitude plot
     hm, = plt.semilogx(w.flatten(), np.mean(mag_samples, 1), '-.', color='orange', label='hmc mean')  # Bode magnitude plot
     # hu, = plt.semilogx(w.flatten(), np.percentile(mag_samples, 97.5, axis=1),'--',color='orange',label='Upper CI')    # Bode magnitude plot
 
     plt.legend(handles=[h1, h2, hm])
     plt.legend()
     plt.title('Bode diagram')
-    plt.ylabel('Magnitude (dB)')
+    plt.ylabel('Magnitude')
     plt.xlim((min(w.flatten()),min(max(omega),1/Ts*3.14)))
 
     plt.subplot(2, 1, 2)
     plt.semilogx(w.flatten(), phase_samples[:,:no_plot], color='green', alpha=0.1)  # Bode phase plot
     plt.semilogx(w.flatten(), phase_true, color='blue')  # Bode phase plot
     hml, = plt.semilogx(w.flatten(), phase_ML, '--', color='purple')  # Bode magnitude plot
-    hml, = plt.semilogx(w.flatten(), phase_ML2, '--', color='pink')  # Bode magnitude plot
+    hml, = plt.semilogx(w.flatten(), phase_ML2, '--', color='red')  # Bode magnitude plot
     plt.semilogx(w.flatten(), np.mean(phase_samples, 1), '-.', color='orange',
                        label='mean')  # Bode magnitude plot
     plt.ylabel('Phase (deg)')
@@ -165,7 +166,7 @@ def plot_dbode_ML(num_samples,den_samples,num_true,den_true,num_ML,den_ML,num_ML
     plt.show()
 
 
-plot_dbode_ML(b_coef_traces[:,-1::-1],f_coef_traces[:,-1::-1],b_true.flatten(),f_true.flatten(),B_ML.flatten(),F_ML2.flatten(),B_ML2.flatten(),F_ML.flatten(),Ts,w_plot,save=False)
+plot_dbode_ML(b_coef_traces[:,-1::-1],f_coef_traces[:,-1::-1],b_true.flatten(),f_true.flatten(),B_ML.flatten(),F_ML.flatten(),B_ML2.flatten(),F_ML2.flatten(),Ts,w_plot,save=False)
 
 
 
