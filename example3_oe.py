@@ -51,6 +51,7 @@ yhat_lower_ci = np.percentile(yhat, 2.5, axis=0)
 
 MF_hmc = 100*(1-np.sum(np.power(y_val[10:]-yhat_mean[10:],2))/np.sum(np.power(y_val[10:],2)))
 
+print('Model fit of hmc estaimte = ', MF_hmc)
 
 # mu_traces = traces['mu']
 f_coef_traces = traces['f_coefs']
