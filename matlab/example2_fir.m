@@ -45,12 +45,12 @@ yhat_tc = predict(mrtc, vData);
 yhat_tc = yhat_tc.OutputData;
 [ghat_tc, ~, ~, ghat_tc_sd] = impulse(mrtc, t);
 
-% Estimate impulse response using estimated model order
-m = arx(eData, [0 13 0]);
-yhat = predict(m, vData);
-yhat = yhat.OutputData;
+% Estimate without regularisation but with an estimated model order of 13
+m_arx = arx(eData, [0 13 0]);
+yhat = predict(m_arx, vData);
+yhat_arx = yhat.OutputData;
 
-
+b_ML0 = m_arx.b;
 
 y_hat_val_ML = yhat_tc;
 b_ML = mrtc.b;
@@ -65,8 +65,36 @@ y_validation = vData.OutputData;
 u_validation = vData.InputData;
 sig_e = 0.05;
 
+[step_true,~] = step(trueSys);
 
+MF_ML = 100*(1 - sum((y_validation(36:end)-y_hat_val_ML(36:end)).^2)/sum(y_validation(36:end).^2));
+MF_ML0 = 100*(1 - sum((y_validation(36:end)-yhat_arx(36:end)).^2)/sum(y_validation(36:end).^2));
 save('../data/example2_fir.mat','y_estimation', 'u_estimation', 'y_validation',...
     'u_validation','y_hat_val_ML','b_ML','sig_e_ML',...
-    'sig_e','nb','a_true','b_true')
+    'sig_e','nb','a_true','b_true','b_ML0','MF_ML','MF_ML0','g_true','step_true')
 
+figure(1)
+clf
+plot(y_validation(36:end))
+hold on
+plot(yhat_arx(36:end),'.-')
+plot(y_hat_val_ML(36:end),'.-')
+hold off
+legend('validation data','arx','arx TC')
+%%
+figure(2)
+clf
+plot(t,g_true)
+hold on
+plot(0:length(b_ML)-1,b_ML)
+plot(0:length(b_ML0)-1,b_ML0)
+hold off
+legend('True','ARX TC','ARX')
+
+figure(3)
+clf
+step(trueSys)
+hold on
+step(mrtc)
+step(m_arx)
+legend('true','ARX TC', 'ARX')

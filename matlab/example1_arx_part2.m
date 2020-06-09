@@ -82,7 +82,8 @@ modelEstimate = arx(estimationData, [10 11 0], arxOpt);
 yhatOracle = predict(modelEstimate, validationData);
 y_hat_val_ML = yhatOracle.OutputData;
 
-MF_ML = 100*(1 - sum((y_validation-y_hat_val_ML).^2)/sum(y_validation.^2));
+max_delay = 12;
+MF_ML = 100*(1 - sum((y_validation(max_delay:end)-y_hat_val_ML(max_delay:end)).^2)/sum(y_validation(max_delay:end).^2));
 
 %% save data
 a_ML = modelEstimate.a;
@@ -108,9 +109,9 @@ hmc_mean_est = tf(b_hs,a_hs,Ts);
    
 figure(1)
 clf
-plot(y_validation)
+plot(y_validation(max_delay:end))
 hold on
-plot(y_hat_val_ML)
+plot(y_hat_val_ML(max_delay:end))
 
 hold off
 legend('Validation data','ML Predicted')

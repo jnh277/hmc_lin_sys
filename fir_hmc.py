@@ -21,103 +21,80 @@ import pystan
 import numpy as np
 from scipy.io import loadmat
 from helpers import build_input_matrix
-import matplotlib.pyplot as plt
-from helpers import plot_trace
-from helpers import plot_firfreq
-
-
-# specific data path
-data_path = 'data/example2_fir.mat'
-input_order = 35       # gives the terms b_0 * u_k + b_1 * u_{k-1} + .. + b_{input_order-1} * u_{k-input_order+1}
-
-data = loadmat(data_path)
-
-y_est = data['y_estimation'].flatten()
-u_est = data['u_estimation'].flatten()
-y_val = data['y_validation'].flatten()
-u_val = data['u_validation'].flatten()
-
-no_obs_est = len(y_est)
-no_obs_val = len(y_val)
-
-# build regression matrix
-est_input_matrix = build_input_matrix(u_est, input_order)
-val_input_matrix = build_input_matrix(u_val, input_order)
-
-# trim measurement vectors to suit regression matrix
-max_delay = (input_order-1)
-y_est = y_est[int(max_delay):]
-y_val = y_val[int(max_delay):]
-
-# calcualte an intial guess using least squares (ML)
-# Ainv = np.linalg.pinv(est_input_matrix)
-# b_init = np.matmul(Ainv, y_est)
-# b_init = data['b_ML'][0,:]
-b_init = np.zeros((input_order))
-
-# Run Stan
-def init_function():
-    sig_e = data['sig_e'].flatten()
-    output = dict(b_coefs=b_init * np.random.uniform(0.8, 1.2, len(b_init)),
-                  sig_e=(sig_e * np.random.uniform(0.8, 1.2))[0],
-                  b_coefs_hyperprior=np.abs(np.random.standard_cauchy(len(b_init))),
-                  shrinkage_param=np.abs(np.random.standard_cauchy(1))[0]
-                  )
-    return output
-
-model = pystan.StanModel(file='stan/fir_tc.stan')
-
-stan_data = {'input_order': int(input_order),
-             'no_obs_est': len(y_est),
-             'no_obs_val': len(y_val),
-             'y_est': y_est,
-             'est_input_matrix': est_input_matrix,
-             'val_input_matrix': val_input_matrix
-             }
-fit = model.sampling(data=stan_data, init=init_function, iter=5000, chains=4)
-
-traces = fit.extract()
-yhat = traces['y_hat']
-yhat[np.isnan(yhat)] = 0.0
-yhat[np.isinf(yhat)] = 0.0
-
-yhat_mean = np.mean(yhat, axis=0)
-yhat_upper_ci = np.percentile(yhat, 97.5, axis=0)
-yhat_lower_ci = np.percentile(yhat, 2.5, axis=0)
-
-stan_est = {'mean': yhat_mean, 'upper': yhat_upper_ci, 'lower': yhat_lower_ci,
-            'sig_e_mean':traces['sig_e'].mean()}
-
-b_hyper_traces = traces['b_coefs_hyperprior']
-b_coef_traces = traces['b_coefs']
-shrinkage_param = traces["shrinkage_param"]
-shrinkage_param_mean = np.mean(shrinkage_param,0)
-
-b_hyper_mean = np.mean(b_hyper_traces,0)
-b_coef_mean = np.mean(b_coef_traces,0)
-
-plt.subplot(1,1,1)
-plt.plot(y_val,linewidth=0.5)
-plt.plot(yhat_mean,linewidth=0.5)
-plt.plot(yhat_upper_ci,'--',linewidth=0.5)
-plt.plot(yhat_lower_ci,'--',linewidth=0.5)
-plt.show()
+from pathlib import Path
+import pickle
 
 
 
-plot_trace(b_coef_traces[:,0],4,1,'b[0]')
-plot_trace(b_coef_traces[:,1],4,2,'b[1]')
-plot_trace(b_coef_traces[:,11],4,3,'b[11]')
-plot_trace(b_coef_traces[:,12],4,4,'b[12]')
-plt.show()
-Ts = 1.0
 
-b_ML = data['b_ML']
-num_true = data['b_true']
-den_true = data['a_true']
-plot_firfreq(b_coef_traces,num_true,den_true,b_ML.flatten())
+def run_fir_hmc(data_path, input_order,  prior='tc', hot_start=False):
+    """ Input order gives the terms # gives the terms b_0 * u_k + b_1 * u_{k-1} + .. + b_{input_order-1} * u_{k-input_order+1}"""
+    """ prior can be 'tc' for tuned correlated kernel or 'hs' for the horseshoe sparesness prior """
+    """ hot start will use least squares values as starting point """
+    data = loadmat(data_path)
 
-plt.subplot(2,1,1)
-plt.plot(np.mean(b_coef_traces,axis=0))
-plt.plot(b_ML[0,:])
-plt.show()
+    y_est = data['y_estimation'].flatten()
+    u_est = data['u_estimation'].flatten()
+    y_val = data['y_validation'].flatten()
+    u_val = data['u_validation'].flatten()
+
+
+    # build regression matrix
+    est_input_matrix = build_input_matrix(u_est, input_order)
+    val_input_matrix = build_input_matrix(u_val, input_order)
+
+    # trim measurement vectors to suit regression matrix
+    max_delay = (input_order-1)
+    y_est = y_est[int(max_delay):]
+    y_val = y_val[int(max_delay):]
+
+    # calcualte an intial guess using least squares (ML)
+    if hot_start:
+        Ainv = np.linalg.pinv(est_input_matrix)
+        b_init = np.matmul(Ainv, y_est)
+    else:
+        b_init = np.zeros((input_order))
+
+    # Run Stan
+    def init_function():
+        sig_e = data['sig_e'].flatten()
+        output = dict(b_coefs=b_init * np.random.uniform(0.8, 1.2, len(b_init)),
+                      sig_e=(sig_e * np.random.uniform(0.8, 1.2))[0],
+                      b_coefs_hyperprior=np.abs(np.random.standard_cauchy(len(b_init))),
+                      shrinkage_param=np.abs(np.random.standard_cauchy(1))[0]
+                      )
+        return output
+
+    stan_data = {'input_order': int(input_order),
+                 'no_obs_est': len(y_est),
+                 'no_obs_val': len(y_val),
+                 'y_est': y_est,
+                 'est_input_matrix': est_input_matrix,
+                 'val_input_matrix': val_input_matrix
+                 }
+
+    # specify model file
+    if prior == 'hs':
+        model_path = 'stan/fir_hs.pkl'
+        if Path(model_path).is_file():
+            model = pickle.load(open(model_path, 'rb'))
+        else:
+            model = pystan.StanModel(file='stan/fir.stan')
+            with open(model_path, 'wb') as file:
+                pickle.dump(model, file)
+    elif prior == 'tc':
+        model_path = 'stan/fir_tc.pkl'
+        if Path(model_path).is_file():
+            model = pickle.load(open(model_path, 'rb'))
+        else:
+            model = pystan.StanModel(file='stan/fir_tc.stan')
+            with open(model_path, 'wb') as file:
+                pickle.dump(model, file)
+    else:
+        print("invalid prior, options are 'hs' or 'tc' ")
+
+    fit = model.sampling(data=stan_data, init=init_function, iter=6000, chains=4)
+
+    traces = fit.extract()
+
+    return (fit, traces)

@@ -17,8 +17,6 @@ B = m0.B;
 F = m0.F;
 
 
-
-
 u = iddata([], idinput(no_obs, 'rbs',Band,Range),'Ts',Ts);
 
 % generate system noise
