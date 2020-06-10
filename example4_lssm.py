@@ -23,6 +23,7 @@ import matplotlib.pyplot as plt
 from helpers import plot_trace
 from helpers import plot_bode_ML
 from lssm import run_lssm_hmc
+import pickle
 
 
 # specific data path
@@ -37,6 +38,10 @@ Ts = data['Ts'].flatten()
 no_obs_est = len(y_est)
 
 (fit, traces) = run_lssm_hmc(data_path, 4, hot_start=False, iter=2000)
+
+with open('lssm_traces.pickle', 'wb') as file:
+    pickle.dump(traces, file)
+
 
 traces = fit.extract()
 yhat = traces['y_hat']
