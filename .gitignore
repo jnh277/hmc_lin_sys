@@ -133,3 +133,4 @@ data/.DS_Store
 
 # ignore compiled stan models
 stan/*.pkl
+results/wheeled_robot_results.pickle
