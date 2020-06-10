@@ -16,8 +16,8 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ###############################################################################
 
-"""Estimates an ARX model using data with Gaussian noise and unknown model orders."""
-""" A horseshoe prior is placed on the coefficients a_{1:n_a} and b_{1:n_b} """
+""" Runs the code for example 1 part 2 in the paper and produces the figures """
+""" This compares L1, L2, and Horseshoe priors for ARX models in HMC """
 
 import pystan
 import numpy as np

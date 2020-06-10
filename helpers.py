@@ -16,6 +16,8 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ###############################################################################
 
+""" Some helper functions """
+
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns

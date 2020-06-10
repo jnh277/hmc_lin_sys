@@ -1,5 +1,23 @@
-"""Estimates the system from mcha6100 assignment 2and its states."""
-import pystan
+###############################################################################
+#    Practical Bayesian Linear System Identification using Hamiltonian Monte Carlo
+#    Copyright (C) 2020  Johannes Hendriks < johannes.hendriks@newcastle.edu.a >
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+###############################################################################
+
+""" Loads saved results for example 6 and plots """
+
 import numpy as np
 from scipy.io import loadmat
 import matplotlib.pyplot as plt
@@ -7,9 +25,8 @@ from helpers import plot_trace
 import pickle
 import scipy.io as sio
 
-
 # load data
-data_path = 'data/ass2SysidData.mat'
+data_path = 'data/wheeled_robot_sysid_data.mat'
 data = loadmat(data_path)
 
 theta = data['h'].flatten()
@@ -20,7 +37,7 @@ y = data['y'].flatten()
 
 no_obs = len(y)
 
-with open('/data/wheeled_robot_results.pickle','rb') as file:
+with open('data/wheeled_robot_results.pickle','rb') as file:
     traces = pickle.load(file)
 
 mass = traces['m']
@@ -123,31 +140,3 @@ plt.ylabel('counts')
 plt.show()
 
 
-# plt.subplot(3,1,1)
-# plt.plot(x,'r.',MarkerSize=2)
-# plt.plot(z_mean[0,:],'b')
-# plt.plot(z_upper_ci[0,:],'b--')
-# plt.plot(z_lower_ci[0,:],'b--')
-# plt.xlabel('t_k')
-# plt.ylabel('x')
-# plt.legend(['Measurements','Mean','Upper CI','Lower CI'])
-#
-# plt.subplot(3,1,2)
-# plt.plot(y,'r.',MarkerSize=2)
-# plt.plot(z_mean[1,:],'b')
-# plt.plot(z_upper_ci[1,:],'b--')
-# plt.plot(z_lower_ci[1,:],'b--')
-# plt.xlabel('t_k')
-# plt.ylabel('y')
-# plt.legend(['Measurements','Mean','Upper CI','Lower CI'])
-#
-# plt.subplot(3,1,3)
-# plt.plot(theta,'r.',MarkerSize=2)
-# plt.plot(z_mean[1,:],'b')
-# plt.plot(z_upper_ci[1,:],'b--')
-# plt.plot(z_lower_ci[1,:],'b--')
-# plt.xlabel('t_k')
-# plt.ylabel('y')
-# plt.legend(['Measurements','Mean','Upper CI','Lower CI'])
-#
-# plt.show()

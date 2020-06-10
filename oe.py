@@ -31,6 +31,10 @@ input_order = 4
 output_order = 3
 
 def run_oe_hmc(data_path, input_order, output_order,  prior='hs', hot_start=False, iter=6000):
+    """ Input order gives the terms b_0 * u_k + b_1 * u_{k-1} + .. + b_{input_order-1} * u_{k-input_order+1}"""
+    """ Output order gives the terms a_0 * y_{k-1} + ... + a_{output_order-1}*y_{k-output_order} """
+    """ Prior can only be 'hs' """
+    """ hot_start=True will initialise at maximum likelihood results"""
     data = loadmat(data_path)
 
     y_est = data['y_estimation'].flatten()

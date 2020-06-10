@@ -16,7 +16,8 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ###############################################################################
 
-"""Estimates an OE model using data with Gaussian noise and horeshoe priors."""
+""" Runs the code for example 3 in the paper and produces the figures """
+""" This demonstrates Bayesian estimation of output error models using HMC """
 
 import numpy as np
 from scipy.io import loadmat

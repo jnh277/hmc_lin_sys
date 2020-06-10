@@ -16,7 +16,10 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ###############################################################################
 
-"""Estimates a msd and its states using a general linear ssm model."""
+""" Runs the code for example 4 in the paper and produces the figures """
+""" This demonstrates Bayesian estimation of linear state space models using HMC """
+
+
 import numpy as np
 from scipy.io import loadmat
 import matplotlib.pyplot as plt

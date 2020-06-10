@@ -16,14 +16,15 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ###############################################################################
 
-"""Estimates an FIR model using data with Gaussian noise."""
+"""Estimates an FIR model using data with Gaussian noise. """
+""" either a horeshoe prior or tuned-correlated kernel prior can be used """
+
 import pystan
 import numpy as np
 from scipy.io import loadmat
 from helpers import build_input_matrix
 from pathlib import Path
 import pickle
-
 
 
 

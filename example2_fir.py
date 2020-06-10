@@ -16,7 +16,9 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ###############################################################################
 
-"""Estimates an FIR model using data with Gaussian noise."""
+""" Runs the code for example 2 in the paper and produces the figures """
+""" This demonstrates Bayesian estiamtion of FIR models using HMC """
+
 import numpy as np
 from scipy.io import loadmat
 import matplotlib.pyplot as plt

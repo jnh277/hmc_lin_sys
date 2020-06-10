@@ -16,7 +16,9 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ###############################################################################
 
-""" runs the code for example 1 part 1 in the paper and produces the figures"""
+""" Runs the code for example 1 part 1 in the paper and produces the figures """
+""" This demonstrates Bayesian estimation of ARX models using HMC and compares with 
+    Metropolis hastings, and maximum likelihood """
 
 import numpy as np
 from helpers import calculate_acf

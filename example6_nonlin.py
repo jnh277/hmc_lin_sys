@@ -16,7 +16,12 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ###############################################################################
 
-"""Estimates the system from mcha6100 assignment 2and its states."""
+""" Runs the code for example 6 in the paper and produces the figures """
+""" This demonstrates Bayesian estimation of non-linear state space models using HMC """
+""" Since this takes a long time to run it also saves the results so that they can be """
+""" loaded and plotted at a later stage """
+
+
 import pystan
 import numpy as np
 from scipy.io import loadmat
@@ -34,8 +39,6 @@ u1 = data['u1'].flatten()
 u2 = data['u2'].flatten()
 x = data['x'].flatten()
 y = data['y'].flatten()
-
-
 
 
 no_obs = len(y)

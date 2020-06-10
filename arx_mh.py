@@ -17,12 +17,11 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ###############################################################################
 
-"""Estimates a model using data from an ARX model with Gaussian noise."""
-import numpy as np
+""" Estimates an ARX model using Metroplis hastings or mMALA and an L2 prior on parameters """
 
+import numpy as np
 from mh_functions import get_loglike_grads
 from mh_functions import build_phi_matrix
-
 from scipy.stats import multivariate_normal
 from scipy.io import loadmat
 
