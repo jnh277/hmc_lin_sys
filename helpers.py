@@ -254,7 +254,7 @@ def plot_bode_ML(A_smps, B_smps, C_smps, D_smps, A_t, B_t, C_t, D_t, A_ML, B_ML,
 
     # hu, = plt.semilogx(w.flatten(), np.percentile(mag_samples, 97.5, axis=1),'--',color='orange',label='Upper CI')    # Bode magnitude plot
 
-    plt.legend(handles=[h1, h2, hml, hm, hmap])
+    # plt.legend(handles=[h1, h2, hml, hm, hmap])
     plt.legend()
     plt.title('Bode diagram')
     plt.ylabel('Magnitude (dB)')
@@ -326,7 +326,7 @@ def plot_dbode_ML(num_samples,den_samples,num_true,den_true,num_ML,den_ML,Ts,ome
     plt.ylabel('Phase (deg)')
     plt.xlabel('Frequency (rad/s)')
     plt.xlim((min(omega), min(max(omega),1/Ts*3.14)))
-    # plt.ylim(-300,10)
+    plt.ylim(-300,10)
 
     if save:
         plt.savefig('bode_plot.png',format='png')

@@ -18,14 +18,13 @@
 ###############################################################################
 */
 
-// ARX model with Gaussian noise and horseshoe sparseness prior on the coefficients.
+// ARX model with student T noise and horseshoe sparseness prior on the coefficients.
 
 data {
     int<lower=0> output_order;
     int<lower=0> input_order;
     int<lower=0> no_obs_est;
     int<lower=0> no_obs_val;
-//    real<lower=1.0> nu;                 // shouldnt go smaller than 1
     matrix[no_obs_est, output_order] est_obs_matrix;
     matrix[no_obs_est, input_order] est_input_matrix;
     matrix[no_obs_val, output_order] val_obs_matrix;

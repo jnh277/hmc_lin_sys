@@ -28,10 +28,10 @@ import pickle
 from pathlib import Path
 
 
-def run_arx_hmc(data_path, input_order, output_order,  prior='hs', hot_start=False):
+def run_arx_hmc(data_path, input_order, output_order,  prior='hs', hot_start=False, iter=6000):
     """Input order gives the terms b_0 * u_k + b_1 * u_{k-1} + .. + b_{input_order-1} * u_{k-input_order+1}"""
     """Output order gives the terms a_0 * y_{k-1} + ... + a_{output_order-1}*y_{k-output_order} """
-    """Priors can be 'hs', 'l1' and 'l2' """
+    """Priors can be 'hs', 'l1' and 'l2', and in a hacky way it can also be 'st' which represents using a student t measurement noise """
     """hot_start == True will start within 40% of the maximum likelihood results"""
 
     data = loadmat(data_path)
@@ -55,30 +55,35 @@ def run_arx_hmc(data_path, input_order, output_order,  prior='hs', hot_start=Fal
 
     # Set up parameter initialisation, initialise from +/- 40% of the maximum likelihood estimate
     if hot_start == True:
-        def init_function():
-            a_init = data['a_ML'].flatten()[1:output_order + 1]
-            b_init = data['b_ML'].flatten()
-            sig_e_init = data['sig_e_ML'].flatten()
-            output = dict(a_coefs=a_init * np.random.uniform(0.6, 1.4, len(a_init)),
-                          b_coefs=b_init * np.random.uniform(0.6, 1.4, len(b_init)),
-                          sig_e=(sig_e_init * np.random.uniform(0.6, 1.4))[0],
-                          shrinkage_param=np.abs(np.random.standard_cauchy(1))[0]
-                          )
-            return output
+        if prior == 'st':
+            def init_function():
+                a_ML = data['a_ML_reg'].flatten()[1:output_order + 1]
+                b_ML = data['b_ML_reg'].flatten()
+                sig_e_ML = data['sig_e_ML_reg'].flatten()
+                output = dict(sig_e=(sig_e_ML * np.random.uniform(0.8, 1.2))[0],
+                              a_coefs=a_ML * np.random.uniform(0.8, 1.2, len(a_ML)),
+                              b_coefs=b_ML * np.random.uniform(0.8, 1.2, len(b_ML)),
+                              shrinkage_param=np.abs(np.random.standard_cauchy(1))[0]
+                              )
+                return output
+        else:
+            def init_function():
+                a_init = data['a_ML'].flatten()[1:output_order + 1]
+                b_init = data['b_ML'].flatten()
+                sig_e_init = data['sig_e_ML'].flatten()
+                output = dict(a_coefs=a_init * np.random.uniform(0.6, 1.4, len(a_init)),
+                              b_coefs=b_init * np.random.uniform(0.6, 1.4, len(b_init)),
+                              sig_e=(sig_e_init * np.random.uniform(0.6, 1.4))[0],
+                              shrinkage_param=np.abs(np.random.standard_cauchy(1))[0]
+                              )
+                return output
     else:
         def init_function():
-            a_init = data['a_ML'].flatten()[1:output_order + 1]
-            b_init = data['b_ML'].flatten()
-            sig_e_init = data['sig_e_ML'].flatten()
-            output = dict(a_coefs=a_init * 0,
-                          b_coefs=b_init * 0,
+            output = dict(a_coefs=np.zeros((output_order)),
+                          b_coefs=np.zeros((input_order)),
                           shrinkage_param=np.abs(np.random.standard_cauchy(1))[0]
                           )
             return output
-
-
-
-    # save_file = Path("./normal_model.pkl")
 
 
     # specify model file
@@ -106,8 +111,16 @@ def run_arx_hmc(data_path, input_order, output_order,  prior='hs', hot_start=Fal
             model = pystan.StanModel(file='stan/arx_l2.stan')
             with open(model_path, 'wb') as file:
                 pickle.dump(model, file)
+    elif prior == 'st':
+        model_path = 'stan/arx_st.pkl'
+        if Path(model_path).is_file():
+            model = pickle.load(open(model_path, 'rb'))
+        else:
+            model = pystan.StanModel(file='stan/arx_st.stan')
+            with open(model_path, 'wb') as file:
+                pickle.dump(model, file)
     else:
-        print("invalid prior specified, priors can be 'hs', 'l1', or 'l2' ")
+        print("invalid prior specified, priors can be 'hs', 'l1', 'l2' or 'st ")
 
     # specify the data
     stan_data = {'input_order': int(input_order),
@@ -122,7 +135,7 @@ def run_arx_hmc(data_path, input_order, output_order,  prior='hs', hot_start=Fal
                  }
 
     # perform sampling using hamiltonian monte carlo
-    fit = model.sampling(data=stan_data, init=init_function, iter=6000, chains=4)
+    fit = model.sampling(data=stan_data, init=init_function, iter=iter, chains=4)
 
     # extract the results
     traces = fit.extract()

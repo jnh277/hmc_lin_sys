@@ -14,7 +14,7 @@ Band = [0 1];
 A = [1  -1.5  0.7];
 B = [0 1 0.5];
 m0 = idpoly(A,B);
-n_states = 2;
+
     
 
 % generate random binary signal
@@ -31,7 +31,6 @@ hold on
 histogram(meas_errors_trnd,30,'Normalization','pdf')
 
 e = iddata([], meas_errors_trnd,'Ts',Ts);
-% e = iddata([], meas_errors,'Ts',Ts);
 
 %% simulate system
 y = sim(m0,[u e]);
@@ -43,7 +42,7 @@ dataOutNoisy = y.OutputData;
 
 
 % Estimate the model using all the estimation data
-noEstimationData = floor(0.67 * noObservations);
+noEstimationData = floor(0.99 * noObservations);
 noValidationData = noObservations - noEstimationData;
 y_estimation = dataOutNoisy(1:noEstimationData);
 y_validation = dataOutNoisy(noEstimationData:end);
@@ -58,7 +57,7 @@ validationData = iddata(dataOutNoisy(noEstimationData:end), dataIn(noEstimationD
 % for estimating model and the remaining for computing the prediction error
 predictionError = zeros([10 11]);
 for na=1:10
-    for nb=1:10
+    for nb=1:11
         modelEstimate = arx(estimationData, [na nb 0]);
         predictionErrObject = pe(modelEstimate, validationData);
         predictionError(na, nb) = sum((predictionErrObject.OutputData).^2);
@@ -69,7 +68,7 @@ end
 
 % Find the model order that minimises the squared prediction error
 idx = find(min(min(predictionError)) == predictionError);
-[na_found, nb_found] = ind2sub([10 10], idx);
+[na_found, nb_found] = ind2sub([10 11], idx);
 
 
 % Estimate the model when the model order is known
@@ -83,17 +82,17 @@ yhatOracle_min = predict(modelEstimate, validationData);
 y_hat_val_ML_min = yhatOracle.OutputData;
 
 % Estimate using a too large model order
-modelEstimate2 = arx(estimationData, [10 10 0]);
+modelEstimate2 = arx(estimationData, [10 11 0]);
 yhatOracle2 = predict(modelEstimate, validationData);
 y_hat_val_ML2 = yhatOracle.OutputData;
 
 % estimate using regularisation
 Option = arxRegulOptions('RegularizationKernel', 'TC');
-[Lambda, R] = arxRegul(estimationData, [10 10 0], Option);
+[Lambda, R] = arxRegul(estimationData, [10 11 0], Option);
 arxOpt = arxOptions;
 arxOpt.Regularization.Lambda = Lambda;
 arxOpt.Regularization.R = R;
-modelEstimateReg = arx(estimationData, [10 10 0], arxOpt);
+modelEstimateReg = arx(estimationData, [10 11 0], arxOpt);
 
 
 
@@ -112,9 +111,9 @@ b_true = m0.B;
 
 
 
-% save('../data/robust_noise_id_data1_3.mat','y_estimation', 'u_estimation', 'y_validation',...
-%     'u_validation','a_ML','b_ML','sig_e_ML','a_true','b_true',...
-%     'sig_e','a_ML_reg','b_ML_reg','sig_e_ML_reg','a_ML_min','b_ML_min','sig_e_ML_min')
+save('../data/example5_outlier.mat','y_estimation', 'u_estimation', 'y_validation',...
+    'u_validation','a_ML','b_ML','sig_e_ML','a_true','b_true',...
+    'sig_e','a_ML_reg','b_ML_reg','sig_e_ML_reg','a_ML_min','b_ML_min','sig_e_ML_min')
 
 %%
 figure(1)
