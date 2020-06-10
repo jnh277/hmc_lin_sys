@@ -26,7 +26,7 @@ import pickle
 
 
 # load data
-data_path = 'data/ass2SysidData.mat'
+data_path = 'data/wheeled_robot_sysid_data.mat'
 data = loadmat(data_path)
 
 theta = data['h'].flatten()
@@ -54,7 +54,7 @@ theta_diff = theta[1:]-theta[:-1]
 z_init = [x,y,theta,0*x,0*x]
 
 
-model = pystan.StanModel(file='stan/ass2.stan')
+model = pystan.StanModel(file='stan/wheeled_robot.stan')
 
 stan_data = {'no_obs': no_obs,
              'Ts':Ts,
@@ -85,7 +85,7 @@ fit = model.sampling(data=stan_data, iter=5000, chains=4,control=control, init=i
 
 traces = fit.extract()
 
-with open('results/rover_results_2.pickle', 'wb') as file:
+with open('results/wheeled_robot_results.pickle', 'wb') as file:
     pickle.dump(traces, file)
 
 # to read

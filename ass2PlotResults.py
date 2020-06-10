@@ -20,7 +20,7 @@ y = data['y'].flatten()
 
 no_obs = len(y)
 
-with open('/Users/johannes/Dropbox/post_doc_research/HMC_lin_sys/results/rover_results_2.pickle','rb') as file:
+with open('/data/wheeled_robot_results.pickle','rb') as file:
     traces = pickle.load(file)
 
 mass = traces['m']
