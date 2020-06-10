@@ -36,7 +36,7 @@ Ts = data['Ts'].flatten()
 
 no_obs_est = len(y_est)
 
-(fit, traces) = run_lssm_hmc(data_path, 4, hot_start=False, iter=4000)
+(fit, traces) = run_lssm_hmc(data_path, 4, hot_start=False, iter=2000)
 
 traces = fit.extract()
 yhat = traces['y_hat']
