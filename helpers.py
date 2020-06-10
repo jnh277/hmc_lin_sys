@@ -20,6 +20,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy import signal
+from scipy.stats import gaussian_kde as kde
 
 def calculate_acf(x):
     lags = np.arange(0, 51, 1)
@@ -30,6 +31,13 @@ def calculate_acf(x):
     acf = acf / np.max(acf)
     return acf
 
+def calc_MAP(x):
+    min_x = np.min(x)
+    max_x = np.max(x)
+    pos = np.linspace(min_x, max_x, 100)
+    kernel = kde(x)
+    z = kernel(pos)
+    return pos[np.argmax(z)]
 
 def build_phi_matrix(obs,order,inputs):
     "Builds the regressor matrix"
@@ -223,6 +231,14 @@ def plot_bode_ML(A_smps, B_smps, C_smps, D_smps, A_t, B_t, C_t, D_t, A_ML, B_ML,
         w, mag_samples[:, count], phase_samples[:, count] = signal.bode((A_s, B_s, C_s, float(D_s)), omega)
         count = count + 1
 
+    # now what if i also want to show the MAP estimate
+    no_freqs = np.shape(mag_samples)[0]
+    mag_MAP = np.zeros((no_freqs))
+    phase_MAP = np.zeros((no_freqs))
+    for k in range(no_freqs):
+        mag_MAP[k] = calc_MAP(mag_samples[:, k])
+        phase_MAP[k] = calc_MAP(phase_samples[:, k])
+
     w, mag_true, phase_true = signal.bode((A_t, B_t, C_t, float(D_t)), omega)
     w, mag_ML, phase_ML = signal.bode((A_ML, B_ML, C_ML, float(D_ML)), omega)
 
@@ -231,14 +247,14 @@ def plot_bode_ML(A_smps, B_smps, C_smps, D_smps, A_t, B_t, C_t, D_t, A_ML, B_ML,
     h2, = plt.semilogx(w.flatten(), mag_samples[:, 0], color='green', alpha=0.1,
                        label='hmc samples')  # Bode magnitude plot
     plt.semilogx(w.flatten(), mag_samples[:, 1:no_plot], color='green', alpha=0.1)  # Bode magnitude plot
-    h1, = plt.semilogx(w.flatten(), mag_true, color='blue', label='True system')  # Bode magnitude plot
+    h1, = plt.semilogx(w.flatten(), mag_true, color='black', label='True system')  # Bode magnitude plot
     hml, = plt.semilogx(w.flatten(), mag_ML,'--', color='purple', label='ML estimate')  # Bode magnitude plot
-    hm, = plt.semilogx(w.flatten(), np.mean(mag_samples, 1), '-.', color='orange',
-                       label='hmc mean')  # Bode magnitude plot
+    hm, = plt.semilogx(w.flatten(), np.mean(mag_samples, 1), '-.', color='orange',label='hmc mean')  # Bode magnitude plot
+    hmap = plt.semilogx(w.flatten(), mag_MAP, '-.', color='blue',label='hmc MAP')  # Bode magnitude plot
 
     # hu, = plt.semilogx(w.flatten(), np.percentile(mag_samples, 97.5, axis=1),'--',color='orange',label='Upper CI')    # Bode magnitude plot
 
-    plt.legend(handles=[h1, h2, hm])
+    plt.legend(handles=[h1, h2, hml, hm, hmap])
     plt.legend()
     plt.title('Bode diagram')
     plt.ylabel('Magnitude (dB)')
@@ -246,16 +262,18 @@ def plot_bode_ML(A_smps, B_smps, C_smps, D_smps, A_t, B_t, C_t, D_t, A_ML, B_ML,
 
     plt.subplot(2, 1, 2)
     plt.semilogx(w.flatten(), phase_samples[:, :no_plot], color='green', alpha=0.1)  # Bode phase plot
-    plt.semilogx(w.flatten(), phase_true, color='blue')  # Bode phase plot
+    plt.semilogx(w.flatten(), phase_true, color='black')  # Bode phase plot
     plt.semilogx(w.flatten(), phase_ML,'--', color='purple')  # Bode phase plot
     plt.semilogx(w.flatten(), np.mean(phase_samples, 1), '-.', color='orange',
                  label='mean')  # Bode magnitude plot
+    plt.semilogx(w.flatten(), phase_MAP, '-.', color='orange',
+                 label='map')  # Bode magnitude plot
     plt.ylabel('Phase (deg)')
     plt.xlabel('Frequency (rad/s)')
     plt.xlim((min(omega), max(omega)))
 
     if save:
-        plt.savefig('bode_ploths10_noinit.png',format='png')
+        plt.savefig('figures/example4_bode.png',format='png')
 
     plt.show()
 
