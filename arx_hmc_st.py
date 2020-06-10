@@ -33,9 +33,6 @@ import pickle
 data_path = 'data/robust_noise_id_data2.mat'
 input_order = 10         # gives the terms b_0 * u_k + b_1 * u_{k-1} + .. + b_{input_order-1} * u_{k-input_order+1}
 output_order = 9        # gives the terms a_0 * y_{k-1} + ... + a_{output_order-1}*y_{k-output_order}
-# input_order = 3         # gives the terms b_0 * u_k + b_1 * u_{k-1} + .. + b_{input_order-1} * u_{k-input_order+1}
-# output_order = 2        # gives the terms a_0 * y_{k-1} + ... + a_{output_order-1}*y_{k-output_order}
-
 
 data = loadmat(data_path)
 
