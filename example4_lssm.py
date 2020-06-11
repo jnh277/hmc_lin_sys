@@ -42,11 +42,6 @@ no_obs_est = len(y_est)
 
 (fit, traces) = run_lssm_hmc(data_path, 4, hot_start=False, iter=2000)
 
-with open('lssm_traces.pickle', 'wb') as file:
-    pickle.dump(traces, file)
-
-
-traces = fit.extract()
 yhat = traces['y_hat']
 yhat[np.isnan(yhat)] = 0.0
 yhat[np.isinf(yhat)] = 0.0
@@ -87,6 +82,9 @@ plt.title('measurement estimates')
 plt.legend(('true','mean','upper CI','lower CI'))
 plt.show()
 
+
+with open('lssm_traces.pickle', 'wb') as file:
+    pickle.dump(traces, file)
 
 plot_trace(A_traces[:,1,0],4,1,'A[2,2]')
 plot_trace(C_traces[:,1],4,2,'C[1]')
