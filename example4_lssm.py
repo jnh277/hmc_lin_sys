@@ -40,7 +40,10 @@ Ts = data['Ts'].flatten()
 
 no_obs_est = len(y_est)
 
-(fit, traces) = run_lssm_hmc(data_path, 4, hot_start=False, iter=2000)
+(fit, traces) = run_lssm_hmc(data_path, 4, hot_start=False, iter=3000)
+
+with open('lssm_traces.pickle', 'wb') as file:
+    pickle.dump(traces, file)
 
 yhat = traces['y_hat']
 yhat[np.isnan(yhat)] = 0.0
@@ -83,8 +86,7 @@ plt.legend(('true','mean','upper CI','lower CI'))
 plt.show()
 
 
-with open('lssm_traces.pickle', 'wb') as file:
-    pickle.dump(traces, file)
+
 
 plot_trace(A_traces[:,1,0],4,1,'A[2,2]')
 plot_trace(C_traces[:,1],4,2,'C[1]')
@@ -112,4 +114,4 @@ B_ML = data['B_ML']
 C_ML = data['C_ML']
 D_ML = data['D_ML']
 
-plot_bode_ML(A_traces,B_traces,C_traces,D_traces,A_true,B_true,C_true,D_true,A_ML,B_ML,C_ML,D_ML,w_plot,save=True)
+plot_bode_ML(A_traces,B_traces,C_traces,D_traces,A_true,B_true,C_true,D_true,A_ML,B_ML,C_ML,D_ML,w_plot,save=False)

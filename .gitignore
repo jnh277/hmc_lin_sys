@@ -135,3 +135,4 @@ data/.DS_Store
 stan/*.pkl
 results/wheeled_robot_results.pickle
 data/wheeled_robot_results.pickle
+results/lssm_traces.pickle

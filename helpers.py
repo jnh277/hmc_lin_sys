@@ -238,8 +238,8 @@ def plot_bode_ML(A_smps, B_smps, C_smps, D_smps, A_t, B_t, C_t, D_t, A_ML, B_ML,
     mag_MAP = np.zeros((no_freqs))
     phase_MAP = np.zeros((no_freqs))
     for k in range(no_freqs):
-        mag_MAP[k] = calc_MAP(mag_samples[:, k])
-        phase_MAP[k] = calc_MAP(phase_samples[:, k])
+        mag_MAP[k] = calc_MAP(mag_samples[k, :])
+        phase_MAP[k] = calc_MAP(phase_samples[k, :])
 
     w, mag_true, phase_true = signal.bode((A_t, B_t, C_t, float(D_t)), omega)
     w, mag_ML, phase_ML = signal.bode((A_ML, B_ML, C_ML, float(D_ML)), omega)
@@ -268,7 +268,7 @@ def plot_bode_ML(A_smps, B_smps, C_smps, D_smps, A_t, B_t, C_t, D_t, A_ML, B_ML,
     plt.semilogx(w.flatten(), phase_ML,'--', color='purple')  # Bode phase plot
     plt.semilogx(w.flatten(), np.mean(phase_samples, 1), '-.', color='orange',
                  label='mean')  # Bode magnitude plot
-    plt.semilogx(w.flatten(), phase_MAP, '-.', color='orange',
+    plt.semilogx(w.flatten(), phase_MAP, '-.', color='blue',
                  label='map')  # Bode magnitude plot
     plt.ylabel('Phase (deg)')
     plt.xlabel('Frequency (rad/s)')
