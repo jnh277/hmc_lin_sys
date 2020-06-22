@@ -10,7 +10,7 @@ parameters {
 }
 model {
     // noise stds priors
-    r ~ cauchy(0,1.0);
+    r ~ cauchy(0, 1.0);
     q ~ cauchy(0, 1.0);
 
     // prior on parameter
