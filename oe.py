@@ -30,10 +30,9 @@ data_path = 'data/example3_oe.mat'
 input_order = 4
 output_order = 3
 
-def run_oe_hmc(data_path, input_order, output_order,  prior='hs', hot_start=False, iter=6000):
+def run_oe_hmc(data_path, input_order, output_order, hot_start=False, iter=6000, OL=False):
     """ Input order gives the terms b_0 * u_k + b_1 * u_{k-1} + .. + b_{input_order-1} * u_{k-input_order+1}"""
     """ Output order gives the terms a_0 * y_{k-1} + ... + a_{output_order-1}*y_{k-output_order} """
-    """ Prior can only be 'hs' """
     """ hot_start=True will initialise at maximum likelihood results"""
     data = loadmat(data_path)
 
@@ -45,13 +44,12 @@ def run_oe_hmc(data_path, input_order, output_order,  prior='hs', hot_start=Fals
     # Run Stan
     if hot_start:
         def init_function():
-            f_true = data['f_ml2'].flatten()[1:output_order+1]
-            b_true = data['b_ml2'].flatten()
+            f_true = data['f_ml'].flatten()[1:output_order+1]
+            b_true = data['b_ml'].flatten()
             sig_e = data['sig_e'].flatten()
-            output = dict(f_coefs=np.flip(f_true) * np.random.uniform(0.8, 1.2, len(f_true)),
-                          b_coefs=np.flip(b_true)* np.random.uniform(0.8, 1.2, len(b_true)),
-                          r2 = 0.1,
-                          r=(sig_e * np.random.uniform(0.8, 1.2))[0],
+            output = dict(f_coefs=np.flip(f_true),# * np.random.uniform(0.8, 1.2, len(f_true)),
+                          b_coefs=np.flip(b_true),#* np.random.uniform(0.8, 1.2, len(b_true)),
+                          r=(sig_e)[0],# * np.random.uniform(0.8, 1.2))[0],
                           )
             return output
     else:
@@ -61,7 +59,15 @@ def run_oe_hmc(data_path, input_order, output_order,  prior='hs', hot_start=Fals
                           )
             return output
 
-    if prior == 'hs':
+    if OL:
+        model_path = 'stan/oe_OL.pkl'
+        if Path(model_path).is_file():
+            model = pickle.load(open(model_path, 'rb'))
+        else:
+            model = pystan.StanModel(file='stan/oe_OL.stan')
+            with open(model_path, 'wb') as file:
+                pickle.dump(model, file)
+    else:
         model_path = 'stan/oe.pkl'
         if Path(model_path).is_file():
             model = pickle.load(open(model_path, 'rb'))
@@ -69,8 +75,6 @@ def run_oe_hmc(data_path, input_order, output_order,  prior='hs', hot_start=Fals
             model = pystan.StanModel(file='stan/oe.stan')
             with open(model_path, 'wb') as file:
                 pickle.dump(model, file)
-    else:
-        print('Invalid prior specified')
 
     stan_data = {'input_order': int(input_order),
                  'output_order': int(output_order),
