@@ -71,7 +71,7 @@ control = {"adapt_delta": 0.85,
            "max_treedepth":13}         # increasing from default 0.8 to reduce divergent steps
 
 def init_function():
-    output = dict(theta=theta0.flatten(),
+    output = dict(theta=theta0.flatten() * np.random.uniform(0.5,1.5,np.shape(theta0.flatten())),
                   h=z_init + np.random.normal(0.0,0.1,np.shape(z_init)),
                   )
     return output
@@ -83,7 +83,7 @@ fit = model.sampling(data=stan_data, iter=5000, chains=4,control=control, init=i
 
 traces = fit.extract()
 
-with open('results/pendulum_results.pickle', 'wb') as file:
+with open('results/pendulum_results2.pickle', 'wb') as file:
     pickle.dump(traces, file)
 
 
