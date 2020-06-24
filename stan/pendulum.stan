@@ -44,17 +44,17 @@ functions{
         row_vector[pdims[2]] m11 = Jr + Mp * Lr^2 + 0.25 * Mp * Lp^2 - 0.25 * Mp * Lp^2 * (cos(z[2,:]) .* cos(z[2,:]));
         row_vector[pdims[2]] m12 = 0.5 * Mp * Lp * Lr * cos(z[2,:]);
         real m22 = (Jp + 0.25 * Mp * Lp^2);
-        row_vector[pdims[2]] sc = m11 .* m22 - m12 * m22;      // denominator of 2x2 inverse of mass matrix
+        row_vector[pdims[2]] sc = m11 * m22 - m12 * m22;      // denominator of 2x2 inverse of mass matrix
 
-        row_vector[pdims[2]] tau = (Km * (Vm - Km * z[3,:])) / Rm;
+        row_vector[pdims[2]] tau = (Km * (u - Km * z[3,:])) / Rm;
 
         row_vector[pdims[2]] d1 = tau - Dr * z[3,:] - 0.5 * Mp * Lp^2 * (sin(z[2,:]) .* cos(z[2,:]) .*z[3,:].* z[4,:]) + 0.5 * Mp * Lp * Lr * (sin(z[2,:]) .* z[4,:] .* z[4,:]);
         row_vector[pdims[2]] d2 = - Dp * z[4,:] + 0.25 *Mp * Lp^2 * (cos(z[2,:]) .* sin(z[2,:]) .* z[3,:].*z[3,:]) - 0.5 * Mp * Lp * g * sin(z[2,:]);
 
         dz[1,:] = z[3,:];
         dz[2,:] = z[4,:];
-        dz[3,:] = (m22 .* d1 - m12 .* d2) ./ sc;
-        dz[4,:] = (m11 .* d2 - m12 .* d1) ./ sc];
+        dz[3,:] = (m22 * d1 - m12 .* d2) ./ sc;
+        dz[4,:] = (m11 .* d2 - m12 .* d1) ./ sc;
         return dz;
     }
     matrix discrete_update_vec(matrix z, row_vector u, vector theta, real Lr, real Mp, real Lp, real g, real Ts){
@@ -89,7 +89,7 @@ functions{
         }
         return z_next;
     }
-
+}
 
 data {
     int<lower=0> no_obs;
@@ -100,7 +100,7 @@ data {
     real Mp;                            // pendulum mass
     real Lp;                            // pendulum length
     real g;                             // gravity
-    vector[5] z0;                       // initial state guess
+    vector[4] z0;                       // initial state guess
 }
 parameters {
     matrix[4,no_obs] h;                     // hidden states
@@ -112,12 +112,12 @@ parameters {
     vector<lower=0,upper=pi()/2>[4] tauQ_unif;
     cholesky_factor_corr[4] LQcorr;
     // horeshoe hyperparameters for theta
-    vector<lower=0>[input_order] theta_hyper;
-    real<lower=0> shrinkage_param;
+    vector<lower=0.0>[6] theta_hyper;
+    real<lower=0.0> shrinkage_param;
 
 }
 transformed parameters {
-    matrix[4,no_obs-1] mu;
+    matrix[4, no_obs-1] mu;
     matrix[3, no_obs] yhat;
 //    matrix[3,no_obs] yhat;
     vector<lower=0>[4] tauQ = 2.5 * tan(tauQ_unif);       // LQ diag scaling
@@ -144,6 +144,9 @@ model {
     shrinkage_param ~ cauchy(0.0, 1.0);
     theta ~ normal(0.0, theta_hyper * shrinkage_param);
 
+    // initial state prior (don't use this for now)
+//    h[:,1] ~ normal(z0, 0.2);      //
+
     // state distributions
     target += matrix_normal_lpdf(h[:,2:no_obs] | mu, diag_pre_multiply(tauQ,LQcorr));
 
@@ -152,7 +155,7 @@ model {
 
 }
 generated quantities {
-    cholesky_factor_cov[5] LQ;
+    cholesky_factor_cov[4] LQ;
     cholesky_factor_cov[3] LR;
     LQ = diag_pre_multiply(tauQ,LQcorr);
     LR = diag_pre_multiply(tauR,LRcorr);
