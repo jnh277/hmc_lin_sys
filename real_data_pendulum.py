@@ -36,7 +36,7 @@ mu0 = data['mu0']
 u = data['u']
 y = data['y']
 
-theta_init = np.ones((6))
+theta0 = np.ones((6))
 
 no_obs = len(y[0])
 
