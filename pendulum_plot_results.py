@@ -32,20 +32,11 @@ data = loadmat(data_path)
 
 Ts = data['dt']
 mu0 = data['mu0']
-# theta0 = data['theta0']
+theta0 = data['theta0']
 u = data['u']
 y = data['y']
 
-theta_init = np.ones((6))
-
 no_obs = len(y[0])
-
-
-# known parameters
-Lr = 0.085      # arm length
-Mp = 0.025      # pendulum mass
-Lp = 0.129      # pendulum length
-g  = 9.81       # gravity
 
 # state initialisation point
 z_init = np.zeros((4,no_obs))
@@ -56,44 +47,26 @@ z_init[2,-1] = z_init[2,-2]
 z_init[3,:-1] = (y[1,1:]-y[1,0:-1])/Ts
 z_init[3,-1] = z_init[3,-2]
 
-model = pystan.StanModel(file='stan/pendulum.stan')
-
-stan_data = {'no_obs': no_obs,
-             'Ts':Ts[0,0],
-             'y': y,
-             'u': u.flatten(),
-             'Lr':Lr,
-             'Mp':Mp,
-             'Lp':Lp,
-             'g':g,
-             'z0':mu0.flatten(),
-             }
-
-control = {"adapt_delta": 0.85,
-           "max_treedepth":13}         # increasing from default 0.8 to reduce divergent steps
-
-def init_function():
-    output = dict(theta=theta0.flatten() * np.random.uniform(0.8,1.2,np.shape(theta0.flatten())),
-                  h=z_init + np.random.normal(0.0,0.1,np.shape(z_init)),
-                  )
-    return output
 
 
-fit = model.sampling(data=stan_data, iter=10000, chains=4,control=control, init=init_function)
-# fit = model.sampling(data=stan_data, iter=10, chains=1,control=control, init=init_function)
-
-
-traces = fit.extract()
-
-with open('results/pendulum_results_ones_init.pickle', 'wb') as file:
-    pickle.dump(traces, file)
+with open('results/pendulum_data1_trial0.pickle','rb') as file:
+    traces = pickle.load(file)
 
 
 theta = traces['theta']
 z = traces['h']
+yhat = traces['yhat']
 
 theta_mean = np.mean(theta,0)
 z_mean = np.mean(z,0)
+
+LQ = traces['LQ']
+LQ_mean = np.mean(LQ,0)
+LR = traces['LR']
+LR_mean = np.mean(LR,0)
+
+R = np.matmul(LR_mean, LR_mean.T)
+Q = np.matmul(LQ_mean, LQ_mean.T)
 
 print('mean theta = ', theta_mean)
 
@@ -111,27 +84,51 @@ plt.subplot(2,2,1)
 plt.plot(y[0,:])
 plt.plot(z_mean[0,:])
 plt.xlabel('time')
-plt.ylabel('arm angle $\theta$')
+plt.ylabel(r'arm angle $\theta$')
 plt.legend(['Measurements','mean estimate'])
 
 plt.subplot(2,2,2)
 plt.plot(y[1,:])
 plt.plot(z_mean[1,:])
 plt.xlabel('time')
-plt.ylabel('pendulum angle $\alpha$')
+plt.ylabel(r'pendulum angle $\alpha$')
 plt.legend(['Measurements','mean estimate'])
 
 plt.subplot(2,2,3)
 plt.plot(z_init[2,:])
 plt.plot(z_mean[2,:])
 plt.xlabel('time')
-plt.ylabel('arm angular velocity $\dot{\theta}$')
+plt.ylabel(r'arm angular velocity $\dot{\theta}$')
 plt.legend(['Grad measurements','mean estimate'])
 
 plt.subplot(2,2,4)
 plt.plot(z_init[3,:])
 plt.plot(z_mean[3,:])
 plt.xlabel('time')
-plt.ylabel('pendulum angular velocity $\dot{\theta}$')
+plt.ylabel(r'pendulum angular velocity $\dot{\alpha}$')
 plt.legend(['Grad measurements','mean estimate'])
 plt.show()
+
+
+
+# plt.subplot(2,2,1)
+# plt.plot(yhat[:,2,49],z[:,2,49],'.')
+# plt.xlabel(r'$\hat{y}_3$ at t=50')
+# plt.ylabel(r'$\dot{\theta}$ at t=50')
+#
+# plt.subplot(2,2,2)
+# plt.plot(yhat[:,2,49],z[:,3,49],'.')
+# plt.xlabel(r'$\hat{y}_2$ at t=50')
+# plt.ylabel(r'$\dot{\alpha}$ at t=50')
+#
+#
+# plt.subplot(2,2,3)
+# plt.plot(yhat[:,2,99],z[:,2,99],'.')
+# plt.xlabel(r'$\hat{y}_3$ at t=100')
+# plt.ylabel(r'$\dot{\theta}$ at t=100')
+#
+# plt.subplot(2,2,4)
+# plt.plot(yhat[:,2,99],z[:,3,99],'.')
+# plt.xlabel(r'$\hat{y}_2$ at t=100')
+# plt.ylabel(r'$\dot{\alpha}$ at t=100')
+# plt.show()
