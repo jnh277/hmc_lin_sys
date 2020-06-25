@@ -49,13 +49,16 @@ z_init[3,-1] = z_init[3,-2]
 
 
 
-with open('results/pendulum_data1_trial0.pickle','rb') as file:
+# with open('results/pendulum_data1_trial0.pickle','rb') as file:
+#     traces = pickle.load(file)
+with open('results/pendulum_results_ones_init.pickle','rb') as file:
     traces = pickle.load(file)
-
 
 theta = traces['theta']
 z = traces['h']
 yhat = traces['yhat']
+
+lp = traces['lp__']
 
 theta_mean = np.mean(theta,0)
 z_mean = np.mean(z,0)
@@ -109,7 +112,10 @@ plt.ylabel(r'pendulum angular velocity $\dot{\alpha}$')
 plt.legend(['Grad measurements','mean estimate'])
 plt.show()
 
-
+plt.hist(lp,100)
+plt.xlabel('sample log-posterior')
+plt.ylabel('count')
+plt.show()
 
 # plt.subplot(2,2,1)
 # plt.plot(yhat[:,2,49],z[:,2,49],'.')

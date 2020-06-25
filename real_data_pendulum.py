@@ -85,7 +85,7 @@ fit = model.sampling(data=stan_data, iter=10000, chains=4,control=control, init=
 
 traces = fit.extract()
 
-with open('results/pendulum_results_ones_init.pickle', 'wb') as file:
+with open('results/pendulum_results_ones_init_2.pickle', 'wb') as file:
     pickle.dump(traces, file)
 
 
@@ -94,6 +94,14 @@ z = traces['h']
 
 theta_mean = np.mean(theta,0)
 z_mean = np.mean(z,0)
+
+LQ = traces['LQ']
+LQ_mean = np.mean(LQ,0)
+LR = traces['LR']
+LR_mean = np.mean(LR,0)
+
+R = np.matmul(LR_mean, LR_mean.T)
+Q = np.matmul(LQ_mean, LQ_mean.T)
 
 print('mean theta = ', theta_mean)
 
@@ -111,27 +119,28 @@ plt.subplot(2,2,1)
 plt.plot(y[0,:])
 plt.plot(z_mean[0,:])
 plt.xlabel('time')
-plt.ylabel('arm angle $\theta$')
+plt.ylabel(r'arm angle $\theta$')
 plt.legend(['Measurements','mean estimate'])
 
 plt.subplot(2,2,2)
 plt.plot(y[1,:])
 plt.plot(z_mean[1,:])
 plt.xlabel('time')
-plt.ylabel('pendulum angle $\alpha$')
+plt.ylabel(r'pendulum angle $\alpha$')
 plt.legend(['Measurements','mean estimate'])
 
 plt.subplot(2,2,3)
 plt.plot(z_init[2,:])
 plt.plot(z_mean[2,:])
 plt.xlabel('time')
-plt.ylabel('arm angular velocity $\dot{\theta}$')
+plt.ylabel(r'arm angular velocity $\dot{\theta}$')
 plt.legend(['Grad measurements','mean estimate'])
 
 plt.subplot(2,2,4)
 plt.plot(z_init[3,:])
 plt.plot(z_mean[3,:])
 plt.xlabel('time')
-plt.ylabel('pendulum angular velocity $\dot{\theta}$')
+plt.ylabel(r'pendulum angular velocity $\dot{\alpha}$')
 plt.legend(['Grad measurements','mean estimate'])
 plt.show()
+
