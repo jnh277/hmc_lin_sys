@@ -161,6 +161,7 @@ generated quantities {
     LQ = diag_pre_multiply(tauQ,LQcorr);
     LR = diag_pre_multiply(tauR,LRcorr);
     loglikelihood = matrix_normal_lpdf( y | yhat, diag_pre_multiply(tauR,LRcorr));
+    loglikelihood += matrix_normal_lpdf(h[:,2:no_obs] | mu, diag_pre_multiply(tauQ,LQcorr));
 
 }
 
