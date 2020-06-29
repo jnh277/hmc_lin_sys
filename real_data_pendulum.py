@@ -65,7 +65,7 @@ z_init[2,-1] = z_init[2,-2]
 z_init[3,:-1] = (y[1,1:]-y[1,0:-1])/Ts
 z_init[3,-1] = z_init[3,-2]
 
-model = pystan.StanModel(file='stan/pendulum.stan')
+model = pystan.StanModel(file='stan/pendulum_coupled.stan')
 
 stan_data = {'no_obs': no_obs,
              'Ts':Ts[0,0],
@@ -94,7 +94,7 @@ fit = model.sampling(data=stan_data, iter=5000, chains=4,control=control, init=i
 
 traces = fit.extract()
 
-with open('results/pendulum_set6_results.pickle', 'wb') as file:
+with open('results/pendulum_set6_results_coupled.pickle', 'wb') as file:
     pickle.dump(traces, file)
 
 
