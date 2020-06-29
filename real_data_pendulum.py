@@ -38,7 +38,7 @@ import pickle
 
 data_path ='data/pendulum_data_all_sets.mat'
 data = loadmat(data_path)
-set_number = 7
+set_number = 0
 Ts = data['dt']
 # theta0 = data['theta_init'][:,0]
 u = data['u_all'][set_number,:,:]
@@ -65,7 +65,7 @@ z_init[2,-1] = z_init[2,-2]
 z_init[3,:-1] = (y[1,1:]-y[1,0:-1])/Ts
 z_init[3,-1] = z_init[3,-2]
 
-model = pystan.StanModel(file='stan/pendulum_coupled.stan')
+model = pystan.StanModel(file='stan/pendulum.stan')
 
 stan_data = {'no_obs': no_obs,
              'Ts':Ts[0,0],
@@ -88,13 +88,13 @@ def init_function():
     return output
 
 
-fit = model.sampling(data=stan_data, iter=5000, chains=4,control=control, init=init_function)
+fit = model.sampling(data=stan_data, iter=10000, chains=4,control=control, init=init_function)
 # fit = model.sampling(data=stan_data, iter=10, chains=1,control=control, init=init_function)
 
 
 traces = fit.extract()
 
-with open('results/pendulum_set7_results_coupled.pickle', 'wb') as file:
+with open('results/pendulum_set0_results_coupled.pickle', 'wb') as file:
     pickle.dump(traces, file)
 
 

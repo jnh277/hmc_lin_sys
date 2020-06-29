@@ -51,7 +51,7 @@ z_init[3,-1] = z_init[3,-2]
 
 # with open('results/pendulum_data1_trial0.pickle','rb') as file:
 #     traces = pickle.load(file)
-with open('results/pendulum_results_ones_init_coupled.pickle','rb') as file:
+with open('results/pendulum_set0_results.pickle','rb') as file:
     traces = pickle.load(file)
 
 theta = traces['theta']
