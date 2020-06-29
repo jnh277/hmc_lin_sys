@@ -32,11 +32,11 @@ data = loadmat(data_path)
 
 Ts = data['dt']
 mu0 = data['mu0']
-# theta0 = data['theta0']
+theta0 = data['theta0']
 u = data['u']
 y = data['y']
 
-theta0 = np.ones((6))
+# theta0 = np.ones((6))
 
 no_obs = len(y[0])
 
