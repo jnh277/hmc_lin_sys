@@ -79,7 +79,7 @@ def init_function():
     return output
 
 
-fit = model.sampling(data=stan_data, iter=5, chains=4,control=control, init=init_function)
+fit = model.sampling(data=stan_data, iter=5000, chains=4,control=control, init=init_function)
 # fit = model.sampling(data=stan_data, iter=10, chains=1,control=control, init=init_function)
 
 
