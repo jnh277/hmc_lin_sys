@@ -56,7 +56,7 @@ z_init[2,-1] = z_init[2,-2]
 z_init[3,:-1] = (y[1,1:]-y[1,0:-1])/Ts
 z_init[3,-1] = z_init[3,-2]
 
-model = pystan.StanModel(file='stan/pendulum.stan')
+model = pystan.StanModel(file='stan/pendulum_coupled.stan')
 
 stan_data = {'no_obs': no_obs,
              'Ts':Ts[0,0],
@@ -79,13 +79,13 @@ def init_function():
     return output
 
 
-fit = model.sampling(data=stan_data, iter=5000, chains=4,control=control, init=init_function)
+fit = model.sampling(data=stan_data, iter=5, chains=4,control=control, init=init_function)
 # fit = model.sampling(data=stan_data, iter=10, chains=1,control=control, init=init_function)
 
 
 traces = fit.extract()
 
-with open('results/pendulum_results_ones_init_2.pickle', 'wb') as file:
+with open('results/pendulum_results_ones_init_coupled.pickle', 'wb') as file:
     pickle.dump(traces, file)
 
 
@@ -95,13 +95,13 @@ z = traces['h']
 theta_mean = np.mean(theta,0)
 z_mean = np.mean(z,0)
 
-LQ = traces['LQ']
-LQ_mean = np.mean(LQ,0)
-LR = traces['LR']
-LR_mean = np.mean(LR,0)
-
-R = np.matmul(LR_mean, LR_mean.T)
-Q = np.matmul(LQ_mean, LQ_mean.T)
+# LQ = traces['LQ']
+# LQ_mean = np.mean(LQ,0)
+# LR = traces['LR']
+# LR_mean = np.mean(LR,0)
+#
+# R = np.matmul(LR_mean, LR_mean.T)
+# Q = np.matmul(LQ_mean, LQ_mean.T)
 
 print('mean theta = ', theta_mean)
 
