@@ -51,14 +51,14 @@ z_init[3,-1] = z_init[3,-2]
 
 # with open('results/pendulum_data1_trial0.pickle','rb') as file:
 #     traces = pickle.load(file)
-with open('results/pendulum_results_ones_init.pickle','rb') as file:
+with open('results/pendulum_results_ones_init_2.pickle','rb') as file:
     traces = pickle.load(file)
 
 theta = traces['theta']
 z = traces['h']
 yhat = traces['yhat']
 
-lp = traces['lp__']
+lp = traces['loglikelihood']
 
 theta_mean = np.mean(theta,0)
 z_mean = np.mean(z,0)
@@ -100,6 +100,8 @@ plt.legend(['Measurements','mean estimate'])
 plt.subplot(2,2,3)
 plt.plot(z_init[2,:])
 plt.plot(z_mean[2,:])
+plt.plot(np.percentile(z[:,2,:],99,axis=0),'--')
+plt.plot(np.percentile(z[:,2,:],1,axis=0),'--')
 plt.xlabel('time')
 plt.ylabel(r'arm angular velocity $\dot{\theta}$')
 plt.legend(['Grad measurements','mean estimate'])
@@ -138,3 +140,50 @@ plt.show()
 # plt.xlabel(r'$\hat{y}_2$ at t=100')
 # plt.ylabel(r'$\dot{\alpha}$ at t=100')
 # plt.show()
+
+plt.subplot(3,3,1)
+plt.hist(z[:,0,15],30)
+plt.xlabel('x at $t_{15}$')
+plt.ylabel('counts')
+
+plt.subplot(3,3,2)
+plt.hist(z[:,0,200],30)
+plt.xlabel('x at $t_{200}$')
+plt.ylabel('counts')
+
+plt.subplot(3,3,3)
+plt.hist(z[:,0,350],30)
+plt.xlabel('x at $t_{400}$')
+plt.ylabel('counts')
+
+plt.subplot(3,3,4)
+plt.hist(z[:,1,15],30)
+plt.xlabel('y at $t_{15}$')
+plt.ylabel('counts')
+
+plt.subplot(3,3,5)
+plt.hist(z[:,1,200],30)
+plt.xlabel('y at $t_{200}$')
+plt.ylabel('counts')
+
+plt.subplot(3,3,6)
+plt.hist(z[:,1,350],30)
+plt.xlabel('y at $t_{400}$')
+plt.ylabel('counts')
+
+plt.subplot(3,3,7)
+plt.hist(z[:,2,15],30)
+plt.xlabel('h at $t_{15}$')
+plt.ylabel('counts')
+
+plt.subplot(3,3,8)
+plt.hist(z[:,2,200],30)
+plt.xlabel('h at $t_{200}$')
+plt.ylabel('counts')
+
+plt.subplot(3,3,9)
+plt.hist(z[:,2,350],30)
+plt.xlabel('h at $t_{400}$')
+plt.ylabel('counts')
+plt.show()
+
