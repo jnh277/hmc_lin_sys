@@ -139,3 +139,6 @@ results/lssm_traces.pickle
 results/pendulum_data1_trial0.pickle
 results/pendulum_results_ones_init.pickle
 results/pendulum_results_ones_init_2.pickle
+results/pendulum_data_trial0.pickle
+results/pendulum_results_ones_init_coupled.pickle
+results/pendulum_results_coupled.pickle

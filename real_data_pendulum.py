@@ -27,16 +27,25 @@ import pickle
 
 
 # load data
-data_path = 'data/pendulum_data1.mat'
+# # data_path = 'data/pendulum_data0.mat'
+# data = loadmat(data_path)
+#
+# Ts = data['dt']
+# mu0 = data['mu0']
+# theta0 = data['theta0']
+# u = data['u']
+# y = data['y']
+
+data_path ='data/pendulum_data_all_sets.mat'
 data = loadmat(data_path)
-
+set_number = 0
 Ts = data['dt']
-mu0 = data['mu0']
-theta0 = data['theta0']
-u = data['u']
-y = data['y']
+# theta0 = data['theta_init'][:,0]
+u = data['u_all'][set_number,:,:]
+y = data['y_all'][set_number,:,:]
 
-# theta0 = np.ones((6))
+
+theta0 = np.ones((6))
 
 no_obs = len(y[0])
 
@@ -56,7 +65,7 @@ z_init[2,-1] = z_init[2,-2]
 z_init[3,:-1] = (y[1,1:]-y[1,0:-1])/Ts
 z_init[3,-1] = z_init[3,-2]
 
-model = pystan.StanModel(file='stan/pendulum_coupled.stan')
+model = pystan.StanModel(file='stan/pendulum.stan')
 
 stan_data = {'no_obs': no_obs,
              'Ts':Ts[0,0],
@@ -66,7 +75,7 @@ stan_data = {'no_obs': no_obs,
              'Mp':Mp,
              'Lp':Lp,
              'g':g,
-             'z0':mu0.flatten(),
+             # 'z0':mu0.flatten(),
              }
 
 control = {"adapt_delta": 0.85,
@@ -85,7 +94,7 @@ fit = model.sampling(data=stan_data, iter=5000, chains=4,control=control, init=i
 
 traces = fit.extract()
 
-with open('results/pendulum_results_ones_init_coupled.pickle', 'wb') as file:
+with open('results/pendulum_set0_results.pickle', 'wb') as file:
     pickle.dump(traces, file)
 
 

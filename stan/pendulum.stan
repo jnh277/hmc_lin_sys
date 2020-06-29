@@ -100,7 +100,7 @@ data {
     real Mp;                            // pendulum mass
     real Lp;                            // pendulum length
     real g;                             // gravity
-    vector[4] z0;                       // initial state guess
+//    vector[4] z0;                       // initial state guess
 }
 parameters {
     matrix[4,no_obs] h;                     // hidden states
