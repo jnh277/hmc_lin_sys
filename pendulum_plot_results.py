@@ -27,14 +27,22 @@ import pickle
 
 
 # load data
-data_path = 'data/pendulum_data0.mat'
-data = loadmat(data_path)
+# data_path = 'data/pendulum_data0.mat'
+# data = loadmat(data_path)
+#
+# Ts = data['dt']
+# mu0 = data['mu0']
+# theta0 = data['theta0']
+# u = data['u']
+# y = data['y']
 
+data_path ='data/pendulum_data_all_sets.mat'
+data = loadmat(data_path)
+set_number = 1
 Ts = data['dt']
-mu0 = data['mu0']
-theta0 = data['theta0']
-u = data['u']
-y = data['y']
+# theta0 = data['theta_init'][:,0]
+u = data['u_all'][set_number,:,:]
+y = data['y_all'][set_number,:,:]
 
 no_obs = len(y[0])
 
@@ -51,7 +59,7 @@ z_init[3,-1] = z_init[3,-2]
 
 # with open('results/pendulum_data1_trial0.pickle','rb') as file:
 #     traces = pickle.load(file)
-with open('results/pendulum_set0_results.pickle','rb') as file:
+with open('results/pendulum_set1_results_coupled.pickle','rb') as file:
     traces = pickle.load(file)
 
 theta = traces['theta']
