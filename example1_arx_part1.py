@@ -29,6 +29,7 @@ from scipy.io import loadmat
 
 from arx_hmc import run_arx_hmc
 from arx_mh import run_arx_mh
+from mh_functions import build_phi_matrix as build_phi_matrix_MH
 
 
 
@@ -57,6 +58,8 @@ a_coef_mean = np.mean(a_hmc,0)
 b_coef_mean = np.mean(b_hmc,0)
 a1_hmc = a_hmc[:,0]
 acf_hmc = calculate_acf(a1_hmc)
+a2_hmc = a_hmc[:,1]
+b2_hmc = b_hmc[:,1]
 
 yhat_hmc = results_hmc['y_hat']      # validation predictions
 yhat_hmc[np.isnan(yhat_hmc)] = 0.0
@@ -71,14 +74,43 @@ MF_hmc = 100*(1-np.sum(np.power(y_val-yhat_mean_hmc,2))/np.sum(np.power(y_val,2)
 results_mh = run_arx_mh(mh2=False)
 a1_mh = results_mh['a1']
 acf_mh = calculate_acf(a1_mh)
+a2_mh = results_mh['a2']
+b2_mh = results_mh['b1']
 
 # estimate using mMALA
 results_mMala = run_arx_mh(mh2=True)
 a1_mMALA = results_mMala['a1']
 acf_mMALA = calculate_acf(a1_mMALA)
+a2_mMALA = results_mMala['a2']
+b2_mMALA = results_mMala['b1']
+
+
+## calculate model fit for the MH and mMALA estimates
+order_a = 2
+order_b = 3
+Phi_val = build_phi_matrix_MH(obs=data['y_validation'].flatten(),
+                          order=(order_a, order_b), inputs=data['u_validation'].flatten())
+theta_MH = results_mh['theta']
+theta_MH_mean = np.mean(theta_MH,0)
+yhat_MH = np.matmul(Phi_val,theta_MH_mean)
+MF_MH = 100*(1-np.sum(np.power(y_val[1:]-yhat_MH,2))/np.sum(np.power(y_val[1:],2)))
+
+
+theta_mMALA = results_mMala['theta']
+theta_mMALA_mean = np.mean(theta_mMALA,0)
+yhat_mMALA = np.matmul(Phi_val,theta_mMALA_mean)
+MF_mMALA = 100*(1-np.sum(np.power(y_val[1:]-yhat_mMALA,2))/np.sum(np.power(y_val[1:],2)))
+
+
+plt.plot(y_val)
+plt.plot(yhat_MH)
+plt.show()
 
 # check goodness of fit, and plot some diagnostics
 fontsize= 16
+
+
+
 
 plt.subplot(2,2,1)
 plt.plot(np.arange(750,825),a1_hmc[750:825])
@@ -102,9 +134,23 @@ plt.plot(acf_mMALA)
 plt.xlabel('lag', fontsize=fontsize)
 plt.ylabel('ACF of $a_1$', fontsize=fontsize)
 # plt.legend(('chain 1','chain 2','chain 3','chain 4'), fontsize=20)
+
+
+b_ML = data['b_ML'][0]
+plt.subplot(2,2,4)
+sns.kdeplot(b2_hmc, shade=True)
+sns.kdeplot(b2_mh, shade=True)
+sns.kdeplot(b2_mMALA, shade=True)
+plt.axvline(b_ML[1], color='k', lw=1, linestyle='--')
+plt.xlabel('$b_1$', fontsize=fontsize)
+plt.ylabel('posterior', fontsize=fontsize)
+plt.xlim((0.8,1.2))
+
 plt.tight_layout()
 plt.savefig("figures/example1_diagnostics.png", format='png')
 plt.show()
+
+
 
 
 

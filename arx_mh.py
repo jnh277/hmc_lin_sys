@@ -98,8 +98,8 @@ def run_arx_mh( mh2=True):
             print("Iteration: {} of {} done with accept rate: {}.".format(k+1, no_iters, np.round(accepted / k, 2)))
 
     # Save to file for plotting in R
-    output = {'sigmae': theta[no_burnin_iters:no_iters, order_ab]}
-
+    output = {'sigmae': theta[no_burnin_iters:no_iters, order_ab],
+              'theta': theta[no_burnin_iters:no_iters, :order_ab]}
     for i in range(order_a):
         a_name = 'a' + str(i+1)
         # the negative sign is needed because of how the regressor matrix was defined for the metropolis hastings function

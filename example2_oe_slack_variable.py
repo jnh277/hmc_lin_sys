@@ -18,6 +18,9 @@
 
 """ Runs the code for example 3 in the paper and produces the figures """
 """ This demonstrates Bayesian estimation of output error models using HMC """
+""" In this example we introduce an auxilary slack variable and along with the parameters
+    estimate the error sequence. Although this increases computational requirements
+    it results in more robust identification """
 
 import numpy as np
 from scipy.io import loadmat
@@ -29,15 +32,15 @@ from oe import run_oe_hmc
 
 # specific data path
 data_path = 'data/example3_oe.mat'
-input_order = 4
-output_order = 3
-# input_order = 11
-# output_order = 10
+# input_order = 4
+# output_order = 3
+input_order = 11
+output_order = 10
 
 data = loadmat(data_path)
 y_val = data['y_validation'].flatten()
 
-(fit, traces) = run_oe_hmc(data_path, input_order, output_order, iter=6000, OL=True, hot_start=True)
+(fit, traces) = run_oe_hmc(data_path, input_order, output_order, iter=10000)
 
 yhat = traces['y_hat_val']
 yhat[np.isnan(yhat)] = 0.0
@@ -77,10 +80,6 @@ plt.ylim((-2,2))
 plt.legend(('y val','y hat'))
 plt.show()
 
-
-plt.plot(y_val[100:150])
-plt.plot(yhat_mean[100:150])
-plt.show()
 
 
 plot_trace(f_coef_traces[:,0],4,1,'f[0]')

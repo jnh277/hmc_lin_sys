@@ -25,19 +25,20 @@ import matplotlib.pyplot as plt
 from helpers import plot_trace
 from scipy import signal
 from oe import run_oe_hmc
+import seaborn as sns
 
 
 # specific data path
 data_path = 'data/example3_oe.mat'
-# input_order = 4
-# output_order = 3
-input_order = 11
-output_order = 10
+input_order = 4
+output_order = 3
+# input_order = 11
+# output_order = 10
 
 data = loadmat(data_path)
 y_val = data['y_validation'].flatten()
 
-(fit, traces) = run_oe_hmc(data_path, input_order, output_order, iter=10000)
+(fit, traces) = run_oe_hmc(data_path, input_order, output_order, iter=6000, OL=True, hot_start=True)
 
 yhat = traces['y_hat_val']
 yhat[np.isnan(yhat)] = 0.0
@@ -78,6 +79,10 @@ plt.legend(('y val','y hat'))
 plt.show()
 
 
+plt.plot(y_val[100:150])
+plt.plot(yhat_mean[100:150])
+plt.show()
+
 
 plot_trace(f_coef_traces[:,0],4,1,'f[0]')
 plot_trace(f_coef_traces[:,1],4,2,'f[2]')
@@ -101,6 +106,55 @@ B_ML = data['b_ml']
 F_ML2 = data['f_ml2']
 B_ML2 = data['b_ml2']
 
+
+
+# do a pairs plot to show marginals and joints
+# fontsize = 16
+#
+# plt.figure(figsize=(10,8.25))
+# plt.subplot(3,3,1)
+# plt.hist(f_coef_traces[:,1],30, density=True)
+# sns.kdeplot(f_coef_traces[:,1], shade=True)
+# plt.axvline(np.mean(f_coef_traces[:,1]), color='orange', lw=1, linestyle='--', label='mean')
+# plt.xlabel('$f_2$', fontsize=fontsize)
+# plt.ylabel('marginal', fontsize=fontsize)
+#
+# plt.subplot(3,3,4)
+# plt.plot(f_coef_traces[:,1],b_coef_traces[:,0],'.')
+# plt.xlabel('$f_2$',fontsize=fontsize)
+# plt.ylabel('$b_0$',fontsize=fontsize)
+#
+# plt.subplot(3,3,5)
+# plt.hist(b_coef_traces[:,0],30, density=True)
+# sns.kdeplot(b_coef_traces[:,0], shade=True)
+# plt.axvline(np.mean(B_ML[:,0]), color='red', lw=2, linestyle='--', label='mean')
+# plt.axvline(np.mean(b_true[:,0]), color='k', lw=2, linestyle='--', label='mean')
+# plt.axvline(np.mean(b_coef_traces[:,0]), color='orange', lw=2, linestyle='--', label='mean')
+# plt.xlabel('$b_0$', fontsize=fontsize)
+# plt.ylabel('marginal', fontsize=fontsize)
+#
+# plt.subplot(3,3,7)
+# plt.plot(f_coef_traces[:,1],b_coef_traces[:,2],'.')
+# plt.xlabel('$f_2$',fontsize=fontsize)
+# plt.ylabel('$b_2$',fontsize=fontsize)
+#
+# plt.subplot(3,3,8)
+# plt.plot(b_coef_traces[:,0],b_coef_traces[:,2],'.')
+# plt.xlabel('$b_0$',fontsize=fontsize)
+# plt.ylabel('$b_2$',fontsize=fontsize)
+#
+# plt.subplot(3,3,9)
+# plt.hist(b_coef_traces[:,2],30, density=True)
+# sns.kdeplot(b_coef_traces[:,2], shade=True)
+# plt.axvline(np.mean(B_ML[:,2]), color='red', lw=2, linestyle='--', label='mean')
+# plt.axvline(np.mean(b_true[:,2]), color='k', lw=2, linestyle='--', label='mean')
+# plt.axvline(np.mean(b_coef_traces[:,2]), color='orange', lw=2, linestyle='--', label='mean')
+# plt.xlabel('$b_2$', fontsize=fontsize)
+# plt.ylabel('marginal', fontsize=fontsize)
+#
+# plt.tight_layout()
+# # plt.savefig('figures/example_1_dists.png',format='png')
+# plt.show()
 
 
 def plot_dbode_ML(num_samples,den_samples,num_true,den_true,num_ML,den_ML,num_ML2,den_ML2,Ts,omega,no_plot=300, max_samples=1000, save=False):
@@ -140,7 +194,7 @@ def plot_dbode_ML(num_samples,den_samples,num_true,den_true,num_ML,den_ML,num_ML
     plt.semilogx(w.flatten(), mag_samples[:, 1:no_plot], color='green', alpha=0.1)  # Bode magnitude plot
     h1, = plt.semilogx(w.flatten(), mag_true, color='blue', label='True system')  # Bode magnitude plot
     hml, = plt.semilogx(w.flatten(), mag_ML,'--', color='purple', label='ML estimate')  # Bode magnitude plot
-    hml2, = plt.semilogx(w.flatten(), mag_ML2,'--', color='red', label='ML reg estimate')  # Bode magnitude plot
+    # hml2, = plt.semilogx(w.flatten(), mag_ML2,'--', color='red', label='ML reg estimate')  # Bode magnitude plot
     hm, = plt.semilogx(w.flatten(), np.mean(mag_samples, 1), '-.', color='orange', label='hmc mean')  # Bode magnitude plot
     # hu, = plt.semilogx(w.flatten(), np.percentile(mag_samples, 97.5, axis=1),'--',color='orange',label='Upper CI')    # Bode magnitude plot
 
@@ -148,27 +202,29 @@ def plot_dbode_ML(num_samples,den_samples,num_true,den_true,num_ML,den_ML,num_ML
     plt.legend()
     plt.title('Bode diagram')
     plt.ylabel('Magnitude')
-    plt.xlim((min(w.flatten()),min(max(omega),1/Ts*3.14)))
+    # plt.xlim((min(w.flatten()),min(max(omega),1/Ts*3.14)))
+    plt.xlim((1e-2, min(max(omega), 1 / Ts * 3.14)))
 
     plt.subplot(2, 1, 2)
     plt.semilogx(w.flatten(), phase_samples[:,:no_plot], color='green', alpha=0.1)  # Bode phase plot
     plt.semilogx(w.flatten(), phase_true, color='blue')  # Bode phase plot
     hml, = plt.semilogx(w.flatten(), phase_ML, '--', color='purple')  # Bode magnitude plot
-    hml, = plt.semilogx(w.flatten(), phase_ML2, '--', color='red')  # Bode magnitude plot
+    # hml, = plt.semilogx(w.flatten(), phase_ML2, '--', color='red')  # Bode magnitude plot
     plt.semilogx(w.flatten(), np.mean(phase_samples, 1), '-.', color='orange',
                        label='mean')  # Bode magnitude plot
     plt.ylabel('Phase (deg)')
     plt.xlabel('Frequency (rad/s)')
-    plt.xlim((min(w.flatten()), min(max(omega),1/Ts*3.14)))
-    plt.ylim((-500, 50))
+    # plt.xlim((min(w.flatten()), min(max(omega),1/Ts*3.14)))
+    plt.xlim((1e-2, min(max(omega), 1 / Ts * 3.14)))
+    plt.ylim((-400, 50))
 
     if save:
-        plt.savefig('bode_plot_oe.png',format='png')
+        plt.savefig('figures/bode_plot_oe.png',format='png')
 
     plt.show()
 
 
-plot_dbode_ML(b_coef_traces[:,-1::-1],f_coef_traces[:,-1::-1],b_true.flatten(),f_true.flatten(),B_ML.flatten(),F_ML.flatten(),B_ML2.flatten(),F_ML2.flatten(),Ts,w_plot,save=False)
+plot_dbode_ML(b_coef_traces[:,-1::-1],f_coef_traces[:,-1::-1],b_true.flatten(),f_true.flatten(),B_ML.flatten(),F_ML.flatten(),B_ML2.flatten(),F_ML2.flatten(),Ts,w_plot,save=True)
 
 
 
