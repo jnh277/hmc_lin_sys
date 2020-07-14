@@ -23,7 +23,7 @@ from scipy.io import loadmat
 import pickle
 from pathlib import Path
 
-def run_lssm_hmc(data_path, number_states, hot_start=False, iter=4000):
+def run_lssm_hmc(data_path, number_states, hot_start=False, iter=4000,discrete=False):
     data = loadmat(data_path)
     y_est = data['y_estimation'].flatten()
     u_est = data['u_estimation'].flatten()
@@ -37,6 +37,7 @@ def run_lssm_hmc(data_path, number_states, hot_start=False, iter=4000):
                           B=data['B_ML'].flatten(),
                           C=data['C_ML'].flatten(),
                           D=data['D_ML'][0,0],
+                          h=data['x_ML']
                           )
             return output
     else:
@@ -46,14 +47,22 @@ def run_lssm_hmc(data_path, number_states, hot_start=False, iter=4000):
                           )
             return output
 
-
-    model_path = 'stan/lssm_hs.pkl'
-    if Path(model_path).is_file():
-        model = pickle.load(open(model_path, 'rb'))
+    if discrete:
+        model_path = 'stan/lssm_hs_discrete.pkl'
+        if Path(model_path).is_file():
+            model = pickle.load(open(model_path, 'rb'))
+        else:
+            model = pystan.StanModel(file='stan/lssm_discrete.stan')
+            with open(model_path, 'wb') as file:
+                pickle.dump(model, file)
     else:
-        model = pystan.StanModel(file='stan/ssm_horseshoe.stan')
-        with open(model_path, 'wb') as file:
-            pickle.dump(model, file)
+        model_path = 'stan/lssm_hs.pkl'
+        if Path(model_path).is_file():
+            model = pickle.load(open(model_path, 'rb'))
+        else:
+            model = pystan.StanModel(file='stan/ssm_horseshoe.stan')
+            with open(model_path, 'wb') as file:
+                pickle.dump(model, file)
 
 
     stan_data = {'no_obs_est': len(y_est),

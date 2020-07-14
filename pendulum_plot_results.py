@@ -86,117 +86,240 @@ z_mean = np.mean(z,0)
 
 print('mean theta = ', theta_mean)
 
-plot_trace(theta[:,0],3,1,'Jr')
-plot_trace(theta[:,1],3,2,'Jp')
-plot_trace(theta[:,2],3,3,'Km')
+
+##
+fontsize = 16
+ax1 = plt.subplot(3,2,1)
+plt.hist(theta[:,0],bins=30,density=True)
+plt.axvline(np.mean(theta[:,0]),lw=2.5,color='orange',linestyle='--')
+plt.xlabel('$J_r$',fontsize=fontsize)
+plt.ylabel('$p(J_r | y_{1:T})$',fontsize=fontsize)
+plt.yticks([],[])
+
+
+from matplotlib import ticker
+formatter = ticker.ScalarFormatter(useMathText=True)
+formatter.set_scientific(True)
+formatter.set_powerlimits((-1,1))
+ax1.xaxis.set_major_formatter(formatter)
+
+
+ax2 = plt.subplot(3,2,2)
+plt.hist(theta[:,1],bins=30,density=True)
+plt.axvline(np.mean(theta[:,1]),lw=2.5,color='orange',linestyle='--')
+plt.xlabel('$J_p$',fontsize=fontsize)
+plt.ylabel('$p(J_p | y_{1:T})$',fontsize=fontsize)
+plt.yticks([],[])
+
+
+formatter2 = ticker.ScalarFormatter(useMathText=True)
+formatter2.set_scientific(True)
+formatter2.set_powerlimits((-1,1))
+ax2.xaxis.set_major_formatter(formatter2)
+
+ax3 = plt.subplot(3,2,3)
+plt.hist(theta[:,2],bins=30,density=True)
+plt.axvline(np.mean(theta[:,2]),lw=2.5,color='orange',linestyle='--')
+plt.xlabel('$k_m$',fontsize=fontsize)
+plt.ylabel('$p(k_m | y_{1:T})$',fontsize=fontsize)
+plt.yticks([],[])
+
+
+formatter3 = ticker.ScalarFormatter(useMathText=True)
+formatter3.set_scientific(True)
+formatter3.set_powerlimits((-1,1))
+ax3.xaxis.set_major_formatter(formatter3)
+
+
+ax4 = plt.subplot(3,2,4)
+plt.hist(theta[:,3],bins=30,density=True)
+plt.axvline(np.mean(theta[:,3]),lw=2.5,color='orange',linestyle='--')
+plt.xlabel('$R_m$',fontsize=fontsize)
+plt.ylabel('$p(R_m | y_{1:T})$',fontsize=fontsize)
+plt.yticks([],[])
+
+formatter4 = ticker.ScalarFormatter(useMathText=True)
+formatter4.set_scientific(True)
+formatter4.set_powerlimits((-1,1))
+ax4.xaxis.set_major_formatter(formatter4)
+
+ax5 = plt.subplot(3,2,5)
+plt.hist(theta[:,4],bins=30,density=True)
+plt.axvline(np.mean(theta[:,4]),lw=2.5,color='orange',linestyle='--')
+plt.xlabel('$D_p$',fontsize=fontsize)
+plt.ylabel('$p(D_p | y_{1:T})$',fontsize=fontsize)
+plt.yticks([],[])
+
+formatter5 = ticker.ScalarFormatter(useMathText=True)
+formatter5.set_scientific(True)
+formatter5.set_powerlimits((-1,1))
+ax5.xaxis.set_major_formatter(formatter5)
+
+ax6 = plt.subplot(3,2,6)
+plt.hist(theta[:,5],bins=30,density=True)
+plt.axvline(np.mean(theta[:,5]),lw=2.5,color='orange',linestyle='--')
+plt.xlabel('$D_r$',fontsize=fontsize)
+plt.ylabel('$p(D_r | y_{1:T})$',fontsize=fontsize)
+plt.yticks([],[])
+
+formatter6 = ticker.ScalarFormatter(useMathText=True)
+formatter6.set_scientific(True)
+formatter6.set_powerlimits((-1,1))
+ax6.xaxis.set_major_formatter(formatter6)
+
+plt.tight_layout()
+plt.savefig('figures/pendulum_params.png',format='png')
 plt.show()
 
-plot_trace(theta[:,3],3,1,'Rm')
-plot_trace(theta[:,4],3,2,'Dp')
-plot_trace(theta[:,5],3,3,'Dr')
-plt.show()
 
+##
+tt = np.linspace(1*Ts[0,0],375*Ts[0,0],375)
 plt.subplot(2,2,1)
-plt.plot(y[0,:])
-plt.plot(z_mean[0,:])
-plt.xlabel('time')
-plt.ylabel(r'arm angle $\theta$')
-plt.legend(['Measurements','mean estimate'])
+plt.plot(tt,y[0,:],'k')
+plt.plot(tt,z_mean[0,:],'--')
+# plt.fill_between(tt,np.percentile(z[:,0],0.5,axis=0),np.percentile(z[:,0],99.5,axis=0))
+plt.xlabel('time (s)',fontsize=fontsize)
+plt.ylabel(r'$\theta$',fontsize=fontsize)
+# plt.legend(['Measured','mean estimate'])
+# plt.xlim((1,2))
 
 plt.subplot(2,2,2)
-plt.plot(y[1,:])
-plt.plot(z_mean[1,:])
-plt.xlabel('time')
-plt.ylabel(r'pendulum angle $\alpha$')
-plt.legend(['Measurements','mean estimate'])
+plt.plot(tt,y[1,:],'k')
+plt.plot(tt,z_mean[1,:],'--')
+plt.xlabel('time (s)',fontsize=fontsize)
+plt.ylabel(r'$\alpha$',fontsize=fontsize)
+# plt.legend(['Measured','mean estimate'])
+# plt.xlim((1,2))
 
 plt.subplot(2,2,3)
-plt.plot(z_init[2,:])
-plt.plot(z_mean[2,:])
-plt.plot(np.percentile(z[:,2,:],99,axis=0),'--')
-plt.plot(np.percentile(z[:,2,:],1,axis=0),'--')
-plt.xlabel('time')
-plt.ylabel(r'arm angular velocity $\dot{\theta}$')
-plt.legend(['Grad measurements','mean estimate'])
+plt.plot(tt,z_init[2,:],'k')
+plt.plot(tt,z_mean[2,:],'--')
+# plt.plot(np.percentile(z[:,2,:],99,axis=0),'--')
+# plt.plot(np.percentile(z[:,2,:],1,axis=0),'--')
+plt.xlabel('time (s)',fontsize=fontsize)
+plt.ylabel(r'$\dot{\theta}$',fontsize=fontsize)
+# plt.legend(['gradient of measured','mean estimate'])
 
 plt.subplot(2,2,4)
-plt.plot(z_init[3,:])
-plt.plot(z_mean[3,:])
-plt.xlabel('time')
-plt.ylabel(r'pendulum angular velocity $\dot{\alpha}$')
-plt.legend(['Grad measurements','mean estimate'])
+plt.plot(tt,z_init[3,:],'k')
+plt.plot(tt,z_mean[3,:],'--')
+plt.xlabel('time (s)',fontsize=fontsize)
+plt.ylabel(r'$\dot{\alpha}$',fontsize=fontsize)
+# plt.legend(['gradient of measured','mean estimate'])
+plt.tight_layout()
+plt.savefig('figures/pendulum_states.png',format='png')
 plt.show()
 
-# plt.hist(lm,100)
-# plt.xlabel('sample log-posterior')
-# plt.ylabel('count')
-# plt.show()
-
-# plt.subplot(2,2,1)
-# plt.plot(yhat[:,2,49],z[:,2,49],'.')
-# plt.xlabel(r'$\hat{y}_3$ at t=50')
-# plt.ylabel(r'$\dot{\theta}$ at t=50')
-#
-# plt.subplot(2,2,2)
-# plt.plot(yhat[:,2,49],z[:,3,49],'.')
-# plt.xlabel(r'$\hat{y}_2$ at t=50')
-# plt.ylabel(r'$\dot{\alpha}$ at t=50')
-#
-#
-# plt.subplot(2,2,3)
-# plt.plot(yhat[:,2,99],z[:,2,99],'.')
-# plt.xlabel(r'$\hat{y}_3$ at t=100')
-# plt.ylabel(r'$\dot{\theta}$ at t=100')
-#
-# plt.subplot(2,2,4)
-# plt.plot(yhat[:,2,99],z[:,3,99],'.')
-# plt.xlabel(r'$\hat{y}_2$ at t=100')
-# plt.ylabel(r'$\dot{\alpha}$ at t=100')
-# plt.show()
 
 plt.subplot(3,3,1)
-plt.hist(z[:,0,15],30)
-plt.xlabel('x at $t_{15}$')
-plt.ylabel('counts')
+plt.hist(z[:,3,00],bins=30,density=True)
+plt.yticks([],[])
+plt.xlabel(r'$\dot{\alpha}$ at $t=0.8$s',fontsize=fontsize)
+plt.ylabel('marginal',fontsize=fontsize)
 
-plt.subplot(3,3,2)
-plt.hist(z[:,0,200],30)
-plt.xlabel('x at $t_{200}$')
-plt.ylabel('counts')
-
-plt.subplot(3,3,3)
-plt.hist(z[:,0,350],30)
-plt.xlabel('x at $t_{400}$')
-plt.ylabel('counts')
-
-plt.subplot(3,3,4)
-plt.hist(z[:,1,15],30)
-plt.xlabel('y at $t_{15}$')
-plt.ylabel('counts')
-
-plt.subplot(3,3,5)
-plt.hist(z[:,1,200],30)
-plt.xlabel('y at $t_{200}$')
-plt.ylabel('counts')
-
-plt.subplot(3,3,6)
-plt.hist(z[:,1,350],30)
-plt.xlabel('y at $t_{400}$')
-plt.ylabel('counts')
-
-plt.subplot(3,3,7)
-plt.hist(z[:,2,15],30)
-plt.xlabel('h at $t_{15}$')
-plt.ylabel('counts')
-
-plt.subplot(3,3,8)
-plt.hist(z[:,2,200],30)
-plt.xlabel('h at $t_{200}$')
-plt.ylabel('counts')
-
-plt.subplot(3,3,9)
-plt.hist(z[:,2,350],30)
-plt.xlabel('h at $t_{400}$')
-plt.ylabel('counts')
+plt.tight_layout()
 plt.show()
 
+
+## pairs plot
+fontsize=12
+plt.subplot(3,3,1)
+plt.hist(z[:,3,245],bins=30,density=True)
+plt.yticks([],[])
+plt.xlabel(r'$\dot{\alpha}$ at $t=1.8$s',fontsize=fontsize)
+plt.ylabel('marginal',fontsize=fontsize)
+
+plt.subplot(3,3,4)
+plt.plot(z[:,3,245],theta[:,2],'.')
+plt.yticks([],[])
+plt.xticks([],[])
+plt.xlabel(r'$\dot{\alpha}$ at $t=1.8$s',fontsize=fontsize)
+plt.ylabel(r'$k_m$',fontsize=fontsize)
+
+plt.subplot(3,3,5)
+plt.hist(theta[:,2],bins=30,density=True)
+plt.yticks([],[])
+plt.xlabel(r'$k_m$',fontsize=fontsize)
+plt.ylabel('marginal',fontsize=fontsize)
+
+plt.subplot(3,3,7)
+plt.plot(z[:,3,245],yhat[:,2,225],'.')
+plt.yticks([],[])
+plt.xticks([],[])
+plt.xlabel(r'$\dot{\alpha}$ at $t=1.8$s',fontsize=fontsize)
+plt.ylabel(r'$I_m$ at $t=1.8$s ',fontsize=fontsize)
+
+
+plt.subplot(3,3,8)
+plt.plot(theta[:,2],yhat[:,2,225],'.')
+plt.yticks([],[])
+plt.xticks([],[])
+plt.xlabel(r'$k_m$',fontsize=fontsize)
+plt.ylabel(r'$I_m$ at $t=1.8$s ',fontsize=fontsize)
+
+plt.subplot(3,3,9)
+plt.hist(yhat[:,2,225],bins=30,density=True)
+# plt.axvline(np.mean(yhat[:,2,225]),lw=2.5,color='k',linestyle='--')
+plt.axvline(y[2,225],lw=2.5,color='k',linestyle='--')
+plt.yticks([],[])
+plt.xlabel(r'$I_m$ at $t=1.8$s ',fontsize=fontsize)
+plt.ylabel('marginal',fontsize=fontsize)
+
+plt.tight_layout()
+plt.savefig('figures/pendulum_pairs.png',format='png')
+plt.show()
+#
+#
+# plt.plot(y[2,:])
+# plt.plot(np.mean(yhat[:,2,:],0))
+# plt.show()
+
+
+
+
+# plt.subplot(3,3,1)
+# plt.hist(z[:,0,15],30)
+# plt.xlabel('x at $t_{15}$')
+# plt.ylabel('counts')
+#
+# plt.subplot(3,3,2)
+# plt.hist(z[:,0,200],30)
+# plt.xlabel('x at $t_{200}$')
+# plt.ylabel('counts')
+#
+# plt.subplot(3,3,3)
+# plt.hist(z[:,0,350],30)
+# plt.xlabel('x at $t_{400}$')
+# plt.ylabel('counts')
+#
+# plt.subplot(3,3,4)
+# plt.hist(z[:,1,15],30)
+# plt.xlabel('y at $t_{15}$')
+# plt.ylabel('counts')
+#
+# plt.subplot(3,3,5)
+# plt.hist(z[:,1,200],30)
+# plt.xlabel('y at $t_{200}$')
+# plt.ylabel('counts')
+#
+# plt.subplot(3,3,6)
+# plt.hist(z[:,1,350],30)
+# plt.xlabel('y at $t_{400}$')
+# plt.ylabel('counts')
+#
+# plt.subplot(3,3,7)
+# plt.hist(z[:,2,15],30)
+# plt.xlabel('h at $t_{15}$')
+# plt.ylabel('counts')
+#
+# plt.subplot(3,3,8)
+# plt.hist(z[:,2,200],30)
+# plt.xlabel('h at $t_{200}$')
+# plt.ylabel('counts')
+#
+# plt.subplot(3,3,9)
+# plt.hist(z[:,2,350],30)
+# plt.xlabel('h at $t_{400}$')
+# plt.ylabel('counts')
+# plt.show()
+#

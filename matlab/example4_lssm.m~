@@ -119,7 +119,17 @@ for t=1:no_obs
     y_ML2(t) = C_ML*q_ML(:,t) + D_ML*u(t)+sqrt(R)*randn;    
 end
 
-x_ML = q_ML;
+ind = 4;
+figure(6)
+clf
+% plot(q(ind,:).')
+% hold on
+% plot(q_ML(ind,:).')
+% hold off
+plot(y)
+hold on
+plot(y_ML2)
+hold off
 
 %%
 
@@ -132,6 +142,6 @@ hold off
 
 save('../data/example4_lssm.mat','y_estimation', 'u_estimation',...
     'A_true','B_true','C_true','D_true',...
-    'R','Q','Ts','states_est','w_max','A_ML','B_ML','C_ML','D_ML','x_ML')
+    'R','Q','Ts','states_est','w_max','A_ML','B_ML','C_ML','D_ML')
 
 
