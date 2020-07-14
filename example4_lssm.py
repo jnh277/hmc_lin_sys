@@ -40,7 +40,9 @@ Ts = data['Ts'].flatten()
 
 no_obs_est = len(y_est)
 
-(fit, traces) = run_lssm_hmc(data_path, 4, hot_start=False, iter=3000)
+# (fit, traces) = run_lssm_hmc(data_path, 4, hot_start=False, iter=3000)
+(fit, traces) = run_lssm_hmc(data_path, 4, hot_start=True, iter=3000)
+
 
 with open('lssm_traces.pickle', 'wb') as file:
     pickle.dump(traces, file)

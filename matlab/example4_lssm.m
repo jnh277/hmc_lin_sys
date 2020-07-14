@@ -64,21 +64,21 @@ end
 
 
 %%
-figure(2)
-clf
-plot(q(1,:))
-hold on
-plot(u)
-plot(y,'o')
-hold off
-
-
-figure(3)
-clf
-plot(q(1,:))
-hold on
-plot(q(2,:))
-hold off
+% figure(2)
+% clf
+% plot(q(1,:))
+% hold on
+% plot(u)
+% plot(y,'o')
+% hold off
+% 
+% 
+% figure(3)
+% clf
+% plot(q(1,:))
+% hold on
+% plot(q(2,:))
+% hold off
 
 sys = ss(A,B,C,D);
 
@@ -115,11 +115,11 @@ y_ML2 = y;
 
 q_ML = q;
 for t=1:no_obs    
-    q_ML(:,t+1) = Ad_ML*q(:,t) + Bd_ML*u(t);
-    y_ML2(t) = C_ML*q_ML(:,t) + D_ML*u(t)+sqrt(R)*randn;    
+    q_ML(:,t+1) = Ad_ML*q_ML(:,t) + Bd_ML*u(t);
+    y_ML2(t) = C_ML*q_ML(:,t) + D_ML*u(t);    
 end
 
-x_ML = q_ML;
+x_ML = q_ML(:,1:end-1);
 
 %%
 
