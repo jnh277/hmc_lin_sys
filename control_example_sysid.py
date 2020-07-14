@@ -43,7 +43,7 @@ no_obs_est = len(y_est)
 (fit, traces) = run_lssm_hmc(data_path, 6, hot_start=True, iter=100)
 
 
-with open('ctrl_sysid_traces.pickle', 'wb') as file:
+with open('results/ctrl_sysid_traces.pickle', 'wb') as file:
     pickle.dump(traces, file)
 
 yhat = traces['y_hat']
