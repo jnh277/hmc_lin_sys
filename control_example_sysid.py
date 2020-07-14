@@ -40,7 +40,7 @@ Ts = data['Ts'].flatten()
 
 no_obs_est = len(y_est)
 
-(fit, traces) = run_lssm_hmc(data_path, 6, hot_start=True, iter=5000)
+(fit, traces) = run_lssm_hmc(data_path, 6, hot_start=True, iter=4000)
 
 
 with open('results/ctrl_sysid_traces.pickle', 'wb') as file:
