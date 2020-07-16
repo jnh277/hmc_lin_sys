@@ -152,3 +152,4 @@ results/pendulum_set4_results_coupled.pickle
 results/pendulum_set5_results_coupled.pickle
 results/pendulum_set6_results_coupled.pickle
 results/pendulum_set7_results_coupled.pickle
+results/ctrl_sysid_traces2.pickle

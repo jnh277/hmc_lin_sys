@@ -234,12 +234,12 @@ def plot_bode_ML(A_smps, B_smps, C_smps, D_smps, A_t, B_t, C_t, D_t, A_ML, B_ML,
         count = count + 1
 
     # now what if i also want to show the MAP estimate
-    no_freqs = np.shape(mag_samples)[0]
-    mag_MAP = np.zeros((no_freqs))
-    phase_MAP = np.zeros((no_freqs))
-    for k in range(no_freqs):
-        mag_MAP[k] = calc_MAP(mag_samples[k, :])
-        phase_MAP[k] = calc_MAP(phase_samples[k, :])
+    # no_freqs = np.shape(mag_samples)[0]
+    # mag_MAP = np.zeros((no_freqs))
+    # phase_MAP = np.zeros((no_freqs))
+    # for k in range(no_freqs):
+    #     mag_MAP[k] = calc_MAP(mag_samples[k, :])
+    #     phase_MAP[k] = calc_MAP(phase_samples[k, :])
 
     w, mag_true, phase_true = signal.bode((A_t, B_t, C_t, float(D_t)), omega)
     w, mag_ML, phase_ML = signal.bode((A_ML, B_ML, C_ML, float(D_ML)), omega)
@@ -252,7 +252,7 @@ def plot_bode_ML(A_smps, B_smps, C_smps, D_smps, A_t, B_t, C_t, D_t, A_ML, B_ML,
     h1, = plt.semilogx(w.flatten(), mag_true, color='black', label='True system')  # Bode magnitude plot
     hml, = plt.semilogx(w.flatten(), mag_ML,'--', color='purple', label='ML estimate')  # Bode magnitude plot
     hm, = plt.semilogx(w.flatten(), np.mean(mag_samples, 1), '-.', color='orange',label='hmc mean')  # Bode magnitude plot
-    hmap = plt.semilogx(w.flatten(), mag_MAP, '-.', color='blue',label='hmc MAP')  # Bode magnitude plot
+    # hmap = plt.semilogx(w.flatten(), mag_MAP, '-.', color='blue',label='hmc MAP')  # Bode magnitude plot
 
     # hu, = plt.semilogx(w.flatten(), np.percentile(mag_samples, 97.5, axis=1),'--',color='orange',label='Upper CI')    # Bode magnitude plot
 
@@ -268,8 +268,8 @@ def plot_bode_ML(A_smps, B_smps, C_smps, D_smps, A_t, B_t, C_t, D_t, A_ML, B_ML,
     plt.semilogx(w.flatten(), phase_ML,'--', color='purple')  # Bode phase plot
     plt.semilogx(w.flatten(), np.mean(phase_samples, 1), '-.', color='orange',
                  label='mean')  # Bode magnitude plot
-    plt.semilogx(w.flatten(), phase_MAP, '-.', color='blue',
-                 label='map')  # Bode magnitude plot
+    # plt.semilogx(w.flatten(), phase_MAP, '-.', color='blue',
+    #              label='map')  # Bode magnitude plot
     plt.ylabel('Phase (deg)')
     plt.xlabel('Frequency (rad/s)')
     plt.xlim((min(omega), max(omega)))
