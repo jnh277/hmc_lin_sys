@@ -16,8 +16,8 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ###############################################################################
 
-""" Runs the code for example 2 in the paper and produces the figures """
-""" This demonstrates Bayesian estiamtion of FIR models using HMC """
+""" Runs the code for example 3 (Section 6.4) in the paper and produces the figures """
+""" This demonstrates Bayesian estiamtion of FIR models using HMC with both horseshoe and TC kernel priors """
 
 import numpy as np
 from scipy.io import loadmat
@@ -93,19 +93,6 @@ plt.xlabel('t',fontsize=16)
 plt.legend(('y','hmc TC mean','ARX TC','hmc TC 99% interval'))
 plt.savefig('figures/fir_onestep.png',format='png')
 plt.show()
-
-
-# plot_trace(b_tc[:,0],4,1,'b[0]')
-# plot_trace(b_tc[:,1],4,2,'b[1]')
-# plot_trace(b_tc[:,11],4,3,'b[11]')
-# plot_trace(b_tc[:,12],4,4,'b[12]')
-# plt.show()
-# Ts = 1.0
-# num_true = data['b_true']
-# den_true = data['a_true']
-# plot_firfreq(b_tc,num_true,den_true,b_ML.flatten())
-
-#
 
 
 

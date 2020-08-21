@@ -16,8 +16,13 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ###############################################################################
 
-""" Runs the code for example 4 in the paper and produces the figures """
-""" This demonstrates Bayesian estimation of linear state space models using HMC """
+""" Runs the code for example 4 (Section 6.5) in the paper and produces the figures """
+""" This demonstrates Bayesian estimation of linear state space models using HMC
+    This scro[t rims the code to estimate the model and save the model and results to the
+    file 'lssm_traces.pickle'. The results can then be plotted using "example4_lssm_plot.py"
+    Since for this problem the joint states and parameters are being estimated which is of 
+    high dimension, the estimation can take several hours to run 
+ """
 
 
 import numpy as np

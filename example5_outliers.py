@@ -16,7 +16,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ###############################################################################
 
-""" Runs the code for example 5 in the paper and produces the figures """
+""" Runs the code for example 5 (Section 6.6) in the paper and produces the figures """
 """ This demonstrates using student T distribution for the noise to provide 
     robustness to measurement outliers """
 
@@ -25,7 +25,6 @@ import numpy as np
 from scipy.io import loadmat
 from helpers import plot_trace
 import matplotlib.pyplot as plt
-# from helpers import plot_dbode_ML
 from arx_hmc import run_arx_hmc
 from scipy import signal
 

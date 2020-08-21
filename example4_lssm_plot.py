@@ -16,8 +16,10 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ###############################################################################
 
-""" Runs the code for example 4 in the paper and produces the figures """
-""" This demonstrates Bayesian estimation of linear state space models using HMC """
+""" Plots the results for example 4 (Section 6.5) in the paper """
+""" Loads the estimated model results produced by example4_lssm.py and 
+    saved in 'lssm_traces.pickle'.
+    """
 
 
 import numpy as np
@@ -25,7 +27,6 @@ from scipy.io import loadmat
 import matplotlib.pyplot as plt
 from helpers import plot_trace
 from helpers import plot_bode_ML
-from lssm import run_lssm_hmc
 import pickle
 
 
@@ -39,10 +40,6 @@ states_est = data['states_est']
 Ts = data['Ts'].flatten()
 
 no_obs_est = len(y_est)
-
-# # (fit, traces) = run_lssm_hmc(data_path, 4, hot_start=False, iter=3000)
-# (fit, traces) = run_lssm_hmc(data_path, 4, hot_start=True, iter=3000)
-
 
 with open('results/lssm_traces.pickle', 'rb') as file:
     traces = pickle.load( file)
