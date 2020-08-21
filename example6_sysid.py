@@ -16,8 +16,13 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ###############################################################################
 
-""" Runs the code for example 4 in the paper and produces the figures """
-""" This demonstrates Bayesian estimation of linear state space models using HMC """
+""" Runs the code for example 6 (Section 6.7) 'Control design with parameter uncertainty
+    in the paper and produces the figures. This demonstrates the utility of havaing samples
+    from the posterior in order to aid the design of a controller when there is data uncertainty"""
+""" This script runs the estimation and saves the estimated model to 'ctrl_sysid_traces2.pickle',
+    so that it can be plotted using example6_plotsysid.py which also converts the samples from state
+     space form to transfer function form for use in the control design in the matlab script 
+     matlab/example6_controldesign.m """
 
 
 import numpy as np
@@ -27,7 +32,6 @@ from helpers import plot_trace
 from helpers import plot_bode_ML
 from lssm import run_lssm_hmc
 import pickle
-
 
 # specific data path
 data_path = 'data/control_example_data.mat'

@@ -16,8 +16,12 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ###############################################################################
 
-""" Runs the code for example 4 in the paper and produces the figures """
-""" This demonstrates Bayesian estimation of linear state space models using HMC """
+""" Plots the model estimated by example6_sysid.py, these plots correspond to the
+    system identification (bode response) results shown in example 6 of the paper
+     (Section 6.7).
+     This also converts the estimated samples from state space form to transfer function form
+     so that the mean transfer function can be calculated and used for control design in the
+     matlab script matlab/example6_controldesign.m"""
 
 
 import numpy as np
@@ -25,7 +29,6 @@ from scipy.io import loadmat
 from scipy.io import savemat
 import matplotlib.pyplot as plt
 from helpers import plot_trace
-# from helpers import plot_bode_ML
 import pickle
 from scipy.signal import ss2tf
 from scipy import signal
