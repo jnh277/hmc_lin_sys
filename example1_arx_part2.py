@@ -16,10 +16,10 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ###############################################################################
 
-""" Runs the code for example 1 part 2 in the paper and produces the figures """
+""" Runs the code for example 1 part 2 (Section 6.2) in the paper and produces the figures """
 """ This compares L1, L2, and Horseshoe priors for ARX models in HMC """
 
-import pystan
+
 import numpy as np
 from scipy.io import loadmat
 import matplotlib.pyplot as plt
@@ -32,7 +32,7 @@ from arx_hmc import run_arx_hmc
 # specific data path
 
 data_path = 'data/arx_example_part_two_e2_reg.mat'
-# specify model orders, not nb = 11 as opposed to 10 in the paper, because numbering starts at one not zero
+# specify model orders, note nb = 11 as opposed to 10 in the paper, because numbering starts at one not zero (total number of terms is correct)
 input_order = 11         # gives the terms b_0 * u_k + b_1 * u_{k-1} + .. + b_{input_order-1} * u_{k-input_order+1}
 output_order = 10        # gives the terms a_0 * y_{k-1} + ... + a_{output_order-1}*y_{k-output_order}
 

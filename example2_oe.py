@@ -16,7 +16,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ###############################################################################
 
-""" Runs the code for example 3 in the paper and produces the figures """
+""" Runs the code for example 3 (Section 6.3) in the paper and produces the figures """
 """ This demonstrates Bayesian estimation of output error models using HMC """
 
 import numpy as np
@@ -25,7 +25,6 @@ import matplotlib.pyplot as plt
 from helpers import plot_trace
 from scipy import signal
 from oe import run_oe_hmc
-import seaborn as sns
 
 
 # specific data path
@@ -55,15 +54,9 @@ MF_hmc = 100*(1-np.sum(np.power(y_val[10:]-yhat_mean[10:],2))/np.sum(np.power(y_
 
 print('Model fit of hmc estaimte = ', MF_hmc)
 
-# mu_traces = traces['mu']
+
 f_coef_traces = traces['f_coefs']
 b_coef_traces = traces['b_coefs']
-# shrinkage_param = traces["shrinkage_param"]
-# shrinkage_param_mean = np.mean(shrinkage_param,0)
-# r_traces = traces["r"]
-
-# mu_mean = np.mean(mu_traces,0)
-# r_mean = np.mean(r_traces,0)
 
 f_mean = np.mean(f_coef_traces,0)
 b_mean = np.mean(b_coef_traces,0)
@@ -71,9 +64,6 @@ b_mean = np.mean(b_coef_traces,0)
 plt.subplot(1,1,1)
 plt.plot(y_val,linewidth=0.5)
 plt.plot(yhat_mean,linewidth=0.5)
-# plt.plot(yhat_OL_mean,linewidth=0.5)
-# plt.plot(yhat_upper_ci,'--',linewidth=0.5)
-# plt.plot(yhat_lower_ci,'--',linewidth=0.5)
 plt.ylim((-2,2))
 plt.legend(('y val','y hat'))
 plt.show()
@@ -92,7 +82,6 @@ plt.show()
 
 
 # now plot the bode diagram
-
 f_true = data["f_true"]
 b_true = data["b_true"]
 
