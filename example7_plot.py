@@ -16,6 +16,9 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ###############################################################################
 
+""" Plots the estimation results for example 7 (Section 6.8) in the paper obtained
+    using example7_pendulum.py """
+
 
 import numpy as np
 from scipy.io import loadmat
@@ -23,16 +26,6 @@ import matplotlib.pyplot as plt
 import pickle
 
 
-
-# load data
-# data_path = 'data/pendulum_data0.mat'
-# data = loadmat(data_path)
-#
-# Ts = data['dt']
-# mu0 = data['mu0']
-# theta0 = data['theta0']
-# u = data['u']
-# y = data['y']
 
 data_path ='data/pendulum_data_all_sets.mat'
 data = loadmat(data_path)
