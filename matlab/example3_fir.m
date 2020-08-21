@@ -1,20 +1,24 @@
-%##########################################################################
-% Practical Bayesian System identification using Hamiltonian Monte Carlo
-% Copyright (C) 2018  Johan Dahlin < uni (at) johandahlin [dot] com >
+%##############################################################################
+%    Practical Bayesian System Identification using Hamiltonian Monte Carlo
+%    Copyright (C) 2020  Johannes Hendriks < johannes.hendriks@newcastle.edu.a >
 %
-% This program is free software: you can redistribute it and/or modify
-% it under the terms of the GNU General Public License as published by
-% the Free Software Foundation, either version 3 of the License, or
-% any later version.
+%    This program is free software: you can redistribute it and/or modify
+%    it under the terms of the GNU General Public License as published by
+%    the Free Software Foundation, either version 3 of the License, or
+%    any later version.
 %
-% This program is distributed in the hope that it will be useful,
-% but WITHOUT ANY WARRANTY; without even the implied warranty of
-% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-% GNU General Public License for more details.
+%    This program is distributed in the hope that it will be useful,
+%    but WITHOUT ANY WARRANTY; without even the implied warranty of
+%    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+%    GNU General Public License for more details.
 %
-% You should have received a copy of the GNU General Public License
-% along with this program.  If not, see <https://www.gnu.org/licenses/>.
-%##########################################################################
+%    You should have received a copy of the GNU General Public License
+%    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+%##############################################################################
+
+% this script generates the data and runs the maximum likelihoodestiamtion
+% for example 3 "fir model" given in Section 6.4 of the paper.
+% the hmc system identification can then be run using example3_fir.py
 
 % Load data from MATLAB help
 load regularizationExampleData.mat eData
