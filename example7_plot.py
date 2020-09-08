@@ -26,7 +26,6 @@ import matplotlib.pyplot as plt
 import pickle
 
 
-
 data_path ='data/pendulum_data_all_sets.mat'
 data = loadmat(data_path)
 set_number = 1
