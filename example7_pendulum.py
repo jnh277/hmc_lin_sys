@@ -32,7 +32,7 @@ import pickle
 
 data_path ='data/pendulum_data_all_sets.mat'
 data = loadmat(data_path)
-set_number = 0
+set_number = 1
 Ts = data['dt']
 # theta0 = data['theta_init'][:,0]
 u = data['u_all'][set_number,:,:]
@@ -88,7 +88,7 @@ fit = model.sampling(data=stan_data, iter=10000, chains=4,control=control, init=
 
 traces = fit.extract()
 
-with open('results/pendulum_set0_results_coupled.pickle', 'wb') as file:
+with open('results/pendulum_set1_results_coupled_euler.pickle', 'wb') as file:
     pickle.dump(traces, file)
 
 
