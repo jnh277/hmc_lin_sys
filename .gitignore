@@ -153,3 +153,6 @@ results/pendulum_set5_results_coupled.pickle
 results/pendulum_set6_results_coupled.pickle
 results/pendulum_set7_results_coupled.pickle
 results/ctrl_sysid_traces2.pickle
+results/pendulum_Traces.mat
+data/stochastic_volatility_data1.mat
+results/stochastic_volatility_traces.mat
