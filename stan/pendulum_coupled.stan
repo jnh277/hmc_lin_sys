@@ -126,8 +126,8 @@ transformed parameters {
 //    for (k in 1:no_obs-1) {
 //        mu[:,k+1] = discrete_update(h[:,k], u1[k], u2[k], m, J, l, a, r1, r2, Ts);
 //    }
-    mu = discrete_update_vec(u[1:no_obs-1], theta, Lr, Mp, Lp, g, Ts);
-//    mu = rk4_update(h[:,1:no_obs-1], u[1:no_obs-1], theta, Lr, Mp, Lp, g, Ts);
+    mu = discrete_update_vec(h[:,1:no_obs-1],u[1:no_obs-1], theta, Lr, Mp, Lp, g, Ts);
+//    mu = rk4_update(h[:,1:no_obs-1], u[1:no_obs-1], theta, Lr, Mp, Lp, g, Ts); this option was used for results in paper
 //    mu = multi_rk4_update(h[:,1:no_obs-1], u1[1:no_obs-1], u2[1:no_obs-1], m, J, l, a, r1, r2, Ts);
 
     // measurement model
