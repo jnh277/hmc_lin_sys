@@ -24,7 +24,7 @@ import numpy as np
 from scipy.io import loadmat
 import matplotlib.pyplot as plt
 import pickle
-
+from scipy.io import savemat
 
 data_path ='data/pendulum_data_all_sets.mat'
 data = loadmat(data_path)
@@ -49,7 +49,7 @@ z_init[3,-1] = z_init[3,-2]
 
 # with open('results/pendulum_data1_trial0.pickle','rb') as file:
 #     traces = pickle.load(file)
-with open('results/pendulum_set1_results_coupled.pickle','rb') as file:
+with open('results/pendulum_set1_results_coupled_euler.pickle','rb') as file:
     traces = pickle.load(file)
 
 theta = traces['theta']

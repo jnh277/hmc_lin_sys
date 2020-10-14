@@ -44,7 +44,7 @@ functions{
         row_vector[pdims[2]] m11 = Jr + Mp * Lr^2 + 0.25 * Mp * Lp^2 - 0.25 * Mp * Lp^2 * (cos(z[2,:]) .* cos(z[2,:]));
         row_vector[pdims[2]] m12 = 0.5 * Mp * Lp * Lr * cos(z[2,:]);
         real m22 = (Jp + 0.25 * Mp * Lp^2);
-        row_vector[pdims[2]] sc = m11 * m22 - m12 * m22;      // denominator of 2x2 inverse of mass matrix
+        row_vector[pdims[2]] sc = m11 * m22 - m12 .* m12;      // denominator of 2x2 inverse of mass matrix
 
         row_vector[pdims[2]] tau = (Km * (u - Km * z[3,:])) / Rm;
 

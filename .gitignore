@@ -157,3 +157,4 @@ results/pendulum_Traces.mat
 data/stochastic_volatility_data1.mat
 results/stochastic_volatility_traces.mat
 results/pendulum_set1_results_coupled_euler.pickle
+results/pendulum_traces_euler.mat
