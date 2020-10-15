@@ -50,19 +50,44 @@ Mp = 0.025      # pendulum mass
 Lp = 0.129      # pendulum length
 g  = 9.81       # gravity
 
-# state initialisation point
-z_init = np.zeros((4,no_obs))
-z_init[0,:] = y[0,:]
-z_init[1,:] = y[1,:]
-z_init[2,:-1] = (y[0,1:]-y[0,0:-1])/Ts
-z_init[2,-1] = z_init[2,-2]
-z_init[3,:-1] = (y[1,1:]-y[1,0:-1])/Ts
-z_init[3,-1] = z_init[3,-2]
+# # state initialisation point
+# z_init = np.zeros((4,no_obs))
+# z_init[0,:] = y[0,:]
+# z_init[1,:] = y[1,:]
+# z_init[2,:-1] = (y[0,1:]-y[0,0:-1])/Ts
+# z_init[2,-1] = z_init[2,-2]
+# z_init[3,:-1] = (y[1,1:]-y[1,0:-1])/Ts
+# z_init[3,-1] = z_init[3,-2]
 
 # model = pystan.StanModel(file='stan/pendulum_coupled.stan')
-model = pystan.StanModel(file='stan/pendulum_coupled_noprior.stan')
 
-stan_data = {'no_obs': no_obs,
+# stan_data = {'no_obs': no_obs,
+#              'Ts':Ts[0,0],
+#              'y': y,
+#              'u': u.flatten(),
+#              'Lr':Lr,
+#              'Mp':Mp,
+#              'Lp':Lp,
+#              'g':g,
+#              # 'z0':mu0.flatten(),
+#              }
+
+################ jarrad version
+# state initialisation point
+z_init = np.zeros((4,no_obs+1))
+z_init[0,:-1] = y[0,:]
+z_init[1,:-1] = y[1,:]
+z_init[0,-1] = y[0,-1]      # repeat last entry
+z_init[1,-1] = y[1,-1]      # repeat last entry
+z_init[2,:-2] = (y[0,1:]-y[0,0:-1])/Ts
+z_init[2,-1:] = z_init[2,-3]
+z_init[3,:-2] = (y[1,1:]-y[1,0:-1])/Ts
+z_init[3,-1:] = z_init[3,-3]
+
+model = pystan.StanModel(file='stan/pendulum_coupled_noprior.stan')
+mu0 = np.zeros((4,))
+cP0 = np.array([np.deg2rad(10),np.deg2rad(10),np.deg2rad(100),np.deg2rad(100)])
+stan_data ={'no_obs': no_obs,
              'Ts':Ts[0,0],
              'y': y,
              'u': u.flatten(),
@@ -70,7 +95,8 @@ stan_data = {'no_obs': no_obs,
              'Mp':Mp,
              'Lp':Lp,
              'g':g,
-             # 'z0':mu0.flatten(),
+             'mu0':mu0,
+             'cP0':cP0,
              }
 
 control = {"adapt_delta": 0.85,
