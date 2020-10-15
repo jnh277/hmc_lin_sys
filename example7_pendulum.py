@@ -59,7 +59,8 @@ z_init[2,-1] = z_init[2,-2]
 z_init[3,:-1] = (y[1,1:]-y[1,0:-1])/Ts
 z_init[3,-1] = z_init[3,-2]
 
-model = pystan.StanModel(file='stan/pendulum_coupled.stan')
+# model = pystan.StanModel(file='stan/pendulum_coupled.stan')
+model = pystan.StanModel(file='stan/pendulum_coupled_noprior.stan')
 
 stan_data = {'no_obs': no_obs,
              'Ts':Ts[0,0],

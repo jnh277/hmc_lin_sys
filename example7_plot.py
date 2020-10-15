@@ -52,6 +52,8 @@ z_init[3,-1] = z_init[3,-2]
 with open('results/pendulum_set1_results_coupled_euler.pickle','rb') as file:
     traces = pickle.load(file)
 
+# savemat('results/pendulum_traces_rk4.mat',traces)
+
 theta = traces['theta']
 z = traces['h']
 yhat = traces['yhat']
