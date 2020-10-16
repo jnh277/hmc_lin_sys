@@ -115,7 +115,7 @@ fit = model.sampling(data=stan_data, iter=10000, chains=4,control=control, init=
 
 traces = fit.extract()
 
-with open('results/pendulum_set1_results_coupled_euler.pickle', 'wb') as file:
+with open('results/pendulum_set1_results_coupled_rk4.pickle', 'wb') as file:
     pickle.dump(traces, file)
 
 

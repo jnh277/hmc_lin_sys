@@ -123,8 +123,8 @@ transformed parameters {
 
 
     // process model
-    mu = discrete_update_vec(h[:,1:no_obs],u[1:no_obs], theta, Lr, Mp, Lp, g, Ts);
-//    mu = rk4_update(h[:,1:no_obs], u[1:no_obs], theta, Lr, Mp, Lp, g, Ts); // this option was used for results in paper
+//    mu = discrete_update_vec(h[:,1:no_obs],u[1:no_obs], theta, Lr, Mp, Lp, g, Ts);
+    mu = rk4_update(h[:,1:no_obs], u[1:no_obs], theta, Lr, Mp, Lp, g, Ts); // this option was used for results in paper
 //    mu = multi_rk4_update(h[:,1:no_obs], u1[1:no_obs], u2[1:no_obs-1], m, J, l, a, r1, r2, Ts);
 
     // measurement model
