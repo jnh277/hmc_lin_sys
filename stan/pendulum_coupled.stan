@@ -103,9 +103,9 @@ data {
 //    vector[4] z0;                       // initial state guess
 }
 parameters {
-    matrix[4,no_obs] h;                     // hidden states
+    matrix[4,no_obs+1] h;                     // hidden states
     vector<lower=0.0>[6] theta;             // the parameters  [Jr, Jp, Km, Rm, Dp, Dr]
-    vector[4] z0;                           // initial state guess
+//    vector[4] z0;                           // initial state guess
     // components of joint covariance
     vector<lower=0,upper=pi()/2>[7] tau_unif;
     cholesky_factor_corr[7] Lcorr;
@@ -115,7 +115,7 @@ parameters {
 
 }
 transformed parameters {
-    matrix[4, no_obs-1] mu;
+    matrix[4, no_obs] mu;
     matrix[3, no_obs] yhat;
     matrix[7, no_obs] mu_c;
 //    matrix[3,no_obs] yhat;
@@ -123,20 +123,16 @@ transformed parameters {
 
 
     // process model
-//    for (k in 1:no_obs-1) {
-//        mu[:,k+1] = discrete_update(h[:,k], u1[k], u2[k], m, J, l, a, r1, r2, Ts);
-//    }
-//    mu = discrete_update_vec(h[:,1:no_obs-1],u[1:no_obs-1], theta, Lr, Mp, Lp, g, Ts);
-    mu = rk4_update(h[:,1:no_obs-1], u[1:no_obs-1], theta, Lr, Mp, Lp, g, Ts); // this option was used for results in paper
+    mu = discrete_update_vec(h[:,1:no_obs-1],u[1:no_obs-1], theta, Lr, Mp, Lp, g, Ts);
+//    mu = rk4_update(h[:,1:no_obs], u[1:no_obs], theta, Lr, Mp, Lp, g, Ts); // this option was used for results in paper
 //    mu = multi_rk4_update(h[:,1:no_obs-1], u1[1:no_obs-1], u2[1:no_obs-1], m, J, l, a, r1, r2, Ts);
 
     // measurement model
-    yhat[1:2,:] = h[1:2,:];
-    yhat[3,:] = (u - theta[3] * h[3, :]) / theta[4];
+    yhat[1:2,:] = h[1:2,1:no_obs];
+    yhat[3,:] = (u - theta[3] * h[3, 1:no_obs]) / theta[4];
 
     // combine
-    mu_c[1:4,2:no_obs] = mu;
-    mu_c[1:4,1] = z0;
+    mu_c[1:4,1:no_obs] = mu;
     mu_c[5:7,:] = yhat;
 }
 model {
@@ -148,16 +144,11 @@ model {
     theta ~ normal(0.0, theta_hyper * shrinkage_param);
 
     // initial state prior (don't use this for now)
-//    h[:,1] ~ normal(z0, 0.2);      //
+    h[:,1] ~ normal(0, 2);      //
 
-//    // state distributions
-//    target += matrix_normal_lpdf(h[:,2:no_obs] | mu, diag_pre_multiply(tauQ,LQcorr));
-//
-//    // measurement distributions
-//    target += matrix_normal_lpdf( y | yhat, diag_pre_multiply(tauR,LRcorr));
 
     // combined distribution
-    target += matrix_normal_lpdf(append_row(h,y) | mu_c, diag_pre_multiply(tau,Lcorr));
+    target += matrix_normal_lpdf(append_row(h[:,2:no_obs+1],y) | mu_c, diag_pre_multiply(tau,Lcorr));
 
 }
 generated quantities {

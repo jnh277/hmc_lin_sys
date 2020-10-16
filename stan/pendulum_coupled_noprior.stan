@@ -106,7 +106,6 @@ data {
 parameters {
     matrix[4,no_obs+1] h;                     // hidden states
     vector<lower=0.0>[6] theta;             // the parameters  [Jr, Jp, Km, Rm, Dp, Dr]
-//    vector[4] z0;                           // initial state guess
     cholesky_factor_cov[7] L;
 
 }

@@ -160,3 +160,4 @@ results/pendulum_set1_results_coupled_euler.pickle
 results/pendulum_traces_euler.mat
 results/pendulum_set1_results_coupled_rk4.pickle
 results/pendulum_traces_rk4.mat
+results/pendulum_set1_results_coupled_euler_noprior.pickle
