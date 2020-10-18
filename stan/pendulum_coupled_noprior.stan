@@ -100,21 +100,30 @@ data {
     real Mp;                            // pendulum mass
     real Lp;                            // pendulum length
     real g;                             // gravity
-    vector[4] mu0;                       // initial state guess
-    vector[4] cP0;                      // initial state variance (must be diagonal elements only)
+//    vector[4] z0;                       // initial state guess
 }
 parameters {
     matrix[4,no_obs+1] h;                     // hidden states
     vector<lower=0.0>[6] theta;             // the parameters  [Jr, Jp, Km, Rm, Dp, Dr]
-    cholesky_factor_cov[7] L;
+//    vector[4] z0;                           // initial state guess
+    // components of joint covariance
+    vector<lower=0,upper=pi()/2>[7] tau_unif;
+    cholesky_factor_corr[7] Lcorr;
+    // horeshoe hyperparameters for theta
+//    vector<lower=0.0>[6] theta_hyper;
+//    real<lower=0.0> shrinkage_param;
 
 }
 transformed parameters {
     matrix[4, no_obs] mu;
     matrix[3, no_obs] yhat;
     matrix[7, no_obs] mu_c;
+//    matrix[3,no_obs] yhat;
+    vector<lower=0>[7] tau = 2.5 * tan(tau_unif);       // L diag scaling
 
-    mu = discrete_update_vec(h[:,1:no_obs],u[1:no_obs], theta, Lr, Mp, Lp, g, Ts);  // 2 euler steps
+
+    // process model
+    mu = discrete_update_vec(h[:,1:no_obs],u[1:no_obs], theta, Lr, Mp, Lp, g, Ts);
 //    mu = rk4_update(h[:,1:no_obs], u[1:no_obs], theta, Lr, Mp, Lp, g, Ts); // this option was used for results in paper
 //    mu = multi_rk4_update(h[:,1:no_obs], u1[1:no_obs], u2[1:no_obs-1], m, J, l, a, r1, r2, Ts);
 
@@ -124,19 +133,29 @@ transformed parameters {
 
     // combine
     mu_c[1:4,1:no_obs] = mu;
-//    mu_c[1:4,1] = z0;
     mu_c[5:7,:] = yhat;
 }
 model {
-    // prior on h_1
-    target += normal_lpdf(h[:,1] | mu0, cP0);
+    Lcorr ~ lkj_corr_cholesky(2);
+
+    // parameter priors
+//    theta_hyper ~ cauchy(0.0, 1.0);
+//    shrinkage_param ~ cauchy(0.0, 1.0);
+//    theta ~ normal(0.0, theta_hyper * shrinkage_param);
+
+    // initial state prior
+    h[:,1] ~ normal(0, 2);      //
+
 
     // combined distribution
-    target += matrix_normal_lpdf(append_row(h[:,2:no_obs+1],y) | mu_c, L);
+    target += matrix_normal_lpdf(append_row(h[:,2:no_obs+1],y) | mu_c, diag_pre_multiply(tau,Lcorr));
 
 }
 generated quantities {
+    cholesky_factor_cov[7] L;
     real loglikelihood;
+    L = diag_pre_multiply(tau,Lcorr);
+//    loglikelihood = matrix_normal_lpdf(append_row(h,y) | mu_c, diag_pre_multiply(tau,Lcorr));
 
 }
 
