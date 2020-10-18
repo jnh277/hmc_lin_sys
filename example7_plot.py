@@ -49,13 +49,13 @@ z_init[3,-1] = z_init[3,-2]
 
 # with open('results/pendulum_data1_trial0.pickle','rb') as file:
 #     traces = pickle.load(file)
-with open('results/pendulum_set1_results_coupled_euler.pickle','rb') as file:
+with open('results/pendulum_set1_results_coupled_rk4.pickle','rb') as file:
     traces = pickle.load(file)
 
-# savemat('results/pendulum_traces_rk4.mat',traces)
+savemat('results/pendulum_traces_rk4.mat',traces)
 
 theta = traces['theta']
-z = traces['h']
+z = traces['h'][:,:,:no_obs]
 yhat = traces['yhat']
 
 # lm = traces['meas_loglikelihood']
