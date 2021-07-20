@@ -52,7 +52,7 @@ z_init[3,-1] = z_init[3,-2]
 with open('results/pendulum_set1_results_coupled_rk4.pickle','rb') as file:
     traces = pickle.load(file)
 
-savemat('results/pendulum_traces_rk4.mat',traces)
+# savemat('results/pendulum_traces_rk4.mat',traces)
 
 theta = traces['theta']
 z = traces['h'][:,:,:no_obs]
@@ -217,16 +217,16 @@ plt.show()
 fontsize=12
 plt.subplot(3,3,1)
 plt.hist(z[:,3,245],bins=30,density=True)
-plt.yticks([],[])
+# plt.yticks([],[])
 plt.xticks([],[])
-plt.xlabel(r'$\dot{\alpha}$ at $t=1.8$s',fontsize=fontsize)
-plt.ylabel('marginal',fontsize=fontsize)
+plt.ylabel(r'$\dot{\alpha}$ at $t=1.8$s',fontsize=fontsize)
+# plt.ylabel('marginal',fontsize=fontsize)
 
 plt.subplot(3,3,4)
 plt.plot(z[:,3,245],theta[:,2],'.')
 # plt.yticks([],[])
 plt.xticks([],[])
-plt.xlabel(r'$\dot{\alpha}$ at $t=1.8$s',fontsize=fontsize)
+# plt.xlabel(r'$\dot{\alpha}$ at $t=1.8$s',fontsize=fontsize)
 plt.ylabel(r'$k_m$',fontsize=fontsize)
 
 plt.subplot(3,3,5)
@@ -234,8 +234,8 @@ plt.hist(theta[:,2],bins=30,density=True)
 plt.yticks([],[])
 plt.xticks([],[])
 # plt.xlim((np.min(theta[:,2]),np.max(theta[:,2])))
-plt.xlabel(r'$k_m$',fontsize=fontsize)
-plt.ylabel('marginal',fontsize=fontsize)
+# plt.xlabel(r'$k_m$',fontsize=fontsize)
+# plt.ylabel('marginal',fontsize=fontsize)
 
 plt.subplot(3,3,7)
 plt.plot(z[:,3,245],yhat[:,2,225],'.')
@@ -251,7 +251,7 @@ plt.yticks([],[])
 # plt.xlim((np.min(theta[:,2]),np.max(theta[:,2])))
 # plt.xticks([],[])
 plt.xlabel(r'$k_m$',fontsize=fontsize)
-plt.ylabel(r'$I_m$ at $t=1.8$s ',fontsize=fontsize)
+# plt.ylabel(r'$I_m$ at $t=1.8$s ',fontsize=fontsize)
 
 plt.subplot(3,3,9)
 plt.hist(yhat[:,2,225],bins=30,density=True)
@@ -260,7 +260,7 @@ plt.axvline(y[2,225],lw=2.5,color='k',linestyle='--')
 plt.yticks([],[])
 # plt.xticks([],[])
 plt.xlabel(r'$I_m$ at $t=1.8$s ',fontsize=fontsize)
-plt.ylabel('marginal',fontsize=fontsize)
+# plt.ylabel('marginal',fontsize=fontsize)
 
 plt.tight_layout()
 plt.savefig('figures/pendulum_pairs.png',format='png')

@@ -162,3 +162,7 @@ results/pendulum_set1_results_coupled_rk4.pickle
 results/pendulum_traces_rk4.mat
 results/pendulum_set1_results_coupled_euler_noprior.pickle
 results/pendulum_set1_results_euler_noprior.pickle
+matlab/results.mat
+
+# ignore the unit toolbox
+matlab/unit/*
