@@ -70,120 +70,12 @@ def run_oe_hmc(data_path, input_order, output_order, hot_start=False, iter=6000,
             return output
 
     if OL:
-        model_code = """
-        data {
-              int<lower=0> output_order;
-              int<lower=0> input_order;
-              int<lower=0> no_obs_est;
-              int<lower=0> no_obs_val;
-              row_vector[no_obs_est] y_est;
-              row_vector[no_obs_est] u_est;
-              row_vector[no_obs_val] u_val;
-            }
-            transformed data {
-                int<lower=0> max_order = max(output_order,input_order-1);
-            }
-            parameters {
-                vector[input_order] b_coefs;
-                vector[output_order] f_coefs;
-                vector<lower=0>[input_order] b_coefs_hyperprior;
-                vector<lower=0>[output_order] f_coefs_hyperprior;
-                real<lower=0> shrinkage_param;
-                real<lower=0> r;            // noise standard deviation
-            }
-            transformed parameters{
-                row_vector[no_obs_est] mu = rep_row_vector(0.0,no_obs_est);
-                for (i in max_order+1:no_obs_est){
-                    mu[i] = u_est[i-input_order+1:i] * b_coefs  -  mu[i-output_order:i-1] * f_coefs;
-                }
-            
-            
-            }
-            model {
-                // hyper priors
-                shrinkage_param ~ cauchy(0.0, 1.0);
-                b_coefs_hyperprior ~ cauchy(0.0, 1.0);
-                f_coefs_hyperprior ~ cauchy(0.0, 1.0);
-            
-                // parameters
-                b_coefs ~ normal(0.0, b_coefs_hyperprior * shrinkage_param);
-                f_coefs ~ normal(0.0, f_coefs_hyperprior * shrinkage_param);
-            
-                // noise standard deviation
-                r ~ cauchy(0.0, 1.0);
-            
-                // measurement likelihood
-                y_est[max_order+1:no_obs_est] ~ normal(mu[max_order+1:no_obs_est], r);
-            
-            }
-            generated quantities {
-                 row_vector[no_obs_val] y_hat_val = rep_row_vector(0.0,no_obs_val);
-             
-                 for (i in max_order+1:no_obs_val){
-                     y_hat_val[i] = u_val[i-input_order+1:i] * b_coefs  - y_hat_val[i-output_order:i-1] * f_coefs;
-                 }
-             }
-        """
+        f = open('stan/oe_OL.stan','r')
+        model_code = f.read()
 
     else:
-        model_code = """
-                    data {
-                          int<lower=0> output_order;
-                          int<lower=0> input_order;
-                          int<lower=0> no_obs_est;
-                          int<lower=0> no_obs_val;
-                          row_vector[no_obs_est] y_est;
-                          row_vector[no_obs_est] u_est;
-                          row_vector[no_obs_val] u_val;
-                          row_vector[no_obs_val] y_val;
-                        }
-                        transformed data {
-                            int<lower=0> max_order = max(output_order,input_order-1);
-                        }
-                        parameters {
-                            vector[input_order] b_coefs;
-                            vector[output_order] f_coefs;
-                            vector<lower=0>[input_order] b_coefs_hyperprior;
-                            vector<lower=0>[output_order] f_coefs_hyperprior;
-                            real<lower=0> shrinkage_param;
-                            real<lower=0> r;            // noise standard deviation
-                            real<lower=0> r2;
-                        //    row_vector[max_order] e_init;
-                            row_vector[no_obs_est] ehat;
-                        }
-                        transformed parameters{
-                            row_vector[no_obs_est] yhat;
-                            yhat[1:max_order] = rep_row_vector(0.0,max_order);
-                            for (i in max_order+1:no_obs_est){
-                        //        ehat[i] = y_est[i-output_order:i-1]*f_coefs + y_est[i] - u_est[i-input_order+1:i] * b_coefs
-                        //              - ehat[i-output_order:i-1]*f_coefs;
-                                yhat[i] = u_est[i-input_order+1:i] * b_coefs - y_est[i-output_order:i-1]*f_coefs
-                                            + ehat[i-output_order:i-1]*f_coefs + ehat[i];
-                            }
-                        
-                        
-                        }
-                        model {
-                            // hyper priors
-                            shrinkage_param ~ cauchy(0.0, 1.0);
-                            b_coefs_hyperprior ~ cauchy(0.0, 1.0);
-                            f_coefs_hyperprior ~ cauchy(0.0, 1.0);
-                        
-                            // parameters
-                            b_coefs ~ normal(0.0, b_coefs_hyperprior * shrinkage_param);
-                            f_coefs ~ normal(0.0, f_coefs_hyperprior * shrinkage_param);
-                        //    ehat ~ normal(0.0, r);
-                        
-                            // noise standard deviation
-                            r ~ cauchy(0.0, 1.0);
-                            r2 ~ cauchy(0.0, 1.0);
-                        
-                            // measurement likelihood
-                            ehat ~ normal(0.0, r);     // this includes the e_init prior
-                            y_est[max_order+1:no_obs_est] ~ normal(yhat[max_order+1:no_obs_est], r2);
-                        
-                        }
-        """
+        f = open('stan/oe.stan')
+        model_code = f.read()
 
     posterior = stan.build(model_code, data=stan_data)
     init = [init_function(),init_function(),init_function(),init_function()]

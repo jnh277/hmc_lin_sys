@@ -37,11 +37,11 @@ y_val = y_val[int(max_delay):]
 
 
 ## estime using horseshoe prior
-(fit, traces) = run_fir_hmc(data_path, input_order,  prior='hs', hot_start=True)
+traces = run_fir_hmc(data_path, input_order,  prior='hs', hot_start=True)
 
 
 ##
-yhat_hs = traces['y_hat']
+yhat_hs = traces['y_hat'].swapaxes(0,-1)
 yhat_hs[np.isnan(yhat_hs)] = 0.0
 yhat_hs[np.isinf(yhat_hs)] = 0.0
 
@@ -50,18 +50,18 @@ yhat_upper_ci_hs = np.percentile(yhat_hs, 97.5, axis=0)
 yhat_lower_ci_hs = np.percentile(yhat_hs, 2.5, axis=0)
 
 
-b_hs = traces['b_coefs']
+b_hs = traces['b_coefs'].swapaxes(0,-1)
 b_hs_mean = np.mean(b_hs,0)
 
 
 MF_hs = 100*(1-np.sum(np.power(y_val-yhat_mean_hs,2))/np.sum(np.power(y_val,2)))
 
 ## estime using TC prior
-(fit, traces) = run_fir_hmc(data_path, input_order,  prior='tc', hot_start=True)
+traces = run_fir_hmc(data_path, input_order,  prior='tc', hot_start=True)
 
 
 ##
-yhat_tc = traces['y_hat']
+yhat_tc = traces['y_hat'].swapaxes(0,-1)
 yhat_tc[np.isnan(yhat_tc)] = 0.0
 yhat_tc[np.isinf(yhat_tc)] = 0.0
 
@@ -70,7 +70,7 @@ yhat_upper_ci_tc = np.percentile(yhat_tc, 99.5, axis=0)
 yhat_lower_ci_tc = np.percentile(yhat_tc, 0.5, axis=0)
 
 
-b_tc = traces['b_coefs']
+b_tc = traces['b_coefs'].swapaxes(0,-1)
 b_tc_mean = np.mean(b_tc,0)
 
 

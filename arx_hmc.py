@@ -19,7 +19,7 @@
 """Estimates an ARX model using data with Gaussian noise and known model orders."""
 """ allows for horseshoe prior, l1 prior, and l2 priors """
 
-import pystan
+import stan
 import numpy as np
 from scipy.io import loadmat
 from helpers import build_input_matrix
@@ -28,7 +28,7 @@ import pickle
 from pathlib import Path
 
 
-def run_arx_hmc(data_path, input_order, output_order,  prior='hs', hot_start=False, iter=6000):
+def run_arx_hmc(data_path, input_order, output_order, prior='hs', hot_start=False, iter=2000):
     """Input order gives the terms b_0 * u_k + b_1 * u_{k-1} + .. + b_{input_order-1} * u_{k-input_order+1}"""
     """Output order gives the terms a_0 * y_{k-1} + ... + a_{output_order-1}*y_{k-output_order} """
     """Priors can be 'hs', 'l1' and 'l2', and in a hacky way it can also be 'st' which represents using a student t measurement noise """
@@ -40,7 +40,6 @@ def run_arx_hmc(data_path, input_order, output_order,  prior='hs', hot_start=Fal
     u_est = data['u_estimation'].flatten()
     y_val = data['y_validation'].flatten()
     u_val = data['u_validation'].flatten()
-
 
     # build regression matrix
     est_input_matrix = build_input_matrix(u_est, input_order)
@@ -85,40 +84,19 @@ def run_arx_hmc(data_path, input_order, output_order,  prior='hs', hot_start=Fal
                           )
             return output
 
-
     # specify model file
     if prior == 'hs':
-        model_path = 'stan/arx_hs.pkl'
-        if Path(model_path).is_file():
-            model = pickle.load(open(model_path, 'rb'))
-        else:
-            model = pystan.StanModel(file='stan/arx.stan')
-            with open(model_path, 'wb') as file:
-                pickle.dump(model, file)
+        f = open('stan/arx.stan', 'r')
+        model_code = f.read()
     elif prior == 'l1':
-        model_path = 'stan/arx_l1.pkl'
-        if Path(model_path).is_file():
-            model = pickle.load(open(model_path, 'rb'))
-        else:
-            model = pystan.StanModel(file='stan/arx_l1.stan')
-            with open(model_path, 'wb') as file:
-                pickle.dump(model, file)
+        f = open('stan/arx_l1.stan', 'r')
+        model_code = f.read()
     elif prior == 'l2':
-        model_path = 'stan/arx_l2.pkl'
-        if Path(model_path).is_file():
-            model = pickle.load(open(model_path, 'rb'))
-        else:
-            model = pystan.StanModel(file='stan/arx_l2.stan')
-            with open(model_path, 'wb') as file:
-                pickle.dump(model, file)
+        f = open('stan/arx_l2.stan', 'r')
+        model_code = f.read()
     elif prior == 'st':
-        model_path = 'stan/arx_st.pkl'
-        if Path(model_path).is_file():
-            model = pickle.load(open(model_path, 'rb'))
-        else:
-            model = pystan.StanModel(file='stan/arx_st.stan')
-            with open(model_path, 'wb') as file:
-                pickle.dump(model, file)
+        f = open('stan/arx_st.stan', 'r')
+        model_code = f.read()
     else:
         print("invalid prior specified, priors can be 'hs', 'l1', 'l2' or 'st ")
 
@@ -135,9 +113,8 @@ def run_arx_hmc(data_path, input_order, output_order,  prior='hs', hot_start=Fal
                  }
 
     # perform sampling using hamiltonian monte carlo
-    fit = model.sampling(data=stan_data, init=init_function, iter=iter, chains=4)
+    posterior = stan.build(model_code, data=stan_data)
+    init = [init_function(),init_function(),init_function(),init_function()]
+    traces = posterior.sample(init=init, num_samples=iter, num_warmup=2000, num_chains=4)
 
-    # extract the results
-    traces = fit.extract()
-
-    return (fit,traces)
+    return traces

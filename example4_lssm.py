@@ -46,13 +46,13 @@ Ts = data['Ts'].flatten()
 no_obs_est = len(y_est)
 
 # (fit, traces) = run_lssm_hmc(data_path, 4, hot_start=False, iter=3000)
-(fit, traces) = run_lssm_hmc(data_path, 4, hot_start=True, iter=3000)
+traces = run_lssm_hmc(data_path, 4, hot_start=True, iter=2000)
 
 
 with open('lssm_traces.pickle', 'wb') as file:
     pickle.dump(traces, file)
 
-yhat = traces['y_hat']
+yhat = traces['y_hat'].swapaxes(0,-1)
 yhat[np.isnan(yhat)] = 0.0
 yhat[np.isinf(yhat)] = 0.0
 
@@ -61,13 +61,13 @@ yhat_upper_ci = np.percentile(yhat, 97.5, axis=0)
 yhat_lower_ci = np.percentile(yhat, 2.5, axis=0)
 
 
-A_traces = traces['A']
-B_traces = traces['B']
-C_traces = traces['C']
-D_traces = traces['D']
-LQ_traces = traces['LQ']
-r_traces = traces['r']
-h_traces = traces['h']
+A_traces = traces['A'].swapaxes(0,-1)
+B_traces = traces['B'].swapaxes(0,-1)
+C_traces = traces['C'].swapaxes(0,-1)
+D_traces = traces['D'].swapaxes(0,-1)
+LQ_traces = traces['LQ'].swapaxes(0,-1)
+r_traces = traces['r'].swapaxes(0,-1)
+h_traces = traces['h'].swapaxes(0,-1)
 
 
 A_mean = np.mean(A_traces,0)

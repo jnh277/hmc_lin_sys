@@ -51,10 +51,10 @@ y_val = y_val[int(max_delay):]
 a_ML = data['a_ML'][0,1:]
 
 # estimate using hmc with horeshoe prior
-(fit_hmc,results_hmc) = run_arx_hmc(data_path, input_order, output_order, prior='l2')
+results_hmc = run_arx_hmc(data_path, input_order, output_order, prior='l2')
 
-a_hmc = results_hmc['a_coefs']
-b_hmc = results_hmc['b_coefs']
+a_hmc = results_hmc['a_coefs'].swapaxes(0,-1)
+b_hmc = results_hmc['b_coefs'].swapaxes(0,-1)
 a_coef_mean = np.mean(a_hmc,0)
 b_coef_mean = np.mean(b_hmc,0)
 a1_hmc = a_hmc[:,0]
@@ -62,7 +62,7 @@ acf_hmc = calculate_acf(a1_hmc)
 a2_hmc = a_hmc[:,1]
 b2_hmc = b_hmc[:,1]
 
-yhat_hmc = results_hmc['y_hat']      # validation predictions
+yhat_hmc = results_hmc['y_hat'].swapaxes(0,-1)      # validation predictions
 yhat_hmc[np.isnan(yhat_hmc)] = 0.0
 yhat_hmc[np.isinf(yhat_hmc)] = 0.0
 yhat_mean_hmc = np.mean(yhat_hmc, axis=0)

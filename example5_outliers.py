@@ -37,10 +37,10 @@ output_order = 10        # gives the terms a_0 * y_{k-1} + ... + a_{output_order
 data = loadmat(data_path)
 y_val = data['y_validation'].flatten()
 
-(fit,traces) = run_arx_hmc(data_path, input_order, output_order,hot_start=True, prior='st',iter=6000)
+traces = run_arx_hmc(data_path, input_order, output_order,hot_start=True, prior='st',iter=2000)
 
 
-yhat = traces['y_hat']
+yhat = traces['y_hat'].swapaxes(0,-1)
 yhat[np.isnan(yhat)] = 0.0
 yhat[np.isinf(yhat)] = 0.0
 
@@ -51,9 +51,9 @@ yhat_lower_ci = np.percentile(yhat, 2.5, axis=0)
 stan_est = {'mean': yhat_mean, 'upper': yhat_upper_ci, 'lower': yhat_lower_ci,
             'sig_e_mean':traces['sig_e'].mean()}
 
-a_coef_traces = traces['a_coefs']
-b_coef_traces = traces['b_coefs']
-shrinkage_param = traces["shrinkage_param"]
+a_coef_traces = traces['a_coefs'].swapaxes(0,-1)
+b_coef_traces = traces['b_coefs'].swapaxes(0,-1)
+shrinkage_param = traces["shrinkage_param"].swapaxes(0,-1)
 shrinkage_param_mean = np.mean(shrinkage_param,0)
 
 a_coef_mean = np.mean(a_coef_traces,0)

@@ -19,7 +19,7 @@
 """Estimates an FIR model using data with Gaussian noise. """
 """ either a horeshoe prior or tuned-correlated kernel prior can be used """
 
-import pystan
+import stan
 import numpy as np
 from scipy.io import loadmat
 from helpers import build_input_matrix
@@ -76,26 +76,16 @@ def run_fir_hmc(data_path, input_order,  prior='tc', hot_start=False):
 
     # specify model file
     if prior == 'hs':
-        model_path = 'stan/fir_hs.pkl'
-        if Path(model_path).is_file():
-            model = pickle.load(open(model_path, 'rb'))
-        else:
-            model = pystan.StanModel(file='stan/fir.stan')
-            with open(model_path, 'wb') as file:
-                pickle.dump(model, file)
+        f = open('stan/fir.stan', 'r')
+        model_code = f.read()
     elif prior == 'tc':
-        model_path = 'stan/fir_tc.pkl'
-        if Path(model_path).is_file():
-            model = pickle.load(open(model_path, 'rb'))
-        else:
-            model = pystan.StanModel(file='stan/fir_tc.stan')
-            with open(model_path, 'wb') as file:
-                pickle.dump(model, file)
+        f = open('stan/fir_tc.stan', 'r')
+        model_code = f.read()
     else:
         print("invalid prior, options are 'hs' or 'tc' ")
 
-    fit = model.sampling(data=stan_data, init=init_function, iter=6000, chains=4)
+    posterior = stan.build(model_code, data=stan_data)
+    init = [init_function(),init_function(),init_function(),init_function()]
+    traces = posterior.sample(init=init, num_samples=2000, num_warmup=4000, num_chains=4)
 
-    traces = fit.extract()
-
-    return (fit, traces)
+    return traces

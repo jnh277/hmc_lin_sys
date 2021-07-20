@@ -44,27 +44,27 @@ y_val = data['y_validation'].flatten()
 
 traces = run_oe_hmc(data_path, input_order, output_order, iter=6000, OL=True, hot_start=True)
 
-yhat = traces['y_hat_val']
+yhat = traces['y_hat_val'].T
 yhat[np.isnan(yhat)] = 0.0
 yhat[np.isinf(yhat)] = 0.0
 
 # yhat_OL = traces['y_hat_val2']
 # yhat_OL_mean = np.mean(yhat_OL, axis=0)
 
-yhat_mean = np.mean(yhat, axis=1)
-yhat_upper_ci = np.percentile(yhat, 97.5, axis=1)
-yhat_lower_ci = np.percentile(yhat, 2.5, axis=1)
+yhat_mean = np.mean(yhat, axis=0)
+yhat_upper_ci = np.percentile(yhat, 97.5, axis=0)
+yhat_lower_ci = np.percentile(yhat, 2.5, axis=0)
 
 MF_hmc = 100*(1-np.sum(np.power(y_val[10:]-yhat_mean[10:],2))/np.sum(np.power(y_val[10:],2)))
 
 print('Model fit of hmc estaimte = ', MF_hmc)
 
 
-f_coef_traces = traces['f_coefs']
-b_coef_traces = traces['b_coefs']
+f_coef_traces = traces['f_coefs'].swapaxes(0,-1)
+b_coef_traces = traces['b_coefs'].swapaxes(0,-1)
 
-f_mean = np.mean(f_coef_traces,1)
-b_mean = np.mean(b_coef_traces,1)
+f_mean = np.mean(f_coef_traces,0)
+b_mean = np.mean(b_coef_traces,0)
 
 plt.subplot(1,1,1)
 plt.plot(y_val,linewidth=0.5)
@@ -79,10 +79,10 @@ plt.plot(yhat_mean[100:150])
 plt.show()
 
 
-plot_trace(f_coef_traces[0, :],4,1,'f[0]')
-plot_trace(f_coef_traces[1, :],4,2,'f[2]')
-plot_trace(b_coef_traces[0, :],4,3,'b[0]')
-plot_trace(b_coef_traces[1, :],4,4,'b[1]')
+plot_trace(f_coef_traces[:, 0],4,1,'f[0]')
+plot_trace(f_coef_traces[:, 2],4,2,'f[2]')
+plot_trace(b_coef_traces[:, 0],4,3,'b[0]')
+plot_trace(b_coef_traces[:, 1],4,4,'b[1]')
 plt.show()
 
 

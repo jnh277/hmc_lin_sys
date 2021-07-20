@@ -46,14 +46,14 @@ max_delay = np.max((output_order,input_order-1))
 y_val = y_val[int(max_delay):]
 
 # fit using hmc with horseshoe prior
-(fit_hs,traces) = run_arx_hmc(data_path, input_order, output_order, prior='hs', hot_start=False)
+traces = run_arx_hmc(data_path, input_order, output_order, prior='hs', hot_start=False)
 
 # extract parameter samples
-a_hs= traces['a_coefs']
-b_hs = traces['b_coefs']
+a_hs= traces['a_coefs'].swapaxes(0,-1)
+b_hs = traces['b_coefs'].swapaxes(0,-1)
 a_hs_mean = np.mean(a_hs,0)
 b_hs_mean = np.mean(b_hs,0)
-yhat = traces['y_hat']      # validation predictions
+yhat = traces['y_hat'].swapaxes(0,-1)      # validation predictions
 yhat[np.isnan(yhat)] = 0.0
 yhat[np.isinf(yhat)] = 0.0
 yhat_mean = np.mean(yhat, axis=0)
@@ -61,15 +61,15 @@ yhat_mean = np.mean(yhat, axis=0)
 MF_hs = 100*(1-np.sum(np.power(y_val-yhat_mean,2))/np.sum(np.power(y_val,2)))
 
 # fit using hmc with horseshoe prior
-(fit_l2,traces) = run_arx_hmc(data_path, input_order, output_order, prior='l2', hot_start=False)
+traces = run_arx_hmc(data_path, input_order, output_order, prior='l2', hot_start=False)
 
 
 # extract parameter samples
-a_l2= traces['a_coefs']
-b_l2 = traces['b_coefs']
+a_l2= traces['a_coefs'].swapaxes(0,-1)
+b_l2 = traces['b_coefs'].swapaxes(0,-1)
 a_l2_mean = np.mean(a_l2,0)
 b_l2_mean = np.mean(b_l2,0)
-yhat = traces['y_hat']      # validation predictions
+yhat = traces['y_hat'].swapaxes(0,-1)     # validation predictions
 yhat[np.isnan(yhat)] = 0.0
 yhat[np.isinf(yhat)] = 0.0
 yhat_mean = np.mean(yhat, axis=0)
@@ -77,15 +77,15 @@ yhat_mean = np.mean(yhat, axis=0)
 MF_l2 = 100*(1-np.sum(np.power(y_val-yhat_mean,2))/np.sum(np.power(y_val,2)))
 
 # fit using hmc with horseshoe prior
-(fit_l1,traces) = run_arx_hmc(data_path, input_order, output_order, prior='l1', hot_start=False)
+traces = run_arx_hmc(data_path, input_order, output_order, prior='l1', hot_start=False)
 
 
 # extract parameter samples
-a_l1= traces['a_coefs']
-b_l1 = traces['b_coefs']
+a_l1= traces['a_coefs'].swapaxes(0,-1)
+b_l1 = traces['b_coefs'].swapaxes(0,-1)
 a_l1_mean = np.mean(a_l1,0)
 b_l1_mean = np.mean(b_l1,0)
-yhat = traces['y_hat']      # validation predictions
+yhat = traces['y_hat'].swapaxes(0,-1)     # validation predictions
 yhat[np.isnan(yhat)] = 0.0
 yhat[np.isinf(yhat)] = 0.0
 yhat_mean = np.mean(yhat, axis=0)
