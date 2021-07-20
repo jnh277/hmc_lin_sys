@@ -19,11 +19,6 @@
 """ Runs the code for example 3 (Section 6.3) in the paper and produces the figures """
 """ This demonstrates Bayesian estimation of output error models using HMC """
 
-# import platform
-# if platform.system()=='Darwin':
-#     import multiprocessing
-#     multiprocessing.set_start_method("fork")
-
 import numpy as np
 from scipy.io import loadmat
 import matplotlib.pyplot as plt
