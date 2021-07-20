@@ -54,9 +54,9 @@ with open('results/pendulum_set1_results_coupled_rk4.pickle','rb') as file:
 
 # savemat('results/pendulum_traces_rk4.mat',traces)
 
-theta = traces['theta']
-z = traces['h'][:,:,:no_obs]
-yhat = traces['yhat']
+theta = traces['theta'].swapaxes(0,-1)
+z = traces['h'].swapaxes(0,-1)[:,:,:no_obs]
+yhat = traces['yhat'].swapaxes(0,-1)
 
 # lm = traces['meas_loglikelihood']
 # lp = traces['process_loglikelihood']

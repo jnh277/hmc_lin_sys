@@ -24,8 +24,6 @@ import numpy as np
 from scipy.io import loadmat
 from helpers import build_input_matrix
 from helpers import build_obs_matrix
-import pickle
-from pathlib import Path
 
 
 def run_arx_hmc(data_path, input_order, output_order, prior='hs', hot_start=False, iter=2000):
