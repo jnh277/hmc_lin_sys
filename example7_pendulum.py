@@ -103,13 +103,13 @@ def init_function():
     return output
 
 
-f = open('stan/pendulum.stan', 'r')
+f = open('stan/pendulum_coupled.stan', 'r')
 model_code = f.read()
 posterior = stan.build(model_code, data=stan_data)
 init = [init_function(), init_function(), init_function(), init_function()]
 traces = posterior.sample(init=init, num_samples=2000, num_warmup=6000, num_chains=4, max_depth=13, delta=0.85)
 
-with open('results/pendulum_set1_results.pickle', 'wb') as file:
+with open('results/pendulum_coupled_set1_results.pickle', 'wb') as file:
     pickle.dump(traces, file)
 
 theta = traces['theta'].swapaxes(0, -1)

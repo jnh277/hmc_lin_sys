@@ -46,38 +46,19 @@ z_init[3,:-1] = (y[1,1:]-y[1,0:-1])/Ts
 z_init[3,-1] = z_init[3,-2]
 
 
-
-# with open('results/pendulum_data1_trial0.pickle','rb') as file:
-#     traces = pickle.load(file)
-with open('results/pendulum_set1_results_coupled_rk4.pickle','rb') as file:
+with open('results/pendulum_set1_results.pickle','rb') as file:
     traces = pickle.load(file)
 
-# savemat('results/pendulum_traces_rk4.mat',traces)
 
 theta = traces['theta'].swapaxes(0,-1)
-z = traces['h'].swapaxes(0,-1)[:,:,:no_obs]
-yhat = traces['yhat'].swapaxes(0,-1)
+z = traces['h'].swapaxes(0,-1).swapaxes(1,2)[:,:,:no_obs]
+yhat = traces['yhat'].swapaxes(0,-1).swapaxes(1,2)
 
-# lm = traces['meas_loglikelihood']
-# lp = traces['process_loglikelihood']
 
 theta_mean = np.mean(theta,0)
 z_mean = np.mean(z,0)
 
-# LQ = traces['LQ']
-# LQ_mean = np.mean(LQ,0)
-# LR = traces['LR']
-# LR_mean = np.mean(LR,0)
-#
-# R = np.matmul(LR_mean, LR_mean.T)
-# Q = np.matmul(LQ_mean, LQ_mean.T)
-
-# L = traces['L']
-# L_mean = np.mean(L,0)
-# Omega = np.matmul(L_mean, L_mean.T)
-
 print('mean theta = ', theta_mean)
-
 
 ##
 fontsize = 16
