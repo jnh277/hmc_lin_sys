@@ -21,14 +21,12 @@
     saved in 'lssm_traces.pickle'.
     """
 
-
 import numpy as np
 from scipy.io import loadmat
 import matplotlib.pyplot as plt
 from helpers import plot_trace
 from helpers import plot_bode_ML
 import pickle
-
 
 # specific data path
 data_path = 'data/example4_lssm.mat'
@@ -42,9 +40,9 @@ Ts = data['Ts'].flatten()
 no_obs_est = len(y_est)
 
 with open('results/lssm_traces.pickle', 'rb') as file:
-    traces = pickle.load( file)
+    traces = pickle.load(file)
 
-yhat = traces['y_hat'].swapaxes(0,-1)
+yhat = traces['y_hat'].swapaxes(0, -1)
 yhat[np.isnan(yhat)] = 0.0
 yhat[np.isinf(yhat)] = 0.0
 
@@ -52,65 +50,53 @@ yhat_mean = np.mean(yhat, axis=0)
 yhat_upper_ci = np.percentile(yhat, 97.5, axis=0)
 yhat_lower_ci = np.percentile(yhat, 2.5, axis=0)
 
+A_traces = traces['A'].swapaxes(0, -1).swapaxes(1, 2)
+B_traces = traces['B'].swapaxes(0, -1)
+C_traces = traces['C'].swapaxes(0, -1)
+D_traces = traces['D'].swapaxes(0, -1)
+LQ_traces = traces['LQ'].swapaxes(0, -1).swapaxes(1, 2)
+r_traces = traces['r'].swapaxes(0, -1)
+h_traces = traces['h'].swapaxes(0, -1).swapaxes(1, 2)
 
-A_traces = traces['A'].swapaxes(0,-1)
-B_traces = traces['B'].swapaxes(0,-1)
-C_traces = traces['C'].swapaxes(0,-1)
-D_traces = traces['D'].swapaxes(0,-1)
-LQ_traces = traces['LQ'].swapaxes(0,-1)
-r_traces = traces['r'].swapaxes(0,-1)
-h_traces = traces['h'].swapaxes(0,-1)
-
-
-A_mean = np.mean(A_traces,0)
-B_mean = np.mean(B_traces,0)
-C_mean = np.mean(C_traces,0)
-D_mean = np.mean(D_traces,0)
-h_mean = np.mean(h_traces,0)
-r_mean = np.mean(r_traces,0)
-LQ_mean = np.mean(LQ_traces,0)
+A_mean = np.mean(A_traces, 0)
+B_mean = np.mean(B_traces, 0)
+C_mean = np.mean(C_traces, 0)
+D_mean = np.mean(D_traces, 0)
+h_mean = np.mean(h_traces, 0)
+r_mean = np.mean(r_traces, 0)
+LQ_mean = np.mean(LQ_traces, 0)
 
 h_upper_ci = np.percentile(h_traces, 97.5, axis=0)
 h_lower_ci = np.percentile(h_traces, 2.5, axis=0)
 
-
-
-plt.subplot(1,1,1)
-plt.plot(y_est,linewidth=0.5)
-plt.plot(yhat_mean,linewidth=0.5)
-plt.plot(yhat_upper_ci,'--',linewidth=0.5)
-plt.plot(yhat_lower_ci,'--',linewidth=0.5)
+plt.subplot(1, 1, 1)
+plt.plot(y_est, linewidth=0.5)
+plt.plot(yhat_mean, linewidth=0.5)
+plt.plot(yhat_upper_ci, '--', linewidth=0.5)
+plt.plot(yhat_lower_ci, '--', linewidth=0.5)
 plt.title('measurement estimates')
-plt.legend(('true','mean','upper CI','lower CI'))
+plt.legend(('true', 'mean', 'upper CI', 'lower CI'))
 plt.show()
 
-
-
-
-plot_trace(A_traces[:,1,0],4,1,'A[2,2]')
-plot_trace(C_traces[:,1],4,2,'C[1]')
-plot_trace(D_traces,4,3,'D')
-plot_trace(r_traces,4,4,'r')
+plot_trace(A_traces[:, 1, 0], 4, 1, 'A[2,2]')
+plot_trace(C_traces[:, 1], 4, 2, 'C[1]')
+plot_trace(D_traces[:, 0], 4, 3, 'D')
+plot_trace(r_traces[:, 0], 4, 4, 'r')
 plt.show()
-#
-# plt.subplot(1,1,1)
-# plt.plot(A_traces[:,1,0],A_traces[:,1,1],'o')
-# plt.title('samples pairs plot')
-# plt.show()
 
 
 # BODE diagram
-# B_mean = np.array([[0],[1]])
 A_true = data['A_true']
 B_true = data['B_true']
 C_true = data['C_true']
 D_true = data['D_true']
 
-w_plot = np.logspace(-2,3)
+w_plot = np.logspace(-2, 3)
 #
 A_ML = data['A_ML']
 B_ML = data['B_ML']
 C_ML = data['C_ML']
 D_ML = data['D_ML']
 
-plot_bode_ML(A_traces,B_traces,C_traces,D_traces,A_true,B_true,C_true,D_true,A_ML,B_ML,C_ML,D_ML,w_plot,save=True)
+plot_bode_ML(A_traces, B_traces, C_traces, D_traces, A_true, B_true, C_true, D_true, A_ML, B_ML, C_ML, D_ML, w_plot,
+             save=True)

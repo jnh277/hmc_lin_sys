@@ -44,7 +44,7 @@ def run_lssm_hmc(data_path, number_states, hot_start=False, iter=2000, discrete=
     else:
         def init_function():
             output = dict(r=1.0,
-                          D=data['D_ML'][0, 0],
+                          D=float(data['D_ML'][0, 0]),
                           )
             return output
 
@@ -58,7 +58,7 @@ def run_lssm_hmc(data_path, number_states, hot_start=False, iter=2000, discrete=
     stan_data = {'no_obs_est': len(y_est),
                  'y_est': y_est,
                  'u_est': u_est,
-                 'Ts': Ts[0],
+                 'Ts': float(Ts[0]),
                  'no_states': number_states,
                  }
 
@@ -66,6 +66,7 @@ def run_lssm_hmc(data_path, number_states, hot_start=False, iter=2000, discrete=
     #            "max_treedepth": 10}  # increasing from default 0.8 to reduce divergent steps
 
     posterior = stan.build(model_code, data=stan_data)
+    print(init_function())
     init = [init_function(),init_function(),init_function(),init_function()]
     traces = posterior.sample(init=init, num_samples=iter, num_warmup=4000, num_chains=4)
 # , max_depth=10, adapt_delt=0.8

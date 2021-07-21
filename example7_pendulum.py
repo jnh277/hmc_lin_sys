@@ -118,14 +118,6 @@ z = traces['h'].swapaxes(0, -1)[:, :, :no_obs]
 theta_mean = np.mean(theta, 0)
 z_mean = np.mean(z, 0)
 
-# LQ = traces['LQ']
-# LQ_mean = np.mean(LQ,0)
-# LR = traces['LR']
-# LR_mean = np.mean(LR,0)
-#
-# R = np.matmul(LR_mean, LR_mean.T)
-# Q = np.matmul(LQ_mean, LQ_mean.T)
-
 print('mean theta = ', theta_mean)
 
 plot_trace(theta[:, 0], 3, 1, 'Jr')

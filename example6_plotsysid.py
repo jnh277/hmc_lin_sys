@@ -23,7 +23,6 @@
      so that the mean transfer function can be calculated and used for control design in the
      matlab script matlab/example6_controldesign.m"""
 
-
 import numpy as np
 from scipy.io import loadmat
 from scipy.io import savemat
@@ -32,7 +31,6 @@ from helpers import plot_trace
 import pickle
 from scipy.signal import ss2tf
 from scipy import signal
-
 
 # specific data path
 data_path = 'data/control_example_data.mat'
@@ -45,10 +43,10 @@ Ts = data['Ts'].flatten()
 
 no_obs_est = len(y_est)
 
-with open('results/ctrl_sysid_traces2.pickle', 'rb') as file:
+with open('results/ctrl_sysid_traces.pickle', 'rb') as file:
     traces = pickle.load(file)
 
-yhat = traces['y_hat'].swapaxes(0,-1)
+yhat = traces['y_hat'].swapaxes(0, -1)
 yhat[np.isnan(yhat)] = 0.0
 yhat[np.isinf(yhat)] = 0.0
 
@@ -56,45 +54,38 @@ yhat_mean = np.mean(yhat, axis=0)
 yhat_upper_ci = np.percentile(yhat, 97.5, axis=0)
 yhat_lower_ci = np.percentile(yhat, 2.5, axis=0)
 
+A_traces = traces['A'].swapaxes(0, -1).swapaxes(1, 2)
+B_traces = traces['B'].swapaxes(0, -1)
+C_traces = traces['C'].swapaxes(0, -1)
+D_traces = traces['D'].swapaxes(0, -1)
+LQ_traces = traces['LQ'].swapaxes(0, -1).swapaxes(1, 2)
+r_traces = traces['r'].swapaxes(0, -1)
+h_traces = traces['h'].swapaxes(0, -1).swapaxes(1, 2)
 
-A_traces = traces['A'].swapaxes(0,-1)
-B_traces = traces['B'].swapaxes(0,-1)
-C_traces = traces['C'].swapaxes(0,-1)
-D_traces = traces['D'].swapaxes(0,-1)
-LQ_traces = traces['LQ'].swapaxes(0,-1)
-r_traces = traces['r'].swapaxes(0,-1)
-h_traces = traces['h'].swapaxes(0,-1)
-
-
-A_mean = np.mean(A_traces,0)
-B_mean = np.mean(B_traces,0)
-C_mean = np.mean(C_traces,0)
-D_mean = np.mean(D_traces,0)
-h_mean = np.mean(h_traces,0)
-r_mean = np.mean(r_traces,0)
-LQ_mean = np.mean(LQ_traces,0)
+A_mean = np.mean(A_traces, 0)
+B_mean = np.mean(B_traces, 0)
+C_mean = np.mean(C_traces, 0)
+D_mean = np.mean(D_traces, 0)
+h_mean = np.mean(h_traces, 0)
+r_mean = np.mean(r_traces, 0)
+LQ_mean = np.mean(LQ_traces, 0)
 
 h_upper_ci = np.percentile(h_traces, 97.5, axis=0)
 h_lower_ci = np.percentile(h_traces, 2.5, axis=0)
 
-
-
-plt.subplot(1,1,1)
-plt.plot(y_est,linewidth=0.5)
-plt.plot(yhat_mean,linewidth=0.5)
-plt.plot(yhat_upper_ci,'--',linewidth=0.5)
-plt.plot(yhat_lower_ci,'--',linewidth=0.5)
+plt.subplot(1, 1, 1)
+plt.plot(y_est, linewidth=0.5)
+plt.plot(yhat_mean, linewidth=0.5)
+plt.plot(yhat_upper_ci, '--', linewidth=0.5)
+plt.plot(yhat_lower_ci, '--', linewidth=0.5)
 plt.title('measurement estimates')
-plt.legend(('true','mean','upper CI','lower CI'))
+plt.legend(('true', 'mean', 'upper CI', 'lower CI'))
 plt.show()
 
-
-
-
-plot_trace(A_traces[:,1,0],4,1,'A[2,2]')
-plot_trace(C_traces[:,1],4,2,'C[1]')
-plot_trace(D_traces,4,3,'D')
-plot_trace(r_traces,4,4,'r')
+plot_trace(A_traces[:, 1, 0], 4, 1, 'A[2,2]')
+plot_trace(C_traces[:, 1], 4, 2, 'C[1]')
+plot_trace(D_traces[:, 0], 4, 3, 'D')
+plot_trace(r_traces[:, 0], 4, 4, 'r')
 plt.show()
 #
 # plt.subplot(1,1,1)
@@ -110,7 +101,7 @@ B_true = data['b']
 C_true = data['c']
 D_true = data['d']
 
-w_plot = np.logspace(-3,0.5)
+w_plot = np.logspace(-3, 0.5)
 #
 A_ML = data['A_ML']
 B_ML = data['B_ML']
@@ -118,8 +109,8 @@ C_ML = data['C_ML']
 D_ML = data['D_ML']
 
 
-
-def plot_bode_ML(A_smps, B_smps, C_smps, D_smps, A_t, B_t, C_t, D_t, A_ML, B_ML, C_ML, D_ML, omega, no_plot=300, max_samples=1000, save=False):
+def plot_bode_ML(A_smps, B_smps, C_smps, D_smps, A_t, B_t, C_t, D_t, A_ML, B_ML, C_ML, D_ML, omega, no_plot=300,
+                 max_samples=1000, save=False):
     """plot bode diagram from estimated system samples and true sys and maximum likelihood estiamte"""
     no_samples = np.shape(A_smps)[0]
     n_states = np.shape(A_smps)[1]
@@ -156,8 +147,9 @@ def plot_bode_ML(A_smps, B_smps, C_smps, D_smps, A_t, B_t, C_t, D_t, A_ML, B_ML,
                        label='posterior samples')  # Bode magnitude plot
     plt.semilogx(w.flatten(), mag_samples[:, 1:no_plot], color='green', alpha=0.1)  # Bode magnitude plot
     h1, = plt.semilogx(w.flatten(), mag_true, color='black', label='True system')  # Bode magnitude plot
-    hml, = plt.semilogx(w.flatten(), mag_ML,'--', color='purple', label='ML estimate')  # Bode magnitude plot
-    hm, = plt.semilogx(w.flatten(), np.mean(mag_samples, 1), '-.', color='orange',label='conditional mean')  # Bode magnitude plot
+    hml, = plt.semilogx(w.flatten(), mag_ML, '--', color='purple', label='ML estimate')  # Bode magnitude plot
+    hm, = plt.semilogx(w.flatten(), np.mean(mag_samples, 1), '-.', color='orange',
+                       label='conditional mean')  # Bode magnitude plot
     # hmap = plt.semilogx(w.flatten(), mag_MAP, '-.', color='blue',label='hmc MAP')  # Bode magnitude plot
 
     # hu, = plt.semilogx(w.flatten(), np.percentile(mag_samples, 97.5, axis=1),'--',color='orange',label='Upper CI')    # Bode magnitude plot
@@ -171,7 +163,7 @@ def plot_bode_ML(A_smps, B_smps, C_smps, D_smps, A_t, B_t, C_t, D_t, A_ML, B_ML,
     plt.subplot(2, 1, 2)
     plt.semilogx(w.flatten(), phase_samples[:, :no_plot], color='green', alpha=0.1)  # Bode phase plot
     plt.semilogx(w.flatten(), phase_true, color='black')  # Bode phase plot
-    plt.semilogx(w.flatten(), phase_ML,'--', color='purple')  # Bode phase plot
+    plt.semilogx(w.flatten(), phase_ML, '--', color='purple')  # Bode phase plot
     plt.semilogx(w.flatten(), np.mean(phase_samples, 1), '-.', color='orange',
                  label='mean')  # Bode magnitude plot
     # plt.semilogx(w.flatten(), phase_MAP, '-.', color='blue',
@@ -181,43 +173,44 @@ def plot_bode_ML(A_smps, B_smps, C_smps, D_smps, A_t, B_t, C_t, D_t, A_ML, B_ML,
     plt.xlim((min(omega), max(omega)))
 
     if save:
-        plt.savefig('figures/ctrl_example_bode.png',format='png')
+        plt.savefig('figures/ctrl_example_bode.png', format='png')
 
     plt.show()
 
 
-plot_bode_ML(A_traces,B_traces,C_traces,D_traces,A_true,B_true,C_true,D_true,A_ML,B_ML,C_ML,D_ML,w_plot,save=True)
+plot_bode_ML(A_traces, B_traces, C_traces, D_traces, A_true, B_true, C_true, D_true, A_ML, B_ML, C_ML, D_ML, w_plot,
+             save=True)
 
 # convert to transfer function
 num_samples = np.shape(A_traces)[0]
 
-
 # for i in range(num_samples):
-tf_nums = np.zeros((num_samples,7))
-tf_dens = np.zeros((num_samples,7))
+tf_nums = np.zeros((num_samples, 7))
+tf_dens = np.zeros((num_samples, 7))
 for i in range(num_samples):
-    tf = ss2tf(A_traces[i,:,:],np.expand_dims(B_traces[i,:],1),np.expand_dims(C_traces[i,:],0),float(D_traces[i]))
-    tf_nums[i,:] = tf[0]
-    tf_dens[i,:] = tf[1]
+    tf = ss2tf(A_traces[i, :, :], np.expand_dims(B_traces[i, :], 1), np.expand_dims(C_traces[i, :], 0),
+               float(D_traces[i]))
+    tf_nums[i, :] = tf[0]
+    tf_dens[i, :] = tf[1]
 
-tf_num_mean = np.mean(tf_nums,0)
-tf_den_mean = np.mean(tf_dens,0)
+tf_num_mean = np.mean(tf_nums, 0)
+tf_den_mean = np.mean(tf_dens, 0)
 
-w, mag_mean, phase_mean = signal.bode((tf_num_mean,tf_den_mean))
+w, mag_mean, phase_mean = signal.bode((tf_num_mean, tf_den_mean))
 
 #
 # plt.semilogx(w,mag_mean)
 # plt.show()
 
-hmc_sysid_results = {"A_traces":A_traces,
-                     "B_traces":B_traces,
-                     "C_traces":C_traces,
-                     "D_traces":D_traces,
-                     "r_traces":r_traces,
-                     "LQ_traces":LQ_traces,
-                     "tf_nums":tf_nums,
-                     "tf_dens":tf_dens,
-                     "tf_num_mean":tf_num_mean,
-                     "tf_den_mean":tf_den_mean,
+hmc_sysid_results = {"A_traces": A_traces,
+                     "B_traces": B_traces,
+                     "C_traces": C_traces,
+                     "D_traces": D_traces,
+                     "r_traces": r_traces,
+                     "LQ_traces": LQ_traces,
+                     "tf_nums": tf_nums,
+                     "tf_dens": tf_dens,
+                     "tf_num_mean": tf_num_mean,
+                     "tf_den_mean": tf_den_mean,
                      }
-savemat('results/ctrl_example_sysid.mat',hmc_sysid_results)
+savemat('results/ctrl_example_sysid.mat', hmc_sysid_results)
