@@ -24,6 +24,7 @@ import pandas as pd
 import matplotlib.pylab as plt
 import math
 from scipy.io import loadmat, savemat
+import scipy.signal as signal
 
 # OE model with Gaussian noise and horseshoe sparseness prior on the coefficients.
 
@@ -67,7 +68,6 @@ model {
 
        err[n] ~ normal(0,sigmae);
        
-//      target+=0.5*(y_est[n]-w[n])^2/(sigmae^2) + log(sigmae^2);      
     
     }
 
@@ -84,9 +84,14 @@ model {
 }
 """
 
-np.random.seed(87655678)
+# number of parameters to use in estimation model
+num_B = 10  # needs to be greater than or equal to 5
+num_F = 9   # needs to be greater than or equal to 4
 
-data = loadmat("oe_ex_data1.mat")
+# np.random.seed(87655678)
+
+# data = loadmat("oe_ex_data1.mat")
+data = loadmat("data/oe_ex/oe_ex_data1.mat")
 
 y_est = data['y_estimation'].flatten()
 u_est = data['u_estimation'].flatten()
@@ -104,8 +109,8 @@ no_obs_est = len(y_est)
 
 def init_function():
     sigmae = math.sqrt(vare) * np.random.uniform(0.8, 1.2)
-    b_coefs = B * np.random.uniform(0.8, 1.2, len(B))
-    f_coefs = F * np.random.uniform(0.8, 1.2, len(F))
+    b_coefs = np.hstack([B * np.random.uniform(0.8, 1.2, len(B)), np.random.uniform(-np.max(np.abs(B)), np.max(np.abs(B)), num_B-len(B))])
+    f_coefs = np.hstack([F * np.random.uniform(0.8, 1.2, len(F)), np.random.uniform(-np.max(np.abs(F)), np.max(np.abs(F)), num_F-len(F))])
     output = {"b_coefs":b_coefs,"f_coefs":f_coefs,"sigmae": sigmae}
     return output
 
@@ -113,28 +118,47 @@ thisinit=[init_function(),init_function(),init_function(),init_function()]
 
 
 stan_data = {
-'len_B': len(B),
-'len_F': len(F),
+'len_B': num_B,
+'len_F': num_F,
 'no_obs_est': no_obs_est,
 'y_est': y_est,
 'u_est': u_est,
 }
 
 # Run Stan
-
-posterior = stan.build(oe_code, data=stan_data, random_seed=87655678)
-fit = posterior.sample(num_chains=4, num_warmup=4000, num_samples=2000, init=thisinit)
+#, random_seed=87655678
+posterior = stan.build(oe_code, data=stan_data, random_seed=1120)
+fit = posterior.sample(num_chains=4, num_thin=4, num_warmup=8000, num_samples=1000, init=thisinit)
 
 # Expore Results
 
 df_stan_est_trace = fit.to_frame()
 df_stan_est_trace.index.name=None
 
-# Export output to feather files
-
-df_stan_est_trace.to_feather('stan_oe_all.feather')
 
 # Export results to Matlab
 
-savemat('results.mat', {'results': df_stan_est_trace.to_dict('list')})
+savemat('results/oe_ex_results.mat', {'results': df_stan_est_trace.to_dict('list')})
+# savemat('results.mat', {'results': df_stan_est_trace.to_dict('list')})
+
+b_coefs = fit['b_coefs']
+
+for i in range(4):
+    plt.subplot(2,2,i+1)
+    plt.plot(b_coefs[0,200+i:800:4])
+    plt.title('trace of b[0] from chain '+str(i))
+
+plt.tight_layout()
+plt.show()
+
+a_coefs = fit['f_coefs']
+
+for i in range(4):
+    plt.subplot(2,2,i+1)
+    plt.plot(a_coefs[0,200+i:800:4])
+    plt.title('trace of a[0] from chain '+str(i))
+
+plt.tight_layout()
+plt.show()
+
 

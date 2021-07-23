@@ -1,7 +1,8 @@
 clear all
 close all
 
-noDataSets = 30;         % Number of simulations of the true system to run
+% I reduced number of data sets for now so it doesnt take as long to run
+noDataSets = 10;         % Number of simulations of the true system to run
 N = 100;                 % Length of simulation in number of samples
 vare = 5*1e-4;          % Measurment noise variance
 displaystring = 'Gt';   % Initialise string to use to display results
@@ -63,15 +64,19 @@ for i=1:noDataSets
  %
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  
- M.A     = length(Atrue)-1; 
+ M.A     = 9; 
  
 %  M.A = length(Atrue)-1+5;  
  
- M.B = M.A
+ M.B = 10;
  
  M.type  = 'oe';  M.w = logspace(-3,pi,10000);
  G=est(Z,M);
  
+  if i == 1
+    Aml = G.A;
+    Bml = G.B;
+ end
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  %
  %  Estimate on basis of noise corrupted data
@@ -79,10 +84,19 @@ for i=1:noDataSets
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
  Gest = est(Z,M); 
+ 
+   if i == 1
+    Aml2 = Gest.A;
+    Bml2 = Gest.B;
+ end
+ 
  Gest.disp.colour = 'g';
  Gest.disp.linestyle = '--';
  
  Gmonte = [Gmonte,Gest.G(:)];
+ 
+
+ 
 
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  %
@@ -105,7 +119,9 @@ for i=1:noDataSets
 
  A = G.A; B = G.B;
 
- save(file_name, 'y_estimation', 'u_estimation', 'yhat','coefs_b','coefs_f', 'A', 'B','vare');
+
+ save(strcat('../data/oe_ex/',file_name), 'y_estimation', 'u_estimation', 'yhat','coefs_b','coefs_f', 'A', 'B','vare');
+%  save(file_name, 'y_estimation', 'u_estimation', 'yhat','coefs_b','coefs_f', 'A', 'B','vare');
 
 end  % End loop over noDataSets iterations
 
@@ -147,92 +163,152 @@ keyboard
 %  Extract Traces
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-load results  % Load in data file produced by Stan
+%%
+load('../results/oe_ex_results.mat');  % Load in data file produced by Stan
+% load('results.mat')  % Load in data file produced by Stan
 
 strb = 'b_coefs.'; stra= 'f_coefs.';
 
-for k=1:M.A 
+
+
+% 
+for k=1:9 
  Atrace(k,:)=getfield(results,strcat(stra,num2str(k)));
-end;
+end
 
-for k=1:M.A+1 
+for k=1:10 
  Btrace(k,:)=getfield(results,strcat(strb,num2str(k)));
-end;
+end
 
-sigtrace = getfield(results,'sigmae');
-% b_hyp_trace = getfield(results,'b_coefs_hyperprior');
-% a_hyp_trace = getfield(results,'f_coefs_hyperprior');
+for i=1:4
+    subplot(2,2,i)
+    plot(Atrace(1,200+i:4:800))
+    title(['A(1) trace for chain', num2str(i)])
+end
 
-energy_trace = getfield(results,'energy__');
-accept_trace = getfield(results,'accept_stat__');
-lp_trace = getfield(results,'lp__');
-divergent_trace = getfield(results,'divergent__');
+% plot bode diagram and compare with HMC estimates
+Htrue = tf(Btrue,Atrue,delta);
+[MAGtrue,PHASEtrue,W] = bode(Htrue);
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-%  display results
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Hml = tf(Bml,Aml,delta);
+[MAGml,PHASEml] = bode(Hml, W);
 
-binum = 59;
-fignum = 3;
 
-for k=1:length(Atrue)-1
- figure(fignum)
- bc=hist(Atrace(k,:),binum); hist(Atrace(k,:),binum); 
- hold on
- plot([Atrue(k+1),Atrue(k+1)],[0,max(bc)],'linewidth',2,'color','r')
- title(strcat('Parameter A(',num2str(k),')'))
- hold off
- fignum=fignum+1;
-end;
+sampleMag = nan(length(Atrace),length(W));
+samplePhase = nan(length(Atrace),length(W));
+for i = 1:length(Atrace)
+    Hsamp = tf(Btrace(:,i).',[1., Atrace(:,i).'],delta);
+    [MAG,PHASE] = bode(Hsamp, W);
+    sampleMag(i,:) = squeeze(MAG);
+    samplePhase(i,:) = squeeze(PHASE)-round(max(PHASE)/360)*360;
+end
 
-for k=1:length(Btrue)
- figure(fignum)
- bc=hist(Btrace(k,:),binum); hist(Btrace(k,:),binum); 
- hold on
- plot([Btrue(k),Btrue(k)],[0,max(bc)],'linewidth',2,'color','r')
- title(strcat('Parameter B(',num2str(k),')')) 
- hold off
- fignum=fignum+1;
-end;
 
-figure(fignum)
- 
-bc=hist(sigtrace,binum); hist(sigtrace,binum); 
+figure()
+clf
+subplot 211
+
 hold on
-plot([sqrt(vare),sqrt(vare)],[0,max(bc)],'linewidth',2,'color','r')
-title('Parameter noise standard deviation') 
-hold off
-fignum=fignum+1;
-
-Acm = [1,mean(Atrace')];
-Bcm = mean(Btrace');
-
-%Acm=A; Bcm=B;
-
-Gcm.A = Acm; Gcm.B = Bcm; Gcm.w = G.w; Gcm.type='oe';
-Gcm = m2f(Gcm); Gcm.disp.legend = 'Conditional Mean'; Gcm.disp.error=0;
-
-shownyq(Gt,G,Gcm)
-
-
-
-% % Debug to figure out how to do filter in python
-% 
-% ord = len(A);
-% 
-% w(1:length(A))=0.0;
-% 
-% for n=length(A):N
-%  w(n) = 0.0;
-%  for i=1:length(B)
-%   w(n) = w(n) + B(i)*u(n-i+1); 
-%  end;
-%  for i=1:length(A)-1
-%   w(n) = w(n) - A(i+1)*w(n-i)
-%   end;
+% for i = 1:300
+s = semilogx(W,20*log10(sampleMag),'g');
+for i =1:length(s)
+s(i).Color(4) = 0.1;
+end
 % end
-%;
-%
+semilogx(W,20*log10(squeeze(MAGtrue)),'k--')
+semilogx(W,20*log10(squeeze(MAGml)),'r.-')
+hold off
+ylabel('Magnitude dB')
+xlabel('Frequency rad/s')
+title('True = dotted black, hmc samples = green, red=ML')
+
+subplot 212
+hold on
+s = semilogx(W,samplePhase,'g');
+for i =1:length(s)
+s(i).Color(4) = 0.1;
+end
+semilogx(W,squeeze(PHASEtrue),'k--')
+semilogx(W,squeeze(PHASEml)-round(max(PHASEml)/360)*360,'r.-')
+hold off
+ylabel('Phase (deg)')
+xlabel('Frequency rad/s')
+title('True = dotted black, hmc samples = green, red = ML')
+
+
+% sigtrace = getfield(results,'sigmae');
+% % b_hyp_trace = getfield(results,'b_coefs_hyperprior');
+% % a_hyp_trace = getfield(results,'f_coefs_hyperprior');
+% 
+% energy_trace = getfield(results,'energy__');
+% accept_trace = getfield(results,'accept_stat__');
+% lp_trace = getfield(results,'lp__');
+% divergent_trace = getfield(results,'divergent__');
+% 
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %
+% %  display results
+% %
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 
+% binum = 59;
+% fignum = 3;
+% 
+% for k=1:length(Atrue)-1
+%  figure(fignum)
+%  bc=hist(Atrace(k,:),binum); hist(Atrace(k,:),binum); 
+%  hold on
+%  plot([Atrue(k+1),Atrue(k+1)],[0,max(bc)],'linewidth',2,'color','r')
+%  title(strcat('Parameter A(',num2str(k),')'))
+%  hold off
+%  fignum=fignum+1;
+% end;
+% 
+% for k=1:length(Btrue)
+%  figure(fignum)
+%  bc=hist(Btrace(k,:),binum); hist(Btrace(k,:),binum); 
+%  hold on
+%  plot([Btrue(k),Btrue(k)],[0,max(bc)],'linewidth',2,'color','r')
+%  title(strcat('Parameter B(',num2str(k),')')) 
+%  hold off
+%  fignum=fignum+1;
+% end;
+% 
+% figure(fignum)
+%  
+% bc=hist(sigtrace,binum); hist(sigtrace,binum); 
+% hold on
+% plot([sqrt(vare),sqrt(vare)],[0,max(bc)],'linewidth',2,'color','r')
+% title('Parameter noise standard deviation') 
+% hold off
+% fignum=fignum+1;
+% 
+% Acm = [1,mean(Atrace')];
+% Bcm = mean(Btrace');
+% 
+% %Acm=A; Bcm=B;
+% 
+% Gcm.A = Acm; Gcm.B = Bcm; Gcm.w = G.w; Gcm.type='oe';
+% Gcm = m2f(Gcm); Gcm.disp.legend = 'Conditional Mean'; Gcm.disp.error=0;
+% 
+% shownyq(Gt,G,Gcm)
+% 
+% 
+% 
+% % % Debug to figure out how to do filter in python
+% % 
+% % ord = len(A);
+% % 
+% % w(1:length(A))=0.0;
+% % 
+% % for n=length(A):N
+% %  w(n) = 0.0;
+% %  for i=1:length(B)
+% %   w(n) = w(n) + B(i)*u(n-i+1); 
+% %  end;
+% %  for i=1:length(A)-1
+% %   w(n) = w(n) - A(i+1)*w(n-i)
+% %   end;
+% % end
+% %;
+% %
