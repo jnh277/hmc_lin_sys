@@ -85,8 +85,8 @@ model {
 """
 
 # number of parameters to use in estimation model
-num_B = 10  # needs to be greater than or equal to 5
-num_F = 9   # needs to be greater than or equal to 4
+# num_B = 10  # needs to be greater than or equal to 5
+# num_F = 9   # needs to be greater than or equal to 4
 
 # np.random.seed(87655678)
 
@@ -99,6 +99,10 @@ u_est = data['u_estimation'].flatten()
 F = data['A'].flatten()[1:]
 B = data['B'].flatten()
 
+
+num_B = len(B)
+num_F = len(F)
+
 vare = data['vare']
 
 no_obs_est = len(y_est)
@@ -109,12 +113,23 @@ no_obs_est = len(y_est)
 
 def init_function():
     sigmae = math.sqrt(vare) * np.random.uniform(0.8, 1.2)
-    b_coefs = np.hstack([B * np.random.uniform(0.8, 1.2, len(B)), np.random.uniform(-np.max(np.abs(B)), np.max(np.abs(B)), num_B-len(B))])
-    f_coefs = np.hstack([F * np.random.uniform(0.8, 1.2, len(F)), np.random.uniform(-np.max(np.abs(F)), np.max(np.abs(F)), num_F-len(F))])
+    # if num_B > len(B):
+    # b_coefs = np.hstack([B * np.random.uniform(0.8, 1.2, len(B)), np.random.uniform(-np.max(np.abs(B)), np.max(np.abs(B)), num_B-len(B))])
+    # else:
+    # f_coefs = np.hstack([F * np.random.uniform(0.8, 1.2, len(F)), np.random.uniform(-np.max(np.abs(F)), np.max(np.abs(F)), num_F-len(F))])
+
+    b_coefs = B * np.random.uniform(0.8, 1.2, len(B))
+    f_coefs = F * np.random.uniform(0.8, 1.2, len(F))
     output = {"b_coefs":b_coefs,"f_coefs":f_coefs,"sigmae": sigmae}
     return output
 
-thisinit=[init_function(),init_function(),init_function(),init_function()]
+num_chains = 4
+
+thisinit = []
+for i in range(num_chains):
+    thisinit.append(init_function())
+
+# thisinit=[init_function(),init_function(),init_function(),init_function()]
 
 
 stan_data = {
@@ -127,8 +142,10 @@ stan_data = {
 
 # Run Stan
 #, random_seed=87655678
+
+
 posterior = stan.build(oe_code, data=stan_data, random_seed=1120)
-fit = posterior.sample(num_chains=4, num_thin=4, num_warmup=8000, num_samples=1000, init=thisinit)
+fit = posterior.sample(num_chains=num_chains, num_thin=4, num_warmup=8000, num_samples=1000, init=thisinit)
 
 # Expore Results
 
@@ -153,9 +170,9 @@ plt.show()
 
 a_coefs = fit['f_coefs']
 
-for i in range(4):
+for i in range(num_chains):
     plt.subplot(2,2,i+1)
-    plt.plot(a_coefs[0,200+i:800:4])
+    plt.plot(a_coefs[0,200+i:800:num_chains])
     plt.title('trace of a[0] from chain '+str(i))
 
 plt.tight_layout()

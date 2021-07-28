@@ -66,7 +66,6 @@ def run_lssm_hmc(data_path, number_states, hot_start=False, iter=2000, discrete=
     #            "max_treedepth": 10}  # increasing from default 0.8 to reduce divergent steps
 
     posterior = stan.build(model_code, data=stan_data)
-    print(init_function())
     init = [init_function(),init_function(),init_function(),init_function()]
     traces = posterior.sample(init=init, num_samples=iter, num_warmup=4000, num_chains=4)
 # , max_depth=10, adapt_delt=0.8

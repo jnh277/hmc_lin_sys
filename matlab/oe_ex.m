@@ -68,7 +68,7 @@ for i=1:noDataSets
  
 %  M.A = length(Atrue)-1+5;  
  
- M.B = 10;
+ M.B = 9;
  
  M.type  = 'oe';  M.w = logspace(-3,pi,10000);
  G=est(Z,M);
