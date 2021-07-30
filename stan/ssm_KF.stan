@@ -71,6 +71,8 @@ transformed parameters {
     vector[no_states] ones;
     vector[no_states] xhat_pred [no_obs_est+1];         // predicted
     matrix[no_states, no_states] P_pred [no_obs_est+1];
+    row_vector[no_obs_est] yhat_pred;
+    row_vector[no_obs_est] S;
     vector[no_states] xhat_cor [no_obs_est];         // corrected
     matrix[no_states, no_states] P_cor [no_obs_est];
     vector[no_states] K;
@@ -90,8 +92,10 @@ transformed parameters {
         // correct
 //        yhat_pred = C * xhat_pred[t] + D*u_est[t];
 //        K = mdivide_right_spd(P_pred[t] *C', C * P_pred[t] * C' + R); // matrix version
-        K = (P_pred[t] * C') / (C * P_pred[t] * C' + r);
-        xhat_cor[t] = xhat_pred[t] + K * (y_est[t] - C * xhat_pred[t] - D*u_est[t]);
+        S[t] = C * P_pred[t] * C' + r;
+        yhat_pred[t] = C * xhat_pred[t] + D*u_est[t];
+        K = (P_pred[t] * C') / S[t];
+        xhat_cor[t] = xhat_pred[t] + K * (y_est[t] - yhat_pred[t]);
         P_cor[t] = (diag_matrix(ones) - K * C) * P_pred[t];
 
         // predict
@@ -119,13 +123,14 @@ model {
     C ~ normal(0.0, C_hyper*shrinkage_param);
     D ~ normal(0.0, D_hyper*shrinkage_param);
 
-    for (t in 1:no_obs_est){
+    y_est ~ normal(yhat_pred, square(S));
+//    for (t in 1:no_obs_est){
     // matrix version
 //        target += -0.5 * (y_est[t] - C * xhat_pred[t]-D*u_est[t])'  * ((r + C * P_pred[t] * C') \ (y_est[t] - C * xhat_pred[t] - D*u_est[t]));
     // scalar y version
-        target += -0.5 * (y_est[t] - C * xhat_pred[t]-D*u_est[t])^2 / (r + C * P_pred[t] * C');
-        target += -0.5 * log_determinant(4*pi() * r * P_pred[t]) + 0.5 * log_determinant(2*pi()*P_cor[t]);
-    }
+//        target += -0.5 * (y_est[t] - C * xhat_pred[t]-D*u_est[t])^2 / (r + C * P_pred[t] * C');
+//        target += -0.5 * log_determinant(4*pi() * r * P_pred[t]) + 0.5 * log_determinant(2*pi()*P_cor[t]);
+//    }
 
     // state distributions
 //    target += matrix_normal_lpdf(h[:,2:no_obs_est] | Ad * h[:,1:no_obs_est-1] + Bd * u_est[1:no_obs_est-1], diag_pre_multiply(tauQ,LQcorr));
