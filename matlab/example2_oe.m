@@ -25,7 +25,8 @@
 % rng(13)
 rng(192038)
 
-sig_e = sqrt(5*1e-4);
+% sig_e = sqrt(5*1e-3);
+sig_e = 0.05;
 
 % Generate data
 noObservations = 200;
