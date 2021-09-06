@@ -21,10 +21,8 @@
 % the hmc system identification can then be run using example2_oe.py
 
 % example 3 oe
-
-% rng(13)
-rng(192038)
-
+% rng(54531445)
+rng(13)
 sig_e = sqrt(5*1e-4);
 
 % Generate data
@@ -77,9 +75,9 @@ sig_e_ML2 = sqrt(m1.NoiseVariance);
 f_true = A;
 b_true = B;
 
-save('../data/example3_oe.mat','y_estimation', 'u_estimation', 'y_validation',...
-    'u_validation','yhat','f_ml','b_ml','f_ml2','b_ml2','sig_e_ML','sig_e_ML2',...
-    'sig_e','f_true','b_true')
+% save('../data/example3_oe.mat','y_estimation', 'u_estimation', 'y_validation',...
+%     'u_validation','yhat','f_ml','b_ml','f_ml2','b_ml2','sig_e_ML','sig_e_ML2',...
+%     'sig_e','f_true','b_true')
 %% plot
 figure(1)
 clf
