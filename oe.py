@@ -38,8 +38,12 @@ def run_oe_hmc(data_path, input_order, output_order, hot_start=False, iter=6000,
 
     y_est = data['y_estimation'].flatten()
     u_est = data['u_estimation'].flatten()
-    y_val = data['y_validation'].flatten()
-    u_val = data['u_validation'].flatten()
+
+    ## TODO: FIX this hack
+    # y_val = data['y_validation'].flatten()
+    # u_val = data['u_validation'].flatten()
+    y_val = data['y_estimation'].flatten()
+    u_val = data['u_estimation'].flatten()
 
     # Run Stan
     if hot_start:
@@ -53,10 +57,11 @@ def run_oe_hmc(data_path, input_order, output_order, hot_start=False, iter=6000,
                           )
             return output
     else:
-        def init_function():
-            sig_e = data['sig_e'].flatten()
-            output = dict(r=(sig_e * np.random.uniform(0.8, 1.2))[0],
-                          )
+        def init_function():    ## TODO: uncomment this
+            # sig_e = data['sig_e'].flatten()
+            # output = dict(r=(sig_e * np.random.uniform(0.8, 1.2))[0],
+            #               )
+            output = dict()
             return output
 
     if OL:
