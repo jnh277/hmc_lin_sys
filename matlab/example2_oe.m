@@ -32,12 +32,13 @@ noObservations = 200;
 % u = randn(noObservations, 1);
 N = noObservations;
 u = [zeros(1,floor(0.15*N)),ones(1,floor(0.2*N)),zeros(1,floor(0.15*N))]; u=[u,u]; u = [u,zeros(1,N-length(u))].';
+%
 
-bq = poly([-8.0722,-0.8672,0.0948]);
-aq = real(poly([0.75*exp(j*pi/3),0.75*exp(-j*pi/3),0.95*exp(j*pi/12),0.95*exp(-j*pi/12)]));   
-aq = real(poly([0.8*exp(j*0.50*pi),0.8*exp(-j*0.50*pi)])); 
-bq = bq*sum(aq)/sum(bq); 
-B = [bq]; A = aq; 
+delta = 0.1;
+den = real(poly([-10,-9,-1+j*10,-1-j*10]));
+num = den(length(den));
+[bq,aq] = c2dm(num,den,delta,'zoh');
+B = bq; A = aq;
 
 y = filter(B, A, u);
 y = y + sig_e * randn(length(y), 1);
@@ -52,7 +53,7 @@ data_estimation = iddata(y_estimation, u_estimation);
 data_validation = iddata(y_validation, u_validation);
 
 % Estimate model using known model orders
-m1 = oe(data_estimation, [4 2 0]);
+m1 = oe(data_estimation, [5 4 0]);
 yhat = predict(m1, data_validation);
 yhat = yhat.OutputData;
 
@@ -111,8 +112,8 @@ legend('True','known order','regularised')
 subplot(2,1,2)
 plot(W,squeeze(PHASE))
 hold on
-plot(W1,squeeze(PHASE1))
-plot(W2,squeeze(PHASE2))
+plot(W1,squeeze(PHASE1)-360)
+plot(W2,squeeze(PHASE2)-360)
 hold off
 xlabel('Frequency')
 ylabel('Phase')
