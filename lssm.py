@@ -22,6 +22,7 @@ import stan
 from scipy.io import loadmat
 import pickle
 from pathlib import Path
+import time
 
 
 def run_lssm_hmc(data_path, number_states, hot_start=False, iter=2000, discrete=False):
@@ -67,6 +68,10 @@ def run_lssm_hmc(data_path, number_states, hot_start=False, iter=2000, discrete=
 
     posterior = stan.build(model_code, data=stan_data)
     init = [init_function(),init_function(),init_function(),init_function()]
+
+    ts = time.time()
     traces = posterior.sample(init=init, num_samples=iter, num_warmup=4000, num_chains=4)
+    tf = time.time()
+    print('Sampling time =', tf-ts)
 # , max_depth=10, adapt_delt=0.8
     return traces
