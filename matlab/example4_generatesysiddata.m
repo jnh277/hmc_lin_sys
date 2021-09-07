@@ -131,26 +131,4 @@ u_estimation = u;
 save('../data/control_example_data.mat','a','b','c','d','x','y_estimation','u_estimation','x_ML','A_ML',...
     'B_ML','C_ML','D_ML','Ts')
 
-% m.ss.A=A;
-% m.ss.B=B;
-% m.ss.C=C;
-% m.ss.D=D;
-% m.ss.Q=Q;
-% m.ss.S=S;
-% m.ss.R=R;
-% m.ss.X1=zeros(nx,1);
-% m.ss.P1=eye(nx);
 
-%Run EM code to obtain initial estimate
-% clear m
-% m.nx=nx; m.type='ss'; o.alg='em';
-% m=est(z,m,o);
-% 
-% bode(sys,m.sysG)
-% drawnow;
-% 
-% %Set priors
-% m.ss.Lam = eye(nx+ny);%[m.ss.Q m.ss.S;m.ss.S' m.ss.R]
-% m.ss.ell = 1;
-% m.ss.M   = [m.ss.A m.ss.B;m.ss.C m.ss.D];
-% m.ss.V   = eye(nx+nu);
