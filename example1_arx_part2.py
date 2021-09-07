@@ -27,6 +27,10 @@ from helpers import plot_dbode_ML
 import seaborn as sns
 import pandas as pd
 
+import platform
+if platform.system()=='Darwin':
+    import multiprocessing
+    multiprocessing.set_start_method("fork")
 
 from arx_hmc import run_arx_hmc
 

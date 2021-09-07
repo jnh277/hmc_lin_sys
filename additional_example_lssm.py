@@ -32,7 +32,10 @@ from helpers import plot_trace
 from helpers import plot_bode_ML
 from lssm import run_lssm_hmc
 import pickle
-
+import platform
+if platform.system()=='Darwin':
+    import multiprocessing
+    multiprocessing.set_start_method("fork")
 
 # specific data path
 data_path = 'data/example4_lssm.mat'

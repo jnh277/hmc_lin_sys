@@ -26,17 +26,19 @@ from helpers import plot_trace
 from scipy import signal
 from oe import run_oe_hmc
 
+import platform
+if platform.system()=='Darwin':
+    import multiprocessing
+    multiprocessing.set_start_method("fork")
 
 # specific data path
 data_path = 'data/example3_oe.mat'
-# input_order = 4
-# output_order = 3
 input_order = 11
 output_order = 10
 
 data = loadmat(data_path)
 y_val = data['y_validation'].flatten()
-(fit, traces) = run_oe_hmc(data_path, input_order, output_order, iter=10000, OL=True, hot_start=True)
+(fit, traces) = run_oe_hmc(data_path, input_order, output_order, iter=6000, OL=True, hot_start=True)
 
 yhat = traces['y_hat_val']
 yhat[np.isnan(yhat)] = 0.0
