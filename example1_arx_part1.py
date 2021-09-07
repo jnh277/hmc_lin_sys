@@ -32,6 +32,10 @@ from arx_hmc import run_arx_hmc
 from arx_mh import run_arx_mh
 from mh_functions import build_phi_matrix as build_phi_matrix_MH
 
+import platform
+if platform.system()=='Darwin':
+    import multiprocessing
+    multiprocessing.set_start_method("fork")
 
 
 # specific data path

@@ -23,52 +23,31 @@
 % the paper for example 6 (section 6.7)
 
 
-model='old';
-% model='new';
-
-max_samples = 4000;
+model='6
 
 %% load in data
-if strcmp(model,'old')
-    % define simulation model
-    nx = 6;
-    n=6; p=1; m=1;
-    den = real( poly([-0.1,-0.2,-0.02+j*1,-0.02-j*1,-0.01-j*0.1,-0.01+j*0.1]) );
-    num = 10*den(length(den));
-    [a,b,c,d] =tf2ss(num,den); 
-    sysc=ss(a,b,c,d); 
-    
-    % load hmc results
-    hmc_sysid_results = load("../results/ctrl_example_sysid");
-    
-    ind = randsample(length(hmc_sysid_results.A_traces),max_samples);
+nx = 6;
+n=6; p=1; m=1;
+den = real( poly([-0.1,-0.2,-0.02+j*1,-0.02-j*1,-0.01-j*0.1,-0.01+j*0.1]) );
+num = 10*den(length(den));
+[a,b,c,d] =tf2ss(num,den); 
+sysc=ss(a,b,c,d); 
 
-    A_hmc = hmc_sysid_results.A_traces(ind,:,:);
-    B_hmc = hmc_sysid_results.B_traces(ind,:);
-    C_hmc = hmc_sysid_results.C_traces(ind,:);
-    D_hmc = hmc_sysid_results.C_traces(ind);
-    num_hmc = hmc_sysid_results.tf_nums(ind,:);
-    den_hmc  = hmc_sysid_results.tf_dens(ind,:);
-    num_mean = hmc_sysid_results.tf_num_mean;
-    den_mean = hmc_sysid_results.tf_den_mean;
-
-    syscm = ss(tf(num_mean,den_mean));
-
-elseif strcmp(model,'new')
-    % define simulation model
-    delta = 0.1;
-    den = real(poly([-10,-9,-1+j*10,-1-j*10]));
-    num = den(length(den));
-    [a,b,c,d] =tf2ss(num,den); 
-    sysc=ss(a,b,c,d);
-    
-    % load hmc results
-    
-end
-
-
+hmc_sysid_results = load("../results/ctrl_example_sysid");
 %%
+max_samples = 4000;
+ind = randsample(length(hmc_sysid_results.A_traces),max_samples);
 
+A_hmc = hmc_sysid_results.A_traces(ind,:,:);
+B_hmc = hmc_sysid_results.B_traces(ind,:);
+C_hmc = hmc_sysid_results.C_traces(ind,:);
+D_hmc = hmc_sysid_results.C_traces(ind);
+num_hmc = hmc_sysid_results.tf_nums(ind,:);
+den_hmc  = hmc_sysid_results.tf_dens(ind,:);
+num_mean = hmc_sysid_results.tf_num_mean;
+den_mean = hmc_sysid_results.tf_den_mean;
+
+syscm = ss(tf(num_mean,den_mean));
 %% first work out the conditional mean system
 % Now iterate through all parameter realisations
 
@@ -81,6 +60,9 @@ hold off
 
 
 %% phase and gain margins for slow controller
+
+
+
 
 %These are controller weighting that remain constant for all controller
 %designs
@@ -96,6 +78,7 @@ n=nx;
 % syscm = conditional mean system
 
 Kslow = lqg(ss(syscm),blkdiag(Qx,Ru),blkdiag(Qw,Rv),Qi);
+
 
 % Tsys = Kslow*ss(syscm)
 fslow = zeros(3,max_samples);

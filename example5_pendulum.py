@@ -29,6 +29,10 @@ import matplotlib.pyplot as plt
 from helpers import plot_trace
 import pickle
 
+import platform
+if platform.system()=='Darwin':
+    import multiprocessing
+    multiprocessing.set_start_method("fork")
 
 data_path ='data/pendulum_data_all_sets.mat'
 data = loadmat(data_path)

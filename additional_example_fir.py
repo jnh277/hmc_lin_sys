@@ -24,6 +24,10 @@ from scipy.io import loadmat
 import matplotlib.pyplot as plt
 from fir_hmc import run_fir_hmc
 import seaborn as sns
+import platform
+if platform.system()=='Darwin':
+    import multiprocessing
+    multiprocessing.set_start_method("fork")
 
 # specific data path
 data_path = 'data/example2_fir.mat'
