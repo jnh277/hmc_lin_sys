@@ -40,16 +40,16 @@ def run_oe_hmc(data_path, input_order, output_order, hot_start=False, iter=6000,
     u_est = data['u_estimation'].flatten()
 
     ## TODO: FIX this hack
-    # y_val = data['y_validation'].flatten()
-    # u_val = data['u_validation'].flatten()
-    y_val = data['y_estimation'].flatten()
-    u_val = data['u_estimation'].flatten()
+    y_val = data['y_validation'].flatten()
+    u_val = data['u_validation'].flatten()
+    # y_val = data['y_estimation'].flatten()
+    # u_val = data['u_estimation'].flatten()
 
     # Run Stan
     if hot_start:
         def init_function():
-            f_true = data['f_ml'].flatten()[1:output_order+1]
-            b_true = data['b_ml'].flatten()
+            f_true = data['f_ml2'].flatten()[1:output_order+1]
+            b_true = data['b_ml2'].flatten()
             sig_e = data['sig_e'].flatten()
             output = dict(f_coefs=np.flip(f_true),# * np.random.uniform(0.8, 1.2, len(f_true)),
                           b_coefs=np.flip(b_true),#* np.random.uniform(0.8, 1.2, len(b_true)),
@@ -57,11 +57,11 @@ def run_oe_hmc(data_path, input_order, output_order, hot_start=False, iter=6000,
                           )
             return output
     else:
-        def init_function():    ## TODO: uncomment this
-            # sig_e = data['sig_e'].flatten()
-            # output = dict(r=(sig_e * np.random.uniform(0.8, 1.2))[0],
-            #               )
-            output = dict()
+        def init_function():
+            sig_e = data['sig_e'].flatten()
+            output = dict(r=(sig_e * np.random.uniform(0.8, 1.2))[0],
+                          )
+            # output = dict()
             return output
 
     if OL:
