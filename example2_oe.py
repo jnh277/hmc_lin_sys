@@ -29,22 +29,19 @@ from oe import run_oe_hmc
 
 # specific data path
 data_path = 'data/example3_oe.mat'
-input_order = 4
-output_order = 3
-# input_order = 11
-# output_order = 10
+# input_order = 4
+# output_order = 3
+input_order = 11
+output_order = 10
 
 data = loadmat(data_path)
 y_val = data['y_validation'].flatten()
-
-(fit, traces) = run_oe_hmc(data_path, input_order, output_order, iter=6000, OL=True, hot_start=True)
+(fit, traces) = run_oe_hmc(data_path, input_order, output_order, iter=10000, OL=True, hot_start=True)
 
 yhat = traces['y_hat_val']
 yhat[np.isnan(yhat)] = 0.0
 yhat[np.isinf(yhat)] = 0.0
 
-# yhat_OL = traces['y_hat_val2']
-# yhat_OL_mean = np.mean(yhat_OL, axis=0)
 
 yhat_mean = np.mean(yhat, axis=0)
 yhat_upper_ci = np.percentile(yhat, 97.5, axis=0)
@@ -52,7 +49,7 @@ yhat_lower_ci = np.percentile(yhat, 2.5, axis=0)
 
 MF_hmc = 100*(1-np.sum(np.power(y_val[10:]-yhat_mean[10:],2))/np.sum(np.power(y_val[10:],2)))
 
-print('Model fit of hmc estaimte = ', MF_hmc)
+print('Model fit of hmc estimate = ', MF_hmc)
 
 
 f_coef_traces = traces['f_coefs']
@@ -86,7 +83,7 @@ f_true = data["f_true"]
 b_true = data["b_true"]
 
 Ts = 1
-w_res = 100
+w_res = 500
 w_plot = np.logspace(-3,np.log10(10*3.14),w_res)
 
 
@@ -94,56 +91,6 @@ F_ML = data['f_ml']
 B_ML = data['b_ml']
 F_ML2 = data['f_ml2']
 B_ML2 = data['b_ml2']
-
-
-
-# do a pairs plot to show marginals and joints
-# fontsize = 16
-#
-# plt.figure(figsize=(10,8.25))
-# plt.subplot(3,3,1)
-# plt.hist(f_coef_traces[:,1],30, density=True)
-# sns.kdeplot(f_coef_traces[:,1], shade=True)
-# plt.axvline(np.mean(f_coef_traces[:,1]), color='orange', lw=1, linestyle='--', label='mean')
-# plt.xlabel('$f_2$', fontsize=fontsize)
-# plt.ylabel('marginal', fontsize=fontsize)
-#
-# plt.subplot(3,3,4)
-# plt.plot(f_coef_traces[:,1],b_coef_traces[:,0],'.')
-# plt.xlabel('$f_2$',fontsize=fontsize)
-# plt.ylabel('$b_0$',fontsize=fontsize)
-#
-# plt.subplot(3,3,5)
-# plt.hist(b_coef_traces[:,0],30, density=True)
-# sns.kdeplot(b_coef_traces[:,0], shade=True)
-# plt.axvline(np.mean(B_ML[:,0]), color='red', lw=2, linestyle='--', label='mean')
-# plt.axvline(np.mean(b_true[:,0]), color='k', lw=2, linestyle='--', label='mean')
-# plt.axvline(np.mean(b_coef_traces[:,0]), color='orange', lw=2, linestyle='--', label='mean')
-# plt.xlabel('$b_0$', fontsize=fontsize)
-# plt.ylabel('marginal', fontsize=fontsize)
-#
-# plt.subplot(3,3,7)
-# plt.plot(f_coef_traces[:,1],b_coef_traces[:,2],'.')
-# plt.xlabel('$f_2$',fontsize=fontsize)
-# plt.ylabel('$b_2$',fontsize=fontsize)
-#
-# plt.subplot(3,3,8)
-# plt.plot(b_coef_traces[:,0],b_coef_traces[:,2],'.')
-# plt.xlabel('$b_0$',fontsize=fontsize)
-# plt.ylabel('$b_2$',fontsize=fontsize)
-#
-# plt.subplot(3,3,9)
-# plt.hist(b_coef_traces[:,2],30, density=True)
-# sns.kdeplot(b_coef_traces[:,2], shade=True)
-# plt.axvline(np.mean(B_ML[:,2]), color='red', lw=2, linestyle='--', label='mean')
-# plt.axvline(np.mean(b_true[:,2]), color='k', lw=2, linestyle='--', label='mean')
-# plt.axvline(np.mean(b_coef_traces[:,2]), color='orange', lw=2, linestyle='--', label='mean')
-# plt.xlabel('$b_2$', fontsize=fontsize)
-# plt.ylabel('marginal', fontsize=fontsize)
-#
-# plt.tight_layout()
-# # plt.savefig('figures/example_1_dists.png',format='png')
-# plt.show()
 
 
 def plot_dbode_ML(num_samples,den_samples,num_true,den_true,num_ML,den_ML,num_ML2,den_ML2,Ts,omega,no_plot=300, max_samples=1000, save=False):
@@ -171,41 +118,42 @@ def plot_dbode_ML(num_samples,den_samples,num_true,den_true,num_ML,den_ML,num_ML
     w, mag_ML, phase_ML = signal.dbode((num_ML.flatten(), den_ML.flatten(), Ts), omega)
     w, mag_ML2, phase_ML2 = signal.dbode((num_ML2.flatten(), den_ML2.flatten(), Ts), omega)
 
-    # convert back from decibal
-    mag_true = np.power(10,mag_true/10)
-    mag_ML = np.power(10, mag_ML / 10)
-    mag_ML2 = np.power(10, mag_ML2 / 10)
-    mag_samples = np.power(10, mag_samples / 10)
+    # # convert back from decibal
+    # mag_true = np.power(10,mag_true/10)
+    # mag_ML = np.power(10, mag_ML / 10)
+    # mag_ML2 = np.power(10, mag_ML2 / 10)
+    # mag_samples = np.power(10, mag_samples / 10)
 
     # plot the samples
     plt.subplot(2, 1, 1)
     h2, = plt.semilogx(w.flatten(), mag_samples[:, 0], color='green', alpha=0.1, label='hmc samples')  # Bode magnitude plot
     plt.semilogx(w.flatten(), mag_samples[:, 1:no_plot], color='green', alpha=0.1)  # Bode magnitude plot
     h1, = plt.semilogx(w.flatten(), mag_true, color='blue', label='True system')  # Bode magnitude plot
-    hml, = plt.semilogx(w.flatten(), mag_ML,'--', color='purple', label='ML estimate')  # Bode magnitude plot
-    # hml2, = plt.semilogx(w.flatten(), mag_ML2,'--', color='red', label='ML reg estimate')  # Bode magnitude plot
+    # hml, = plt.semilogx(w.flatten(), mag_ML,'--', color='purple', label='ML estimate')  # Bode magnitude plot
+    hml2, = plt.semilogx(w.flatten(), mag_ML2,'--', color='red', label='ML reg estimate')  # Bode magnitude plot
     hm, = plt.semilogx(w.flatten(), np.mean(mag_samples, 1), '-.', color='orange', label='hmc mean')  # Bode magnitude plot
     # hu, = plt.semilogx(w.flatten(), np.percentile(mag_samples, 97.5, axis=1),'--',color='orange',label='Upper CI')    # Bode magnitude plot
 
     plt.legend(handles=[h1, h2, hm])
     plt.legend()
     plt.title('Bode diagram')
-    plt.ylabel('Magnitude')
+    plt.ylabel('Magnitude (dB)')
+    plt.ylim((-45,10))
     # plt.xlim((min(w.flatten()),min(max(omega),1/Ts*3.14)))
-    plt.xlim((1e-2, min(max(omega), 1 / Ts * 3.14)))
+    plt.xlim((1e-1, min(max(omega), 1 / Ts * 3.14)))
 
     plt.subplot(2, 1, 2)
     plt.semilogx(w.flatten(), phase_samples[:,:no_plot], color='green', alpha=0.1)  # Bode phase plot
     plt.semilogx(w.flatten(), phase_true, color='blue')  # Bode phase plot
-    hml, = plt.semilogx(w.flatten(), phase_ML, '--', color='purple')  # Bode magnitude plot
-    # hml, = plt.semilogx(w.flatten(), phase_ML2, '--', color='red')  # Bode magnitude plot
+    # hml, = plt.semilogx(w.flatten(), phase_ML, '--', color='purple')  # Bode magnitude plot
+    hml, = plt.semilogx(w.flatten(), phase_ML2, '--', color='red')  # Bode magnitude plot
     plt.semilogx(w.flatten(), np.mean(phase_samples, 1), '-.', color='orange',
                        label='mean')  # Bode magnitude plot
     plt.ylabel('Phase (deg)')
     plt.xlabel('Frequency (rad/s)')
     # plt.xlim((min(w.flatten()), min(max(omega),1/Ts*3.14)))
-    plt.xlim((1e-2, min(max(omega), 1 / Ts * 3.14)))
-    plt.ylim((-400, 50))
+    plt.xlim((1e-1, min(max(omega), 1 / Ts * 3.14)))
+    plt.ylim((-500, 50))
 
     if save:
         plt.savefig('figures/bode_plot_oe.png',format='png')
