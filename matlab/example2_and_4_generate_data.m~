@@ -29,7 +29,7 @@ close all;
 %  Specify Experiment Conditions
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-N    = 400;         % Number of data samples
+N    = 200;         % Number of data samples
 T    = 1;           % Sampling Period
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -66,11 +66,9 @@ y = z + sqrt(R) * randn(size(z));
 
 
 %% tf estimates
-y_estimation = y(1:round(N/2));
-u_estimation = u(1:round(N/2));
+y_estimation = y;
+u_estimation = u;
 
-y_validation = y(round(N/2):end);
-u_validation = u(round(N/2):end);
 
 data_estimation = iddata(y_estimation.', u_estimation.');
 m1 = oe(data_estimation, [7 6 0]);
@@ -89,7 +87,7 @@ b_ml2 = m2.b;
 sig_e2 = sqrt(m2.NoiseVariance);
 
 
-tf_true = tf(Btrue,Ftrue,Ts);
+tf_true = tf(Btrue,Ftrue);
 %%
 figure(3)
 bode(tf_true)
@@ -98,11 +96,10 @@ bode(m1)
 bode(m2)
 
 %%
-f_true = Ftrue;
-b_true = Btrue;
 
 
-save('../data/example2_and_4.mat','y_estimation','u_estimation',...
+
+save('../data/example2_and_4_short.mat','a','b','c','d','x','y_estimation','u_estimation',...
 'Ts','u_validation','y_validation','f_ml2','b_ml2','sig_e2','f_true','b_true','f_ml','b_ml','sig_e1')
 
 
