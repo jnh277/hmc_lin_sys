@@ -29,7 +29,7 @@ close all;
 %  Specify Experiment Conditions
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-N    = 400;         % Number of data samples
+N    = 200;         % Number of data samples
 T    = 1;           % Sampling Period
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -72,9 +72,10 @@ nu        = size(B,2);
 R = 1e-4*eye(ny);
 S = zeros(nx,ny);
 Q = 1e-3*eye(nx);
-u = randn(size(B,2),N);  % The exogenous input
+u = randn(size(B,2),N);  % The exogenous input 
+u(1:10) = 0;
 e = (sqrtm(R)*randn(size(C,1),N)); % The measurement noise sequence
-w = sqrtm(Q)*randn(nx,N);
+w = sqrtm(Q)*randn(nx,N)*0;
 x = zeros(nx,N+1); 
 y = zeros(ny,N);
 for t=1:N
@@ -93,52 +94,60 @@ z.u = u;
 
 %% estimate using ssest function
 
-dat = iddata(y.',u.',Ts);
-[sys_ML,x0_ML] = ssest(dat,6);
+% dat = iddata(y.',u.',Ts);
+% [sys_ML,x0_ML] = ssest(dat,6);
+% 
+% A_ML = sys_ML.A;
+% B_ML = sys_ML.B;
+% C_ML = sys_ML.C;
+% D_ML = sys_ML.D;
+% %% simulate maximum likelihood system
+% [n_states,~] = size(A_ML);
+% H = expm([A_ML, B_ML;zeros(size(B)).', zeros(size(B,6))]*Ts);
+% Ad_ML = H(1:n_states,1:n_states);
+% Bd_ML = H(1:n_states,n_states+1);
+% y_ML = y;
+% 
+% x_ML = x;
+% for t=1:N/2    
+%     x_ML(:,t+1) = Ad_ML*x_ML(:,t) + Bd_ML*u(t);
+%     y_ML(t) = C_ML*x_ML(:,t) + D_ML*u(t);    
+% end
+% 
+% x_ML = x_ML(:,1:end-1);
+% 
+% figure(3)
+% clf
+% plot(y)
+% hold on
+% plot(y_ML)
+% hold off
 
-A_ML = sys_ML.A;
-B_ML = sys_ML.B;
-C_ML = sys_ML.C;
-D_ML = sys_ML.D;
-%% simulate maximum likelihood system
-[n_states,~] = size(A_ML);
-H = expm([A_ML, B_ML;zeros(size(B)).', zeros(size(B,6))]*Ts);
-Ad_ML = H(1:n_states,1:n_states);
-Bd_ML = H(1:n_states,n_states+1);
-y_ML = y;
-
-x_ML = x;
-for t=1:N/2    
-    x_ML(:,t+1) = Ad_ML*x_ML(:,t) + Bd_ML*u(t);
-    y_ML(t) = C_ML*x_ML(:,t) + D_ML*u(t);    
-end
-
-x_ML = x_ML(:,1:end-1);
-
-figure(3)
-clf
-plot(y)
-hold on
-plot(y_ML)
-hold off
-
-%%
-figure(2)
-clf
-bode(sysc)
-hold on
-bode(sys_ML)
-hold off
+% %%
+% figure(2)
+% clf
+% bode(sysc)
+% hold on
+% bode(sys_ML)
+% hold off
 
 
 %% tf estimates
 y_estimation = y;
 u_estimation = u;
 
+
 data_estimation = iddata(y_estimation.', u_estimation.');
-% opt = oeOptions;
+m1 = oe(data_estimation, [7 6 0]);
+f_ml = m1.f;
+b_ml = m1.b;
+sig_e1 = sqrt(m1.NoiseVariance);
+
+
+data_estimation = iddata(y_estimation.', u_estimation.');
+opt = oeOptions;
 opt.Regularization.Lambda = 0.5;
-m2 = oe(data_estimation, [11 10 0]);
+m2 = oe(data_estimation, [11 10 0], opt);
 
 f_ml2 = m2.f;
 b_ml2 = m2.b;
@@ -148,20 +157,17 @@ f_true = cell2mat(tf_true.denominator);
 b_true = cell2mat(tf_true.numerator);
 
 
-
+%%
 figure(3)
+bode(m1)
+hold on
 bode(m2)
 
 %%
-tf_ml1 = c2d(tf(sys_ML),Ts);
-f_ml = cell2mat(tf_ml1.denominator);
-b_ml = cell2mat(tf_ml1.numerator);
-sig_e1 = sqrt(sys_ML.NoiseVariance);
 
 
-bode(tf_ml1)
 
-save('../data/example2_and_4.mat','a','b','c','d','x','y_estimation','u_estimation','x_ML','A_ML',...
-    'B_ML','C_ML','D_ML','Ts','u_validation','y_validation','f_ml2','b_ml2','sig_e2','f_true','b_true','f_ml','b_ml','sig_e1')
+save('../data/example2_and_4_short.mat','a','b','c','d','x','y_estimation','u_estimation',...
+'Ts','u_validation','y_validation','f_ml2','b_ml2','sig_e2','f_true','b_true','f_ml','b_ml','sig_e1')
 
 
