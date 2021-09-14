@@ -25,6 +25,7 @@ import matplotlib.pyplot as plt
 from helpers import plot_trace
 from scipy import signal
 from oe import run_oe_hmc
+from scipy.io import savemat
 
 import platform
 if platform.system()=='Darwin':
@@ -32,13 +33,16 @@ if platform.system()=='Darwin':
     multiprocessing.set_start_method("fork")
 
 # specific data path
-data_path = 'data/example3_oe.mat'
+data_path = 'data/example2_and_4.mat'
+# data_path = 'data/control_example_data.mat'
+# input_order = 7
+# output_order = 6
 input_order = 11
 output_order = 10
 
 data = loadmat(data_path)
 y_val = data['y_validation'].flatten()
-(fit, traces) = run_oe_hmc(data_path, input_order, output_order, iter=6000, OL=True, hot_start=True)
+(fit, traces) = run_oe_hmc(data_path, input_order, output_order, iter=6000, OL=True, hot_start=True, f_init=data['f_ml2'],b_init=data['b_ml2'],sig_init=data['sig_e2'])
 
 yhat = traces['y_hat_val']
 yhat[np.isnan(yhat)] = 0.0
@@ -54,8 +58,17 @@ MF_hmc = 100*(1-np.sum(np.power(y_val[10:]-yhat_mean[10:],2))/np.sum(np.power(y_
 print('Model fit of hmc estimate = ', MF_hmc)
 
 
+
+
 f_coef_traces = traces['f_coefs']
 b_coef_traces = traces['b_coefs']
+
+
+# hmc_sysid_results = {
+#     "tf_num":b_coef_traces[:,-1::-1],
+#     "tf_den":f_coef_traces[:,-1::-1],
+# }
+# savemat('results/example2_samples2.mat',hmc_sysid_results)
 
 f_mean = np.mean(f_coef_traces,0)
 b_mean = np.mean(b_coef_traces,0)
@@ -89,8 +102,8 @@ w_res = 500
 w_plot = np.logspace(-3,np.log10(10*3.14),w_res)
 
 
-F_ML = data['f_ml']
-B_ML = data['b_ml']
+F_ML = data['f_ml2']
+B_ML = data['b_ml2']
 F_ML2 = data['f_ml2']
 B_ML2 = data['b_ml2']
 
@@ -140,9 +153,11 @@ def plot_dbode_ML(num_samples,den_samples,num_true,den_true,num_ML,den_ML,num_ML
     plt.legend()
     plt.title('Bode diagram')
     plt.ylabel('Magnitude (dB)')
-    plt.ylim((-45,10))
+    plt.ylim(-100,50)
+    # plt.ylim((-45,10))
     # plt.xlim((min(w.flatten()),min(max(omega),1/Ts*3.14)))
-    plt.xlim((1e-1, min(max(omega), 1 / Ts * 3.14)))
+    # plt.xlim((1e-1, min(max(omega), 1 / Ts * 3.14)))
+    plt.xlim((1e-3, min(max(omega), 1 / Ts * 3.14)))
 
     plt.subplot(2, 1, 2)
     plt.semilogx(w.flatten(), phase_samples[:,:no_plot], color='green', alpha=0.1)  # Bode phase plot
@@ -154,8 +169,10 @@ def plot_dbode_ML(num_samples,den_samples,num_true,den_true,num_ML,den_ML,num_ML
     plt.ylabel('Phase (deg)')
     plt.xlabel('Frequency (rad/s)')
     # plt.xlim((min(w.flatten()), min(max(omega),1/Ts*3.14)))
-    plt.xlim((1e-1, min(max(omega), 1 / Ts * 3.14)))
-    plt.ylim((-500, 50))
+    # plt.xlim((1e-1, min(max(omega), 1 / Ts * 3.14)))
+    plt.xlim((1e-3, min(max(omega), 1 / Ts * 3.14)))
+    # plt.ylim((-500, 50))
+    plt.ylim((-600,20))
 
     if save:
         plt.savefig('figures/bode_plot_oe.png',format='png')
@@ -164,6 +181,5 @@ def plot_dbode_ML(num_samples,den_samples,num_true,den_true,num_ML,den_ML,num_ML
 
 
 plot_dbode_ML(b_coef_traces[:,-1::-1],f_coef_traces[:,-1::-1],b_true.flatten(),f_true.flatten(),B_ML.flatten(),F_ML.flatten(),B_ML2.flatten(),F_ML2.flatten(),Ts,w_plot,save=True)
-
 
 

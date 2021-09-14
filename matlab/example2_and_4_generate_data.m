@@ -17,8 +17,9 @@
 % ###############################################################################
 
 % This script generates the data to be used for system identifaction for
-% example 6 (Section 6.7) in the paper. 
+% example 2 and 4 in the paper. 
 
+rng(44)                 % for reproduceability
 
 clear all;
 close all;
@@ -28,7 +29,7 @@ close all;
 %  Specify Experiment Conditions
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-N    = 200;         % Number of data samples
+N    = 400;         % Number of data samples
 T    = 1;           % Sampling Period
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -80,6 +81,12 @@ for t=1:N
 	y(:,t)   = C*x(:,t) + D*u(:,t) + e(:,t);  %Simulate output
 	x(:,t+1) = A*x(:,t) + B*u(:,t) + w(:,t);  %Simulate state with innovations structure
 end
+y_validation = y(:,N/2+1:end);
+u_validation = u(:,N/2+1:end);
+
+y = y(:,1:N/2);
+u = u(:,1:N/2);
+
 z.y = y; 
 z.u = u;
 
@@ -101,7 +108,7 @@ Bd_ML = H(1:n_states,n_states+1);
 y_ML = y;
 
 x_ML = x;
-for t=1:N    
+for t=1:N/2    
     x_ML(:,t+1) = Ad_ML*x_ML(:,t) + Bd_ML*u(t);
     y_ML(t) = C_ML*x_ML(:,t) + D_ML*u(t);    
 end
@@ -124,11 +131,37 @@ bode(sys_ML)
 hold off
 
 
-%%
+%% tf estimates
 y_estimation = y;
 u_estimation = u;
 
-save('../data/control_example_data.mat','a','b','c','d','x','y_estimation','u_estimation','x_ML','A_ML',...
-    'B_ML','C_ML','D_ML','Ts')
+data_estimation = iddata(y_estimation.', u_estimation.');
+% opt = oeOptions;
+opt.Regularization.Lambda = 0.5;
+m2 = oe(data_estimation, [11 10 0]);
+
+f_ml2 = m2.f;
+b_ml2 = m2.b;
+sig_e2 = sqrt(m2.NoiseVariance);
+tf_true = tf(sys);
+f_true = cell2mat(tf_true.denominator);
+b_true = cell2mat(tf_true.numerator);
+
+
+
+figure(3)
+bode(m2)
+
+%%
+tf_ml1 = c2d(tf(sys_ML),Ts);
+f_ml = cell2mat(tf_ml1.denominator);
+b_ml = cell2mat(tf_ml1.numerator);
+sig_e1 = sqrt(sys_ML.NoiseVariance);
+
+
+bode(tf_ml1)
+
+save('../data/example2_and_4.mat','a','b','c','d','x','y_estimation','u_estimation','x_ML','A_ML',...
+    'B_ML','C_ML','D_ML','Ts','u_validation','y_validation','f_ml2','b_ml2','sig_e2','f_true','b_true','f_ml','b_ml','sig_e1')
 
 

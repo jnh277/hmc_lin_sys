@@ -26,33 +26,32 @@ from pathlib import Path
 
 
 # specific data path
-data_path = 'data/example3_oe.mat'
-input_order = 4
-output_order = 3
+# data_path = 'data/example3_oe.mat'
+# input_order = 4
+# output_order = 3
 
-def run_oe_hmc(data_path, input_order, output_order, hot_start=False, iter=6000, OL=False):
+def run_oe_hmc(data_path, input_order, output_order, hot_start=False, iter=6000, OL=False, f_init=None, b_init=None, sig_init=None):
     """ Input order gives the terms b_0 * u_k + b_1 * u_{k-1} + .. + b_{input_order-1} * u_{k-input_order+1}"""
     """ Output order gives the terms a_0 * y_{k-1} + ... + a_{output_order-1}*y_{k-output_order} """
     """ hot_start=True will initialise at maximum likelihood results"""
+    np.random.seed(15)
+
     data = loadmat(data_path)
 
     y_est = data['y_estimation'].flatten()
     u_est = data['u_estimation'].flatten()
 
-    ## TODO: FIX this hack
     y_val = data['y_validation'].flatten()
     u_val = data['u_validation'].flatten()
-    # y_val = data['y_estimation'].flatten()
-    # u_val = data['u_estimation'].flatten()
 
     # Run Stan
     if hot_start:
         def init_function():
-            f_true = data['f_ml2'].flatten()[1:output_order+1]
-            b_true = data['b_ml2'].flatten()
-            sig_e = data['sig_e'].flatten()
-            output = dict(f_coefs=np.flip(f_true),# * np.random.uniform(0.8, 1.2, len(f_true)),
-                          b_coefs=np.flip(b_true),#* np.random.uniform(0.8, 1.2, len(b_true)),
+            f_true = f_init.flatten()[1:output_order+1]
+            b_true = b_init.flatten()
+            sig_e = sig_init.flatten()
+            output = dict(f_coefs=np.flip(f_true),#* np.random.uniform(0.9, 1.1, len(f_true)),
+                          b_coefs=np.flip(b_true),# * np.random.uniform(0.9, 1.1, len(b_true)),
                           r=(sig_e)[0],# * np.random.uniform(0.8, 1.2))[0],
                           )
             return output
@@ -66,6 +65,7 @@ def run_oe_hmc(data_path, input_order, output_order, hot_start=False, iter=6000,
 
     if OL:
         model_path = 'stan/oe_OL.pkl'
+        # model_path = 'stan/oe_noprior.pkl'
         if Path(model_path).is_file():
             model = pickle.load(open(model_path, 'rb'))
         else:
@@ -91,7 +91,7 @@ def run_oe_hmc(data_path, input_order, output_order, hot_start=False, iter=6000,
                  'no_obs_val': len(y_val),
                  }
 
-    fit = model.sampling(data=stan_data, init=init_function, iter=iter, chains=4)
+    fit = model.sampling(data=stan_data, init=init_function, iter=iter, chains=4, seed=10)
     traces = fit.extract()
 
     return (fit, traces)
