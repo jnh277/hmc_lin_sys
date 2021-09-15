@@ -48,9 +48,9 @@ def run_oe_hmc(data_path, input_order, output_order, hot_start=False, iter=6000,
     # Run Stan
     if hot_start:
         def init_function():
-            f_true = data['f_ml'].flatten()[1:output_order+1]
-            b_true = data['b_ml'].flatten()
-            sig_e = data['sig_e'].flatten()
+            f_true = data['f_ml2'].flatten()[1:output_order+1]
+            b_true = data['b_ml2'].flatten()
+            sig_e = data['sig_e_ML2'].flatten()
             output = dict(f_coefs=np.flip(f_true),# * np.random.uniform(0.8, 1.2, len(f_true)),
                           b_coefs=np.flip(b_true),#* np.random.uniform(0.8, 1.2, len(b_true)),
                           r=(sig_e)[0],# * np.random.uniform(0.8, 1.2))[0],

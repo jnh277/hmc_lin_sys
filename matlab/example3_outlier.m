@@ -17,7 +17,7 @@
 %##############################################################################
 
 % this script generates the data and runs the maximum likelihoodestiamtion
-% for example 5 "measurements with outliers" given in Section 6.6 of the paper.
+% for example 3 "measurements with outliers" given in Section 6.4 of the paper.
 % the hmc system identification can then be run using example5_outliers.py
 
 
@@ -134,7 +134,7 @@ b_true = m0.B;
 
 
 
-save('../data/example5_outlier.mat','y_estimation', 'u_estimation', 'y_validation',...
+save('../data/example3_outlier.mat','y_estimation', 'u_estimation', 'y_validation',...
     'u_validation','a_ML','b_ML','sig_e_ML','a_true','b_true',...
     'sig_e','a_ML_reg','b_ML_reg','sig_e_ML_reg','a_ML_min','b_ML_min','sig_e_ML_min')
 

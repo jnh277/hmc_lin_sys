@@ -23,10 +23,13 @@
 import numpy as np
 from scipy.io import loadmat
 import matplotlib.pyplot as plt
-from helpers import plot_dbode_ML
+from helpers import plot_dbode_ML, plot_d_nyquist
 import seaborn as sns
 import pandas as pd
-
+import platform
+if platform.system()=='Darwin':
+    import multiprocessing
+    multiprocessing.set_start_method("fork")
 
 from arx_hmc import run_arx_hmc
 
@@ -221,7 +224,12 @@ b_ML = data["b_ML"]
 
 
 Ts = 1.0
-w_res = 100
+w_res = 500
 w_plot = np.logspace(-2,np.log10(3.14),w_res)
 plot_dbode_ML(b_hs,a_hs,b_true,a_true,b_ML,a_ML,Ts,w_plot, save=True)
 
+# function for creating the nyquist plot of a discrete time system
+from scipy import signal
+
+
+plot_d_nyquist(b_hs,a_hs,b_true,a_true,b_ML,a_ML,Ts,w_plot, save='figures/arx_nyquist.png')

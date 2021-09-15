@@ -331,7 +331,7 @@ def plot_dbode_ML(num_samples,den_samples,num_true,den_true,num_ML,den_ML,Ts,ome
     # plt.ylim(-300,10)
 
     if save:
-        plt.savefig('bode_plot.png',format='png')
+        plt.savefig('figures/bode_plot.png',format='png')
 
     plt.show()
 
@@ -389,5 +389,60 @@ def plot_firfreq(b_samples,num_true,den_true,b_ML,Ts=1.0,no_plot=300, max_sample
 
     if save:
         plt.savefig('fir_bode_plot.png',format='png')
+
+    plt.show()
+
+def plot_d_nyquist(num_samples,den_samples,num_true,den_true,num_ML,den_ML,Ts,omega,no_plot=300, xlims=None, ylims=None, max_samples=1000, save=False):
+    """plot nyquist diagram from estimated discrete time system samples and true sys"""
+    no_samples = np.shape(num_samples)[0]
+    no_eval = min(no_samples,max_samples)
+    sel = np.random.choice(np.arange(no_samples), no_eval, False)
+    omega_res = max(np.shape(omega))
+
+    H_real_samples = np.zeros((omega_res, no_eval))
+    H_imag_samples = np.zeros((omega_res, no_eval))
+
+
+
+    count = 0
+    for s in sel:
+        den_sample = np.concatenate(([1.0], den_samples[s,:]), 0)
+        num_sample = num_samples[s, :]
+        w, H_samp= signal.dfreqresp((num_sample, den_sample, Ts), omega)
+        H_real_samples[:, count] = H_samp.real
+        H_imag_samples[:, count] = H_samp.imag
+        # w, mag_samples[:, count], phase_samples[:, count] = signal.dbode((num_sample, den_sample, Ts), omega)
+        count = count + 1
+
+    # calculate the true bode diagram
+    # plot the true bode diagram
+    w, H_true = signal.dfreqresp((num_true.flatten(), den_true.flatten(), Ts), omega)
+    w, H_ML = signal.dfreqresp((num_ML.flatten(), den_ML.flatten(), Ts), omega)
+
+    # plot the samples
+    plt.subplot(1, 1, 1)
+    h2, = plt.plot(H_real_samples[:,0], H_imag_samples[:,0], color='green', alpha=0.1, label='hmc samples')  # Bode magnitude plot
+    plt.plot(H_real_samples[:,1:no_plot], H_imag_samples[:,1:no_plot], color='green', alpha=0.1)  # Bode magnitude plot
+    # plt.plot(H_real_samples[:,:no_plot], -H_imag_samples[:,:no_plot], color='green', alpha=0.1)  # Bode magnitude plot
+    h1, = plt.plot(H_true.real, H_true.imag, color='blue', label='True system')  # Bode magnitude plot
+    # plt.plot(H_true.real, -H_true.imag, color='blue')  # Bode magnitude plot
+    h_ML, = plt.plot(H_ML.real, H_ML.imag,'--', color='purple', label='ML Estimate')  # Bode magnitude plot
+    # plt.plot(H_ML.real, -H_ML.imag,'--', color='purple')  # Bode magnitude plot
+    hm, = plt.plot(np.mean(H_real_samples,axis=1), np.mean(H_imag_samples,axis=1), '-.', color='orange', label='hmc mean')  # Bode magnitude plot
+    # plt.plot(np.mean(H_real_samples,axis=1), -np.mean(H_imag_samples,axis=1), '-.', color='orange')  # Bode magnitude plot
+
+
+    plt.xlabel('Real')
+    plt.ylabel('Imaginary')
+    if xlims is not None:
+        plt.xlim(xlims)
+    if ylims is not None:
+        plt.ylim(ylims)
+
+    plt.legend(handles=[h1, h2, hm, h_ML])
+
+    if save is not None:
+        plt.savefig(save,format='png')
+
 
     plt.show()

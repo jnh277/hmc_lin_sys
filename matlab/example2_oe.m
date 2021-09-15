@@ -59,8 +59,12 @@ yhat = predict(m1, data_validation);
 yhat = yhat.OutputData;
 
 % Estimate model using regularisation (without knowing model orders)
+
+[Lambda, R] = arxRegul(data_estimation, [10 11 0]);
 opt = oeOptions;
-opt.Regularization.Lambda = 0.5;
+% opt.Regularization.Lambda = 0.5;
+opt.Regularization.Lambda = Lambda;
+opt.Regularization.R = R;
 m2 = oe(data_estimation, [11 10 0], opt);
 yhat_reg = predict(m2, data_validation);
 yhat_reg = yhat_reg.OutputData;
@@ -79,7 +83,7 @@ sig_e_ML2 = sqrt(m1.NoiseVariance);
 f_true = A;
 b_true = B;
 
-save('../data/example3_oe.mat','y_estimation', 'u_estimation', 'y_validation',...
+save('../data/example2_oe.mat','y_estimation', 'u_estimation', 'y_validation',...
     'u_validation','yhat','f_ml','b_ml','f_ml2','b_ml2','sig_e_ML','sig_e_ML2',...
     'sig_e','f_true','b_true')
 %% plot

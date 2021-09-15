@@ -23,14 +23,17 @@
 
 import numpy as np
 from scipy.io import loadmat
-from helpers import plot_trace
+from helpers import plot_trace, plot_d_nyquist
 import matplotlib.pyplot as plt
 from arx_hmc import run_arx_hmc
 from scipy import signal
-
+import platform
+if platform.system()=='Darwin':
+    import multiprocessing
+    multiprocessing.set_start_method("fork")
 
 # specific data path
-data_path = 'data/example5_outlier.mat'
+data_path = 'data/example3_outlier.mat'
 input_order = 11         # gives the terms b_0 * u_k + b_1 * u_{k-1} + .. + b_{input_order-1} * u_{k-input_order+1}
 output_order = 10        # gives the terms a_0 * y_{k-1} + ... + a_{output_order-1}*y_{k-output_order}
 
@@ -77,7 +80,7 @@ b_true = data["b_true"]
 a_true = data["a_true"]
 Ts = 1.0
 
-w_res = 100
+w_res = 300
 w_plot = np.logspace(-2,np.log10(3.14),w_res)
 # plot_dbode(b_coef_traces,a_coef_traces,b_true,a_true,Ts,w_plot)
 
@@ -146,5 +149,5 @@ def plot_dbode_ML(num_samples,den_samples,num_true,den_true,num_ML,den_ML,Ts,ome
 
 
 plot_dbode_ML(b_coef_traces,a_coef_traces,b_true,a_true,b_ML,a_ML,Ts,w_plot)
-
+plot_d_nyquist(b_coef_traces,a_coef_traces,b_true,a_true,b_ML,a_ML,Ts,w_plot, no_plot=600, save='figures/arx_outlier_nyquist.png')
 # w, mag_ML, phase_ML = signal.dbode((b_ML.flatten(), a_ML.flatten(), Ts), w_plot)

@@ -16,19 +16,22 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ###############################################################################
 
-""" Runs the code for example 3 (Section 6.3) in the paper and produces the figures """
+""" Runs the code for example 2 (Section 6.3) in the paper and produces the figures """
 """ This demonstrates Bayesian estimation of output error models using HMC """
 
 import numpy as np
 from scipy.io import loadmat
 import matplotlib.pyplot as plt
-from helpers import plot_trace
+from helpers import plot_trace, plot_d_nyquist
 from scipy import signal
 from oe import run_oe_hmc
-
+import platform
+if platform.system()=='Darwin':
+    import multiprocessing
+    multiprocessing.set_start_method("fork")
 
 # specific data path
-data_path = 'data/example3_oe.mat'
+data_path = 'data/example2_oe.mat'
 # input_order = 4
 # output_order = 3
 input_order = 11
@@ -47,7 +50,7 @@ yhat_mean = np.mean(yhat, axis=0)
 yhat_upper_ci = np.percentile(yhat, 97.5, axis=0)
 yhat_lower_ci = np.percentile(yhat, 2.5, axis=0)
 
-MF_hmc = 100*(1-np.sum(np.power(y_val[10:]-yhat_mean[10:],2))/np.sum(np.power(y_val[10:],2)))
+MF_hmc = 100*(1-np.sum(np.power(y_val[11:]-yhat_mean[10:],2))/np.sum(np.power(y_val[11:],2)))
 
 print('Model fit of hmc estimate = ', MF_hmc)
 
@@ -66,10 +69,6 @@ plt.legend(('y val','y hat'))
 plt.show()
 
 
-plt.plot(y_val[100:150])
-plt.plot(yhat_mean[100:150])
-plt.show()
-
 
 plot_trace(f_coef_traces[:,0],4,1,'f[0]')
 plot_trace(f_coef_traces[:,1],4,2,'f[2]')
@@ -82,7 +81,7 @@ plt.show()
 f_true = data["f_true"]
 b_true = data["b_true"]
 
-Ts = 1
+Ts = 0.1
 w_res = 500
 w_plot = np.logspace(-3,np.log10(10*3.14),w_res)
 
@@ -162,6 +161,19 @@ def plot_dbode_ML(num_samples,den_samples,num_true,den_true,num_ML,den_ML,num_ML
 
 
 plot_dbode_ML(b_coef_traces[:,-1::-1],f_coef_traces[:,-1::-1],b_true.flatten(),f_true.flatten(),B_ML.flatten(),F_ML.flatten(),B_ML2.flatten(),F_ML2.flatten(),Ts,w_plot,save=True)
+import scipy.signal as signal
+w, _ = signal.dfreqresp((b_true.flatten(),f_true.flatten(), Ts))
+plot_d_nyquist(b_coef_traces[:,-1::-1],f_coef_traces[:,-1::-1],b_true.flatten(),f_true.flatten(),B_ML2.flatten(),F_ML2.flatten(),Ts,w, no_plot=300,xlims=[-2.75, 1.5], ylims=[-2,2], save='figures/oe_nyquist.png')
 
 
-
+# b_mean = np.mean(b_coef_traces,axis=0)
+# plt.plot(b_mean[-1::-1])
+# plt.xlabel('k')
+# plt.ylabel('b_k')
+# plt.show()
+#
+# f_mean = np.mean(f_coef_traces,axis=0)
+# plt.plot(f_mean[-1::-1])
+# plt.xlabel('k')
+# plt.ylabel('f_k')
+# plt.show()
