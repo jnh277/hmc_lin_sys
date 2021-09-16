@@ -131,6 +131,9 @@ dmypy.json
 stan/.DS_Store
 data/.DS_Store
 
+
+unit/*
+
 # ignore compiled stan models
 stan/*.pkl
 results/wheeled_robot_results.pickle
