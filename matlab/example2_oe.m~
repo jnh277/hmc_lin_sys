@@ -21,21 +21,25 @@
 % the hmc system identification can then be run using example2_oe.py
 
 % example 3 oe
-% rng(54531445)
-rng(13)
-sig_e = sqrt(5*1e-4);
+
+% rng(13)
+rng(192038)
+
+% sig_e = sqrt(5*1e-3);
+sig_e = 0.05;
 
 % Generate data
 noObservations = 200;
 % u = randn(noObservations, 1);
 N = noObservations;
 u = [zeros(1,floor(0.15*N)),ones(1,floor(0.2*N)),zeros(1,floor(0.15*N))]; u=[u,u]; u = [u,zeros(1,N-length(u))].';
+%
 
-bq = poly([-8.0722,-0.8672,0.0948]);
-aq = real(poly([0.75*exp(j*pi/3),0.75*exp(-j*pi/3),0.95*exp(j*pi/12),0.95*exp(-j*pi/12)]));   
-aq = real(poly([0.8*exp(j*0.50*pi),0.8*exp(-j*0.50*pi)])); 
-bq = bq*sum(aq)/sum(bq); 
-B = [bq]; A = aq; 
+delta = 0.1;
+den = real(poly([-10,-9,-1+j*10,-1-j*10]));
+num = den(length(den));
+[bq,aq] = c2dm(num,den,delta,'zoh');
+B = bq; A = aq;
 
 y = filter(B, A, u);
 y = y + sig_e * randn(length(y), 1);
@@ -50,13 +54,17 @@ data_estimation = iddata(y_estimation, u_estimation);
 data_validation = iddata(y_validation, u_validation);
 
 % Estimate model using known model orders
-m1 = oe(data_estimation, [4 2 0]);
+m1 = oe(data_estimation, [5 4 0]);
 yhat = predict(m1, data_validation);
 yhat = yhat.OutputData;
 
 % Estimate model using regularisation (without knowing model orders)
+
+[Lambda, R] = arxRegul(data_estimation, [10 11 0]);
 opt = oeOptions;
-opt.Regularization.Lambda = 0.5;
+% opt.Regularization.Lambda = 0.5;
+opt.Regularization.Lambda = Lambda;
+opt.Regularization.R = R;
 m2 = oe(data_estimation, [11 10 0], opt);
 yhat_reg = predict(m2, data_validation);
 yhat_reg = yhat_reg.OutputData;
@@ -75,7 +83,32 @@ sig_e_ML2 = sqrt(m1.NoiseVariance);
 f_true = A;
 b_true = B;
 
-% save('../data/example3_oe.mat','y_estimation', 'u_estimation', 'y_validation',...
+%% estimation using the unit system identification toolbox
+addpath(genpath('../unit/'))
+Z.u     = u_estimation;
+Z.y     = y_estimation; 
+
+Mq.A     = 10; 
+Mq.B     = 10; 
+Mq.T     = Ts; 
+Mq.type  = 'oe';
+OPT.disp = 1;
+Gest = est(Z,Mq,OPT);
+Gest.A;
+Gest.B;
+%%
+figure(4)
+clf
+bode(tf(b_true,f_true,delta))
+hold on
+bode(tf(b_ml2,f_ml2,delta))
+bode(tf(Gest.B,Gest.A,delta))
+hold off
+
+
+%%
+
+% save('../data/example2_oe.mat','y_estimation', 'u_estimation', 'y_validation',...
 %     'u_validation','yhat','f_ml','b_ml','f_ml2','b_ml2','sig_e_ML','sig_e_ML2',...
 %     'sig_e','f_true','b_true')
 %% plot
@@ -109,8 +142,8 @@ legend('True','known order','regularised')
 subplot(2,1,2)
 plot(W,squeeze(PHASE))
 hold on
-plot(W1,squeeze(PHASE1))
-plot(W2,squeeze(PHASE2))
+plot(W1,squeeze(PHASE1)-360)
+plot(W2,squeeze(PHASE2)-360)
 hold off
 xlabel('Frequency')
 ylabel('Phase')

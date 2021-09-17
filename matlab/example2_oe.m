@@ -83,9 +83,21 @@ sig_e_ML2 = sqrt(m1.NoiseVariance);
 f_true = A;
 b_true = B;
 
+%%
+figure(4)
+clf
+bode(tf(b_true,f_true,delta))
+hold on
+bode(tf(b_ml2,f_ml2,delta))
+bode(tf(Gest.B,Gest.A,delta))
+hold off
+
+
+%%
+
 save('../data/example2_oe.mat','y_estimation', 'u_estimation', 'y_validation',...
     'u_validation','yhat','f_ml','b_ml','f_ml2','b_ml2','sig_e_ML','sig_e_ML2',...
-    'sig_e','f_true','b_true')
+    'sig_e','f_true','b_true','f_unit','b_unit')
 %% plot
 figure(1)
 clf

@@ -97,6 +97,7 @@ clf
 bode(m0)
 hold on
 bode(modelEstimate)
+bode(tf(Gest.B,Gest.A,Ts))
 
 hold off
 legend('True sys','Maximum likelihood estimate')

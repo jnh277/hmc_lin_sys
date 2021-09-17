@@ -50,7 +50,7 @@ yhat_mean = np.mean(yhat, axis=0)
 yhat_upper_ci = np.percentile(yhat, 97.5, axis=0)
 yhat_lower_ci = np.percentile(yhat, 2.5, axis=0)
 
-MF_hmc = 100*(1-np.sum(np.power(y_val[11:]-yhat_mean[10:],2))/np.sum(np.power(y_val[11:],2)))
+MF_hmc = 100*(1-np.sum(np.power(y_val[10:]-yhat_mean[10:],2))/np.sum(np.power(y_val[10:],2)))
 
 print('Model fit of hmc estimate = ', MF_hmc)
 
@@ -90,6 +90,8 @@ F_ML = data['f_ml']
 B_ML = data['b_ml']
 F_ML2 = data['f_ml2']
 B_ML2 = data['b_ml2']
+F_unit = data['f_unit']
+B_unit = data['b_unit']
 
 
 def plot_dbode_ML(num_samples,den_samples,num_true,den_true,num_ML,den_ML,num_ML2,den_ML2,Ts,omega,no_plot=300, max_samples=1000, save=False):
@@ -163,6 +165,7 @@ def plot_dbode_ML(num_samples,den_samples,num_true,den_true,num_ML,den_ML,num_ML
 plot_dbode_ML(b_coef_traces[:,-1::-1],f_coef_traces[:,-1::-1],b_true.flatten(),f_true.flatten(),B_ML.flatten(),F_ML.flatten(),B_ML2.flatten(),F_ML2.flatten(),Ts,w_plot,save=True)
 import scipy.signal as signal
 w, _ = signal.dfreqresp((b_true.flatten(),f_true.flatten(), Ts))
+# plot_d_nyquist(b_coef_traces[:,-1::-1],f_coef_traces[:,-1::-1],b_true.flatten(),f_true.flatten(),B_unit.flatten(),F_unit.flatten(),Ts,w, no_plot=300,xlims=[-2.75, 1.5], ylims=[-2,2], save='figures/oe_nyquist.png')
 plot_d_nyquist(b_coef_traces[:,-1::-1],f_coef_traces[:,-1::-1],b_true.flatten(),f_true.flatten(),B_ML2.flatten(),F_ML2.flatten(),Ts,w, no_plot=300,xlims=[-2.75, 1.5], ylims=[-2,2], save='figures/oe_nyquist.png')
 
 

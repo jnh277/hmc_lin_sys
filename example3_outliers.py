@@ -40,7 +40,7 @@ output_order = 10        # gives the terms a_0 * y_{k-1} + ... + a_{output_order
 data = loadmat(data_path)
 y_val = data['y_validation'].flatten()
 
-(fit,traces) = run_arx_hmc(data_path, input_order, output_order,hot_start=True, prior='st',iter=6000)
+(fit,traces) = run_arx_hmc(data_path, input_order, output_order,hot_start=True, prior='st',iter=8000)
 
 
 yhat = traces['y_hat']
@@ -149,5 +149,5 @@ def plot_dbode_ML(num_samples,den_samples,num_true,den_true,num_ML,den_ML,Ts,ome
 
 
 plot_dbode_ML(b_coef_traces,a_coef_traces,b_true,a_true,b_ML,a_ML,Ts,w_plot)
-plot_d_nyquist(b_coef_traces,a_coef_traces,b_true,a_true,b_ML,a_ML,Ts,w_plot, no_plot=600, save='figures/arx_outlier_nyquist.png')
+# plot_d_nyquist(b_coef_traces,a_coef_traces,b_true,a_true,b_ML,a_ML,Ts,w_plot, no_plot=600, save='figures/arx_outlier_nyquist.png')
 # w, mag_ML, phase_ML = signal.dbode((b_ML.flatten(), a_ML.flatten(), Ts), w_plot)
