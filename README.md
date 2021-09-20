@@ -41,7 +41,7 @@ Additional examples not included in the paper:
 
 ### Python code requirements
 - Python 3.7 or greater
-- Pystan 2.21
+- Pystan 2.19 or 2.21
 - numpy
 - matplotlib
 - seaborn
