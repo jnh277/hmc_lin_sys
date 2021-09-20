@@ -17,10 +17,10 @@
 ###############################################################################
 
 """ Runs the code to perform hmc estimation of the QUBE_Servo 2 QUANSAR rotary
-    pendulum based on experimentally collected data as described in example 7
-    (Section 6.8) of the paper.
+    pendulum based on experimentally collected data as described in example 4
+    (Section 7.5) of the paper.
     Since this estimation can take several hours the results are saved and can be
-    loaded and plotted using example7_plot.py """
+    loaded and plotted using example4_plot.py """
 
 import pystan
 import numpy as np

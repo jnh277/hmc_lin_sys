@@ -16,7 +16,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ###############################################################################
 
-""" Runs the code for example 2 (Section 6.3) in the paper and produces the figures """
+""" Runs the code for example 2 (Section 7.3) in the paper and produces the figures """
 """ This demonstrates Bayesian estimation of output error models using HMC """
 
 import numpy as np

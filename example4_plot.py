@@ -16,8 +16,8 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ###############################################################################
 
-""" Plots the estimation results for example 7 (Section 6.8) in the paper obtained
-    using example7_pendulum.py """
+""" Plots the estimation results for example 4 (Section 7.5) in the paper obtained
+    using example4_pendulum.py """
 
 
 import numpy as np

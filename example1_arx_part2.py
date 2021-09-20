@@ -16,7 +16,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ###############################################################################
 
-""" Runs the code for example 1 part 2 (Section 6.2) in the paper and produces the figures """
+""" Runs the code for example 1 part 2 (Section 7.2) in the paper and produces the figures """
 """ This compares L1, L2, and Horseshoe priors for ARX models in HMC """
 
 

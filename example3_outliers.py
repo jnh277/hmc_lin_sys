@@ -16,7 +16,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ###############################################################################
 
-""" Runs the code for example 5 (Section 6.6) in the paper and produces the figures """
+""" Runs the code for example 3 (Section 7.4) in the paper and produces the figures """
 """ This demonstrates using student T distribution for the noise to provide 
     robustness to measurement outliers """
 
