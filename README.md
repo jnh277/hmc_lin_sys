@@ -341,7 +341,9 @@ Alternatively, new simulated data can be generated using
 matlab/additional_example3_generate_data.m
 ```
 
-The results are shown below
+The results are shown below for a fast controller with a nominal phase
+margin of 13 degrees and a slow controller with a nominal phase margin of 26 degrees.
+Both controllers were designed base on the conditional mean estimate.
 
 Estimated system | Controller phase margin
 :----------------------:|:----------------------:
