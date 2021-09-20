@@ -16,9 +16,9 @@
 % #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 % ###############################################################################
 
-% This script is the associated matlab code to go with the illustrative
-% example of jointly sampling the latent variables and parameters provided
-% in Section 5.1 of the paper.
+% An additoinal example not included in the paper
+% pedagogical example of sampling the states and parameters from a first
+% order state space system with all code implemented in matlab
 
 clear all
 clc

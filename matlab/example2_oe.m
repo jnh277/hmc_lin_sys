@@ -17,7 +17,7 @@
 %##############################################################################
 
 % this script generates the data and runs the maximum likelihoodestiamtion
-% for example 2 "output error" given in Section 6.3 of the paper.
+% for example 2 "output error" given in Section 7.3 of the paper.
 % the hmc system identification can then be run using example2_oe.py
 
 % example 3 oe

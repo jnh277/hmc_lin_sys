@@ -29,7 +29,15 @@ Examples included in the paper:
 - Estimation of an ARX model of unknown order from simulated data with significant outliers and comparison to an ML approach (paper section 7.4)
 - Estimation of a non-linear inverted pendulum model from real data (paper section 7.5)
 
-Additoinal examples not included in the paper:
+Additional examples not included in the paper:
+- Pedagogical first-order state space example implemented in matlab
+- Finite impulse response example comparing different prior choices and the ML appraoch
+- Example of estimating a 4th order linear state space model from simulated data
+  and comparison to ML approach
+- An example of estimating a 6th order Linear state space model from simulated data and using
+  the posterior samples to determine the distribution of a fast and slow controllers phase margin
+
+
 
 ### Python code requirements
 - Python 3.7 or greater
@@ -44,8 +52,10 @@ Additoinal examples not included in the paper:
 ### Matlab code requirements
 A recent version of matlab with the system identification toolbox
 
+## Examples included in the paper
 
-## Sampling from a donut shaped target density
+
+### Sampling from a donut shaped target density
 Matlab code to sample from this distribution using HMC is given in
 ```
 matlab/HMC_donut_example.m
@@ -74,12 +84,12 @@ k=1 | k=2 | k=3 | k=1,...,10
 
 Plots from this code
 
-## ARX example part 1
+### ARX example part 1
 Estimation of an ARX model of known order from simulated data, comparing HMC with other MCMC and ML approaches (paper section 7.1)
 
 ARX model structure
 
-![equation](https://latex.codecogs.com/svg.image?y_t=\sum_{k=1}^{n_a}&space;a_k&space;y_{t-k}&plus;\sum_{k=0}^{n_b}&space;b_k&space;u_{t-k}&plus;e_t,)
+![equation](https://latex.codecogs.com/svg.image?y_t=\sum_{k=1}^{n_a}&space;a_k&space;y_{t-k}&plus;\sum_{k=0}^{n_b}&space;b_k&space;u_{t-k}&plus;e_t,&space;\qquad&space;e_t&space;\sim&space;\mathcal{N}(0,&space;\sigma_e^2))
 
 The following parameters are sampled/estimated
 
@@ -105,7 +115,7 @@ resulting distributions
 ![arx_diagnostics](figures/example1_diagnostics.png) 
 
 
-## ARX example part 2
+### ARX example part 2
 Estimation of an ARX model of unknown order from simulated data, comparing HMC with different priors to ML 
 (paper section 7.2)
 
@@ -136,13 +146,13 @@ given using Matlab's arx function
 ![arx_nyquist](figures/ARX_nyquist_half.png) 
 
 
-## Output error example 
+### Output error example 
 Estimation of an output error model of unknown order from simulated data and comparison to ML approach with regularisation 
 (paper section 7.3)
 
 Output model structure
 
-![equation](https://latex.codecogs.com/svg.image?y_t=\frac{b_0&space;&plus;&space;b_1&space;q^{-1}&space;&plus;&space;\ldots&space;&plus;&space;b_{n_b}&space;q^{-n_b}}{1&space;&plus;&space;f_1&space;q^{-1}&space;&plus;&space;\ldots&space;&plus;&space;f_{n_f}&space;q^{-n_f}}\,u_t&plus;e_t,)
+![equation](https://latex.codecogs.com/svg.image?y_t=\frac{b_0&space;&plus;&space;b_1&space;q^{-1}&space;&plus;&space;\ldots&space;&plus;&space;b_{n_b}&space;q^{-n_b}}{1&space;&plus;&space;f_1&space;q^{-1}&space;&plus;&space;\ldots&space;&plus;&space;f_{n_f}&space;q^{-n_f}}\,u_t&plus;e_t,&space;\qquad&space;e_t&space;\sim&space;\mathcal{N}(0,&space;\sigma_e^2))
 
 The following parameters are sampled/estimated
 
@@ -167,7 +177,7 @@ resulting distributions
 
 ![oe_nyquist](figures/oe_nyquist_half.png)
 
-## Measurement outlier example
+### Measurement outlier example
 Estimation of an ARX model of unknown order from simulated data with significant outliers and comparison to an ML approach
 with regularisation (paper section 7.4)
 
@@ -190,18 +200,149 @@ The estimated nyquist plot for the hmc samples and the ML approach are shown bel
 ![outliers_nyquist](figures/arx_outlier_nyquist_half.png)
 
 
-## Nonlinear inverted pendulum
+### Nonlinear inverted pendulum
 Estimation of the parameters of a non-linear rotary inverted pendulum from real data collected using
-the QUBE-Servo 2 of QUANSAR. The continuous time dynamics of the system can be modelled by
+the QUBE-Servo 2 of QUANSAR. Refer to the paper for the modelling of this system.
 
-![equation](https://latex.codecogs.com/svg.image?M(\alpha)\begin{bmatrix}\ddot{\theta}&space;\\&space;\ddot{\alpha}\end{bmatrix}&space;&plus;&space;\nu(\dot{\theta},\dot{\alpha}){\begin{bmatrix}\dot{\theta}&space;\\&space;\dot{\alpha}\end{bmatrix}&space;=&space;\begin{bmatrix}\tau&space;-&space;D_r\dot{\theta}&space;\\&space;-\frac{1}{2}m_pL_pg\sin(\alpha)-D_p\dot{\alpha}\end{bmatrix},)
+The HMC sampling of this system is computationally intensive and can take several hours to run, hence
+saved results are included which can be plotted using
 
-where
+```
+python example4_plot.py
+```
+
+The sampling can be rerun using
+```
+example4_pendulum.py
+```
+
+Joint state and parameter estimation is performed for this problem. 
+Marginalising over the parameters gives the smoothed state estimates shown below
+
+![pendulum_smoothed_states](figures/pendulum_states.png)
+
+The marginal parameter estimates are shown below
+
+![pendulum_parameter_estimates](figures/pendulum_params.png)
+
+Some joint parameter and state estimates are given by
+
+![pendulum_joint_state_param](figures/pendulum_pairs.png)
 
 
+## Additional Examples
+
+### Pedagogical first-order state space example
+A pedagogical example of jointly sampling the parameters and states
+of a first-order state space model from simulated data implemented in matlab
+
+The system is modelled by
+
+![equation](https://latex.codecogs.com/svg.image?x_{t&plus;1}&space;=&space;\theta&space;x_t&space;&plus;&space;w_t,&space;\qquad&space;w_t&space;\sim&space;\mathcal{N}(0,0.1^2))
+
+![equation](https://latex.codecogs.com/svg.image?y_t&space;=&space;x_t&space;&plus;&space;e_t,&space;\qquad&space;e_t&space;\sim&space;\mathcal{N}(0,0.05^2))
+
+The results are shown below
+
+states | theta
+:-----------------------:|:-----------------------:
+![state_space_states](figures/state_space.png)|![state_space_theta](figures/state_space_theta.png)
+
+### Finite impulse response example
+Finite impulse response (FIR) example comparing different prior choices and the ML appraoch
+
+Model structure given by
+
+![equation](https://latex.codecogs.com/svg.image?y_t=\sum_{k=1}^{n_b}&space;b_k&space;u_{t-k}&plus;e_t,&space;\qquad&space;e_t&space;\sim&space;\mathcal{N}(0,&space;\sigma_e^2))
+
+Paremeters to be estimated
+
+![equation](https://latex.codecogs.com/svg.image?\eta=\{b_{1:n_b},&space;\sigma_e\})
+
+The estimation can be run using
+```
+python additional_example1_fir.py
+```
+
+Alternatively, new simulated data can be generated using the matlab script
+```
+matlab/additional_example1_fir.m
+```
+
+The impulse of the estimated systems given using 
+- ML assuming n_b = 13
+- ML with TC regularisation assuming n_b = 33
+- HMC with horseshoe prior assuming n_b = 33
+- HMC with TC prior assuming n_b = 33
+
+![fir_impulse](figures/fir_impulse.png)
+
+### Linear State Space Model (LSSM) example
+Example of estimating a 4th order linear state space model from simulated data
+and comparison to ML approach
+
+The model structure is given by
+
+![equation](https://latex.codecogs.com/svg.image?x_{t&plus;1}&space;\sim&space;\mathcal{N}(A_dx_t&space;&plus;&space;B_d&space;u_t,&space;Q),)
+
+![equation](https://latex.codecogs.com/svg.image?y_t&space;\sim&space;\mathcal{N}(Cx_k&space;&plus;&space;Du_k,&space;R))
+
+Since this sampling can take several hours, saved results have been included and the
+results can be plotted using
+```
+python additional_example2_lssm_plot.py
+```
+
+The HMC sampling can be run using
+```
+python additional_example2_lssm.py
+```
+
+New simulated data can be generated using the matlab script
+```
+matlab/additional_example2_lssm.m
+```
 
 
+The parameters to be estimated are A_d, B_d, C, D, Q, R and x_1,...,x_T. An LKJ prior
+is placed on Q and R
 
+The bode response of the HMC samples, true system and ML estimate are shown below
 
+![LSSM_bode](figures/example4_bode.png)
 
+### Controller phase margin example
+An example of estimating a 6th order Linear state space model from simulated data and using
+the posterior samples to determine the distribution of a fast and slow controllers phase margin
 
+The same model structure is used as in the previous example
+
+The HMC sampling can be run using
+
+```
+python additional_example3_sysid.py
+```
+
+The following script plots the results and also prepares them for the matlab script
+that computes the phase margins of the controllers
+
+```
+python additional_example3_plotsysid.py
+```
+
+The distribution of the fast and slow controller phase margins can be computed and plotted using
+the matlab script
+```
+matlab/additional_example3_controller_phase_margin.m
+```
+
+Alternatively, new simulated data can be generated using
+```
+matlab/additional_example3_generate_data.m
+```
+
+The results are shown below
+
+Estimated system | Controller phase margin
+:----------------------:|:----------------------:
+![estimated_system](figures/ctrl_example_bode.png)|![phase_margins](figures/phase_margin.png)
