@@ -135,7 +135,11 @@ def run_arx_hmc(data_path, input_order, output_order,  prior='hs', hot_start=Fal
                  }
 
     # perform sampling using hamiltonian monte carlo
-    fit = model.sampling(data=stan_data, init=init_function, iter=iter, chains=4)
+    control = {"adapt_delta": 0.95,
+               "max_treedepth": 10}  # increasing from default 0.8 to reduce divergent steps
+
+    fit = model.sampling(data=stan_data, init=init_function, iter=iter, chains=4,control=control)
+    # fit = model.sampling(data=stan_data, init=init_function, iter=iter, chains=4)
 
     # extract the results
     traces = fit.extract()

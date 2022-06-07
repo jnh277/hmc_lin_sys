@@ -57,6 +57,10 @@ a_ML = data['a_ML'][0,1:]
 # estimate using hmc with horeshoe prior
 (fit_hmc,results_hmc) = run_arx_hmc(data_path, input_order, output_order, prior='l2')
 
+hmc_sampler_params = fit_hmc.get_sampler_params()
+accept_hmc = hmc_sampler_params[0]['accept_stat__']
+print('HMC target acceptance rate was {} and achieved acceptance rate was {}'.format(0.95,accept_hmc.mean()))
+
 a_hmc = results_hmc['a_coefs']
 b_hmc = results_hmc['b_coefs']
 a_coef_mean = np.mean(a_hmc,0)
