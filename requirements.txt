@@ -1,5 +1,5 @@
 matplotlib==3.4.2
-numpy==1.21.1
+numpy==1.22.0
 pandas==1.2.1
 pystan~=2.19
 scipy==1.7.0
